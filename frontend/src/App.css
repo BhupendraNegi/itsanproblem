@@ -193,6 +193,18 @@ li {
   margin-bottom: 2rem;
 }
 
+.auth-buttons-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.parent-center {
+  display: grid;
+  place-items: center;
+}
+
 .auth-btn {
   display: flex;
   flex-direction: column;
