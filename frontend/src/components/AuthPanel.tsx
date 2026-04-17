@@ -35,14 +35,14 @@ export function AuthPanel({
             onClick={() => setMode('login')}
           >
             <span className="btn-title">Sign In</span>
-            <span className="btn-subtitle">Existing user</span>
+            {/* <span className="btn-subtitle">Existing user</span> */}
           </button>
           <button 
             className={`auth-btn ${mode === 'register' ? 'active' : ''}`} 
             onClick={() => setMode('register')}
           >
             <span className="btn-title">Create Account</span>
-            <span className="btn-subtitle">New user</span>
+            {/* <span className="btn-subtitle">New user</span> */}
           </button>
         </div>
 
@@ -87,9 +87,14 @@ export function AuthPanel({
             </label>
           )}
           {error && <p className="alert">{error}</p>}
-          <button type="submit" className="primary-button" disabled={isLoading}>
-            {isLoading ? 'Processing...' : (mode === 'register' ? 'Create Account' : 'Sign In')}
-          </button>
+          <br></br>
+          <div className='parent-center'>
+          <div className="auth-buttons-bottom-row">
+            <button type="submit" className="primary-button" disabled={isLoading}>
+              {isLoading ? 'Processing...' : (mode === 'register' ? 'Create Account' : 'Sign In')}
+            </button>
+          </div>
+          </div>
         </form>
       </section>
     </main>
