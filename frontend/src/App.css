@@ -2,6 +2,13 @@
   color: #111827;
   background: #f3f4f6;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 
 body {
@@ -9,19 +16,22 @@ body {
   min-height: 100vh;
   background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
   padding-top: 80px;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 #root {
   margin: 0 auto;
   padding: 1.5rem 0 4rem;
+  width: 100%;
 }
 
 .app-shell {
   display: grid;
   gap: 1.5rem;
   width: 100%;
-  padding: 0 1rem;
-  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0 5%;
 }
 
 /* Navbar Styling */
@@ -159,7 +169,7 @@ li {
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06);
   padding: 1.5rem;
   width: 100%;
-  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .auth-panel {
@@ -314,6 +324,9 @@ li {
 .post-body {
   line-height: 1.75;
   white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
 }
 
 .meta,
@@ -336,8 +349,9 @@ li {
   border: 1px solid #e5e7eb;
   border-radius: 0.95rem;
   background: #f9fafb;
-  box-sizing: border-box;
-  width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
 }
 
 .comment-form {
@@ -387,11 +401,4 @@ li {
     flex-direction: column;
     align-items: stretch;
   }
-}
-
-
-.my_container {
-    max-width: 1300px;
-    margin-left: auto;
-    margin-right: auto;
 }
