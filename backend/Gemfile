@@ -48,6 +48,8 @@ end
 
 gem "devise", "~> 4.9"
 gem "devise-jwt", "~> 0.12.1"
+gem "jwt"
+gem "rack-cors"
 gem "rspec-rails", "~> 8.0"
 gem "sidekiq", "~> 8.0"
 gem "redis", "~> 5.4"
