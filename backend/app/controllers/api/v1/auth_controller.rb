@@ -1,8 +1,6 @@
 module Api
   module V1
     class AuthController < ApplicationController
-      skip_before_action :authenticate_user!, only: [:register, :login]
-
       def register
         user = User.new(register_params)
 
