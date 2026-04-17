@@ -1,4 +1,4 @@
-# It's A Problem - Frontend
+# It's A Problem - Frontend Architecture
 
 A modern React + TypeScript application for sharing anonymous problems and getting community feedback.
 
@@ -260,4 +260,3 @@ Store (useAuth)
     ├── PostForm (uses mutations)
     └── PostCard (reads/writes posts)
 ```
-
