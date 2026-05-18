@@ -1,0 +1,46 @@
+require 'rails_helper'
+
+RSpec.describe Post, type: :model do
+  let(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }
+  subject(:post) { user.posts.build(title: "My problem", body: "It is bad.") }
+
+  describe "validations" do
+    it { is_expected.to be_valid }
+
+    it "requires a title" do
+      post.title = ""
+      expect(post).not_to be_valid
+    end
+
+    it "requires a body" do
+      post.body = ""
+      expect(post).not_to be_valid
+    end
+  end
+
+  describe "associations" do
+    it { is_expected.to belong_to(:user) }
+    it { is_expected.to have_many(:comments).dependent(:destroy) }
+  end
+
+  describe "#as_json" do
+    before { post.save! }
+
+    it "exposes id, title, body, and created_at" do
+      json = post.as_json
+      expect(json.keys).to include("id", "title", "body", "created_at")
+    end
+
+    it "sets author to Anonymous" do
+      expect(post.as_json["author"]).to eq("Anonymous")
+    end
+
+    it "does not expose user_id" do
+      expect(post.as_json.keys).not_to include("user_id")
+    end
+
+    it "includes comments array" do
+      expect(post.as_json["comments"]).to eq([])
+    end
+  end
+end

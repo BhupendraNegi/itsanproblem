@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { User } from '../types'
 
 interface HeaderProps {
@@ -10,17 +11,25 @@ export function Header({ user, onLogout }: HeaderProps) {
     <header className="navbar">
       <div className="navbar-container">
         <div className="navbar-brand">
-          <h1 className="app-title">It&apos;s A Problem</h1>
-          <p className="app-subtitle">Anonymous problem board</p>
-        </div>
-        
-        <div className="navbar-user">
-          <div className="user-info">
-            <span className="user-label">Logged in as</span>
-            <span className="user-name">{user.name}</span>
+          <img src="/assets/logo-iap-mark.svg" alt="" />
+          <div>
+            <h1 className="app-title">it&apos;s an problem<span className="dot">.</span></h1>
+            <p className="app-subtitle">Anonymous problem board</p>
           </div>
-          <button className="logout-btn" onClick={onLogout}>
-            Logout
+        </div>
+
+        <div className="navbar-user">
+          <Link to={`/users/${user.id}`} className="user-pill" style={{ textDecoration: 'none' }}>
+            <span className="user-name">{user.name}</span>
+            <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
+          </Link>
+          <button
+            className="logout-icon-btn"
+            onClick={onLogout}
+            title="Log out"
+            aria-label="Log out"
+          >
+            <img src="/assets/icons/log-out.svg" alt="" />
           </button>
         </div>
       </div>

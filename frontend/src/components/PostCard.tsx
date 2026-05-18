@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Comment, Post } from '../types'
 
 interface PostCardProps {
@@ -8,8 +9,16 @@ interface PostCardProps {
   isCommentLoading: boolean
 }
 
-function formatDate(timestamp: string) {
-  return new Date(timestamp).toLocaleString()
+function formatRelative(timestamp: string) {
+  const diff = Date.now() - new Date(timestamp).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  if (days < 7) return `${days}d ago`
+  return new Date(timestamp).toLocaleDateString()
 }
 
 export function PostCard({
@@ -19,40 +28,82 @@ export function PostCard({
   onCommentSubmit,
   isCommentLoading
 }: PostCardProps) {
+  const helpfulCount = post.helpful_count ?? 0
+  const isHot = helpfulCount >= 10
+  const handle = post.anon_handle ?? 'anonymous'
+
   return (
     <article className="post-card">
-      <div className="post-header">
-        <div>
-          <h3>{post.title}</h3>
-          <p className="meta">Posted anonymously · {formatDate(post.created_at)}</p>
-        </div>
+      <header className="post-header">
+        <h3 className="post-title">{post.title}</h3>
+        {isHot && (
+          <span className="hot-badge">
+            <img src="/assets/icons/flame.svg" alt="" />
+            {helpfulCount}
+          </span>
+        )}
+      </header>
+
+      <p className="post-body" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
+        {post.body}
+      </p>
+
+      <div className="post-meta">
+        <span>{handle}</span>
+        <span className="dot">·</span>
+        <span>{formatRelative(post.created_at)}</span>
+        <span className="dot">·</span>
+        <span>{post.comments.length} {post.comments.length === 1 ? 'reply' : 'replies'}</span>
       </div>
-      <p className="post-body">{post.body}</p>
+
+      <div className="post-actions" onClick={(e) => e.stopPropagation()}>
+        <button className="action-btn">
+          <img src="/assets/icons/heart.svg" alt="" />
+          Mark helpful
+          {helpfulCount > 0 && <> · {helpfulCount}</>}
+        </button>
+        <button className="action-btn">
+          <img src="/assets/icons/flag.svg" alt="" />
+          Flag
+        </button>
+      </div>
+
       <div className="comments-section">
-        <h4>Comments</h4>
+        <h4>{post.comments.length === 0 ? 'No comments yet' : `${post.comments.length} ${post.comments.length === 1 ? 'reply' : 'replies'}`}</h4>
         {post.comments.length === 0 ? (
-          <p className="small-text">No comments yet.</p>
+          <p style={{ color: 'var(--fg2)', fontSize: 14 }}>Be the first to say something useful.</p>
         ) : (
           <ul className="comment-list">
             {post.comments.map((comment: Comment) => (
               <li key={comment.id} className="comment-item">
                 <p>{comment.body}</p>
-                <span className="comment-meta">{comment.author} · {formatDate(comment.created_at)}</span>
+                <span className="comment-meta">
+                  <Link to={`/users/${comment.author_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                    <strong>{comment.author}</strong>
+                  </Link>
+                  {' '}· {formatRelative(comment.created_at)}
+                </span>
               </li>
             ))}
           </ul>
         )}
-        <form className="comment-form" onSubmit={(event) => onCommentSubmit(event, post.id)}>
-          <textarea
-            value={commentInputs[post.id] || ''}
-            placeholder="Write a comment with your name"
-            onChange={(event) => setCommentInputs((current) => ({ ...current, [post.id]: event.target.value }))}
-            rows={2}
-            required
-          />
-          <button type="submit" disabled={isCommentLoading}>
-            {isCommentLoading ? 'Commenting...' : 'Add comment'}
-          </button>
+
+        <form className="comment-form" onSubmit={(e) => onCommentSubmit(e, post.id)}>
+          <label className="field">
+            <span>Reply as <strong>{post.author || 'you'}</strong></span>
+            <textarea
+              value={commentInputs[post.id] || ''}
+              onChange={(e) => setCommentInputs((curr) => ({ ...curr, [post.id]: e.target.value }))}
+              placeholder="Write something useful. Your name is attached."
+              rows={2}
+              required
+            />
+          </label>
+          <div className="comment-form-actions">
+            <button type="submit" className="btn-primary" disabled={isCommentLoading || !commentInputs[post.id]?.trim()}>
+              {isCommentLoading ? 'Posting…' : 'Post reply'}
+            </button>
+          </div>
         </form>
       </div>
     </article>

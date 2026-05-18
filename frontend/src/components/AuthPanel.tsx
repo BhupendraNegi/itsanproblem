@@ -20,83 +20,92 @@ export function AuthPanel({
   error
 }: AuthPanelProps) {
   return (
-    <main className="app-shell">
-      <section className="auth-panel">
-        <div className="head-row">
-          <div>
-            <h1>It&apos;s A Problem</h1>
-            <p>Register or log in, then share your anonymous post and let others comment with their name.</p>
-          </div>
-        </div>
+    <main className="auth-shell">
+      <div className="auth-intro">
+        <h1>it&apos;s an problem<span className="dot">.</span></h1>
+        <p>Register or log in, then share your anonymous post and let others comment with their name.</p>
+      </div>
 
-        <div className="auth-buttons-row">
-          <button 
-            className={`auth-btn ${mode === 'login' ? 'active' : ''}`} 
+      <section className="card">
+        <div className="auth-tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'login'}
+            className={`auth-tab${mode === 'login' ? ' active' : ''}`}
             onClick={() => setMode('login')}
           >
-            <span className="btn-title">Sign In</span>
-            {/* <span className="btn-subtitle">Existing user</span> */}
+            <span>Sign In</span>
+            <span className="tab-sub">Existing user</span>
           </button>
-          <button 
-            className={`auth-btn ${mode === 'register' ? 'active' : ''}`} 
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'register'}
+            className={`auth-tab${mode === 'register' ? ' active' : ''}`}
             onClick={() => setMode('register')}
           >
-            <span className="btn-title">Create Account</span>
-            {/* <span className="btn-subtitle">New user</span> */}
+            <span>Create Account</span>
+            <span className="tab-sub">New user</span>
           </button>
         </div>
 
-        <form className="form-card" onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} className="stack">
           {mode === 'register' && (
-            <label>
-              Name
+            <label className="field">
+              <span>Name</span>
               <input
                 value={authFields.name}
-                onChange={(event) => setAuthFields({ ...authFields, name: event.target.value })}
-                required
+                onChange={(e) => setAuthFields({ ...authFields, name: e.target.value })}
+                placeholder="What should we call you?"
               />
             </label>
           )}
-          <label>
-            Email
+          <label className="field">
+            <span>Email</span>
             <input
               type="email"
               value={authFields.email}
-              onChange={(event) => setAuthFields({ ...authFields, email: event.target.value })}
+              onChange={(e) => setAuthFields({ ...authFields, email: e.target.value })}
+              placeholder="you@school.edu"
               required
             />
           </label>
-          <label>
-            Password
+          <label className="field">
+            <span>Password</span>
             <input
               type="password"
               value={authFields.password}
-              onChange={(event) => setAuthFields({ ...authFields, password: event.target.value })}
+              onChange={(e) => setAuthFields({ ...authFields, password: e.target.value })}
+              placeholder="At least 8 characters"
               required
             />
           </label>
           {mode === 'register' && (
-            <label>
-              Confirm Password
+            <label className="field">
+              <span>Confirm password</span>
               <input
                 type="password"
                 value={authFields.passwordConfirmation}
-                onChange={(event) => setAuthFields({ ...authFields, passwordConfirmation: event.target.value })}
-                required
+                onChange={(e) => setAuthFields({ ...authFields, passwordConfirmation: e.target.value })}
               />
             </label>
           )}
-          {error && <p className="alert">{error}</p>}
-          <br></br>
-          <div className='parent-center'>
-          <div className="auth-buttons-bottom-row">
-            <button type="submit" className="primary-button" disabled={isLoading}>
-              {isLoading ? 'Processing...' : (mode === 'register' ? 'Create Account' : 'Sign In')}
-            </button>
-          </div>
-          </div>
+          {error && <div className="alert warning">{error}</div>}
+          <button
+            type="submit"
+            className="btn-primary auth-submit"
+            disabled={isLoading}
+            style={{ marginTop: 6 }}
+          >
+            {isLoading ? 'Processing…' : (mode === 'register' ? 'Create account' : 'Sign in')}
+          </button>
         </form>
       </section>
+
+      <p style={{ textAlign: 'center', marginTop: 24, color: 'var(--fg2)', fontSize: 13 }}>
+        Your posts are anonymous by default. Comments are signed.
+      </p>
     </main>
   )
 }

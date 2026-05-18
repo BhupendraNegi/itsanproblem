@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Post } from './types'
+import type { AuthResponse, Post, UserProfile } from './types'
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -43,5 +43,10 @@ export async function createPost(data: { title: string; body: string }) {
 
 export async function createComment(postId: number, data: { body: string }) {
   const response = await api.post(`/posts/${postId}/comments`, { comment: data })
+  return response.data
+}
+
+export async function fetchUserProfile(userId: number) {
+  const response = await api.get<UserProfile>(`/users/${userId}`)
   return response.data
 }

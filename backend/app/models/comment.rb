@@ -6,7 +6,8 @@ class Comment < ApplicationRecord
 
   def as_json(options = {})
     super({ only: [:id, :body, :created_at] }.merge(options)).merge(
-      author: user.name
+      "author" => user.name,
+      "author_id" => user_id
     )
   end
 end
