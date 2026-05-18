@@ -58,7 +58,7 @@ RSpec.describe "Api::V1::Posts", type: :request do
 
       it "returns errors for missing title" do
         post "/api/v1/posts", params: { post: { body: "Details." } }, headers: auth_headers_for(user), as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(JSON.parse(response.body)["errors"]).to be_present
       end
     end

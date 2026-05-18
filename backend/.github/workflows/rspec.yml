@@ -1,0 +1,49 @@
+name: RSpec
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/rspec.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/rspec.yml"
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: backend/.ruby-version
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Set up database
+        env:
+          RAILS_ENV: test
+        run: |
+          bundle exec rails db:create
+          bundle exec rails db:migrate
+
+      - name: Run RSpec
+        env:
+          RAILS_ENV: test
+        run: bundle exec rspec --format progress --format RSpec::Core::Formatters::JsonFormatter --out tmp/rspec_results.json
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rspec-results
+          path: backend/tmp/rspec_results.json

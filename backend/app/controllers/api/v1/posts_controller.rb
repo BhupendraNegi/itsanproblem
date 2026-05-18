@@ -19,7 +19,7 @@ module Api
         if post.save
           render json: post.as_json, status: :created
         else
-          render json: { errors: post.errors.full_messages }, status: :unprocessable_entity
+          render json: { errors: post.errors.full_messages }, status: :unprocessable_content
         end
       end
 
