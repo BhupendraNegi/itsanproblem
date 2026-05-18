@@ -5,7 +5,7 @@ class Comment < ApplicationRecord
   validates :body, presence: true
 
   def as_json(options = {})
-    super({ only: [:id, :body, :created_at] }.merge(options)).merge(
+    super({ only: [ :id, :body, :created_at ] }.merge(options)).merge(
       "author" => user.name,
       "author_id" => user_id
     )
