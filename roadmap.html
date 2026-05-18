@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>it's an problem — roadmap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="colors_and_type.css"/>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      color: var(--fg1);
+      background: var(--gradient-page);
+      padding: 48px 32px 80px;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .frame { max-width: 1120px; margin: 0 auto; }
+
+    header.top {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 28px;
+    }
+    header.top img { height: 48px; width: 48px; }
+    header.top h1 {
+      font-family: var(--font-display);
+      font-size: 40px; font-weight: 700; letter-spacing: -0.025em;
+      margin: 0; line-height: 1.05;
+    }
+    header.top h1 .dot { color: var(--accent); }
+    header.top .lede { margin: 6px 0 0; color: var(--fg2); font-size: 15px; max-width: 600px; }
+
+    h2.phase {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin: 40px 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    h2.phase .tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    h2.phase .tag.p0 { background: var(--coral-100); color: var(--coral-700); }
+    h2.phase .tag.p1 { background: var(--indigo-100); color: var(--indigo-700); }
+    h2.phase .tag.p2 { background: var(--slate-200); color: var(--slate-700); }
+    h2.phase .tag.future { background: var(--bg-card); color: var(--fg2); border: 1px dashed var(--border-default); }
+
+    p.phase-sub {
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.04em;
+      color: var(--fg2);
+      margin: 0 0 22px;
+    }
+
+    .items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+    }
+    .item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 14px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow-card);
+      display: grid;
+      gap: 10px;
+    }
+    .item-head {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .item h3 {
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 600; letter-spacing: -0.005em;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .effort {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--fg2);
+      font-weight: 600;
+      padding: 3px 8px;
+      background: var(--slate-100);
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .item p { margin: 0; font-size: 14px; color: var(--fg1); }
+    .item .why {
+      font-size: 13px;
+      color: var(--fg2);
+      padding: 10px 12px;
+      background: var(--bg-card-sunken);
+      border-radius: 10px;
+      border-left: 3px solid var(--indigo-500);
+    }
+    .item .why strong { color: var(--fg1); font-weight: 600; }
+    .item .needs {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg2);
+    }
+    .item .needs code {
+      background: var(--coral-50);
+      color: var(--coral-700);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 10.5px;
+    }
+
+    /* Open questions section */
+    .questions {
+      background: var(--gradient-page);
+      border: 1px solid var(--indigo-200);
+      border-radius: 16px;
+      padding: 28px;
+      margin-top: 40px;
+    }
+    .questions h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin: 0 0 6px;
+    }
+    .questions p.lede {
+      color: var(--fg2);
+      margin: 0 0 22px;
+      font-size: 14px;
+    }
+    .q {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border-default);
+    }
+    .q .num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--indigo-700);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    .q h4 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      margin: 4px 0 8px;
+      letter-spacing: -0.005em;
+    }
+    .q p { margin: 0; font-size: 13.5px; color: var(--fg2); line-height: 1.6; }
+    .q .answer-hint {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--coral-50);
+      color: var(--coral-800);
+      font-size: 13px;
+      border-radius: 8px;
+    }
+    .q .answer-hint strong { color: var(--coral-700); }
+
+    /* Risks */
+    .risks {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .risk {
+      padding: 16px 18px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--coral-200);
+      border-radius: 12px;
+      border-left: 4px solid var(--coral-500);
+    }
+    .risk h4 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: var(--coral-700);
+    }
+    .risk p { margin: 0; font-size: 13.5px; color: var(--fg1); }
+    .risk .mitigation {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--fg2);
+    }
+    .risk .mitigation strong { color: var(--fg1); }
+
+    /* Now/Next/Later */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 24px 0 32px;
+    }
+    .sum-card {
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-default);
+    }
+    .sum-card.now {
+      background: var(--gradient-brand);
+      color: white;
+      border-color: transparent;
+    }
+    .sum-card.next { background: var(--bg-card); }
+    .sum-card.later { background: var(--bg-card-sunken); }
+
+    .sum-card .lab {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: 0.85;
+      margin-bottom: 4px;
+    }
+    .sum-card h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+    }
+    .sum-card p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0.92;
+    }
+    .sum-card.now p { color: rgba(255,255,255,.92); }
+
+    @media (max-width: 720px) {
+      .summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <header class="top">
+      <img src="assets/logo-iap-mark.svg" alt=""/>
+      <div>
+        <h1>roadmap<span class="dot">.</span></h1>
+        <p class="lede">What's in the repo today, and a prioritized list of what to build next — informed by the founder brief, the actual code, and the design system we just built.</p>
+      </div>
+    </header>
+
+    <div class="summary">
+      <div class="sum-card now">
+        <div class="lab">Now · 1–2 weeks</div>
+        <h3>Finish the core loop</h3>
+        <p>Profiles, helpful marks, anon handles, notifications. Make a single user's first session feel complete.</p>
+      </div>
+      <div class="sum-card next">
+        <div class="lab">Next · 1–2 months</div>
+        <h3>Friends &amp; rooms</h3>
+        <p>Friend-anon posts, college verification, tags. The "tell a friend without hurting them" thesis.</p>
+      </div>
+      <div class="sum-card later">
+        <div class="lab">Later · post-traction</div>
+        <h3>AI &amp; monetization</h3>
+        <p>AI advisor trained on helpful answers, premium tiers, university partnerships. Only with real data.</p>
+      </div>
+    </div>
+
+    <!-- =================== NOW =================== -->
+    <h2 class="phase">Now · finish the core loop <span class="tag p0">P0 · ship before anything else</span></h2>
+    <p class="phase-sub">Without these, a user signs up, posts once, and never comes back. Each can be cut into a 1–3 day PR.</p>
+    <div class="items">
+
+      <div class="item">
+        <div class="item-head"><h3>Profile pages</h3><span class="effort">2 days</span></div>
+        <p>One screen per user: name, badges, helpful points, comments they've written (anonymous posts hidden by design).</p>
+        <div class="why"><strong>Why now.</strong> The whole "earn reputation through good replies" idea is invisible without somewhere to display it. Currently profiles don't exist as a route.</div>
+        <div class="needs">needs · <code>user_stats</code> table · <code>/users/:id</code> route</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Helpful marks</h3><span class="effort">2 days</span></div>
+        <p>Heart icon on each comment + each post. Polymorphic — same UI for both. Count is the only ranking signal we expose.</p>
+        <div class="why"><strong>Why now.</strong> No upvote / like exists today. Without it there's no way to surface good advice or reward commenters — the whole feedback layer of the product is missing.</div>
+        <div class="needs">needs · <code>helpful_marks</code> table · UQ on (user, target) so one user can't spam</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Stable anon handles</h3><span class="effort">1 day</span></div>
+        <p>Each post gets a memorable handle like <code>anon_a91f</code>. Same across replies in that thread, different across threads.</p>
+        <div class="why"><strong>Why now.</strong> "Posted anonymously · Posted anonymously · Posted anonymously" reads flat. Handles make multi-message threads readable. Also: move <code>user_id</code> off the <code>posts</code> table — currently identity sits next to content in the DB, which is a privacy footgun.</div>
+        <div class="needs">needs · <code>anon_handles</code> table · migration to drop <code>posts.user_id</code></div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Notifications</h3><span class="effort">3 days</span></div>
+        <p>In-app bell + email digest. Two events at launch: "someone replied to your anonymous post" and "your reply earned a helpful mark."</p>
+        <div class="why"><strong>Why now.</strong> Posters can't see their own anonymous posts in a feed (no way to find them again). Notifications are the only way back. They're also the single biggest D7 retention lever for any community product.</div>
+        <div class="needs">needs · <code>notifications</code> table · ActionMailer · digest job</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Recent vs Hot filter</h3><span class="effort">half day</span></div>
+        <p>Segmented control on the feed. Hot = sort by helpful_count desc within last 7 days.</p>
+        <div class="why"><strong>Why now.</strong> Cheap, big perceived-quality win. Already mocked in the UI kit.</div>
+        <div class="needs">needs · query param on <code>GET /posts</code></div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Flag / report</h3><span class="effort">2 days</span></div>
+        <p>Three-dot menu → "Report" → reason picker (harm, spam, identifying info). 3 flags auto-hides pending review.</p>
+        <div class="why"><strong>Why now.</strong> Anonymous boards <em>will</em> get dumped on. You don't need a real mod team yet — you do need a kill switch.</div>
+        <div class="needs">needs · <code>flags</code> table · auto-hide threshold</div>
+      </div>
+
+    </div>
+
+    <!-- =================== NEXT =================== -->
+    <h2 class="phase">Next · the founder thesis <span class="tag p1">P1 · differentiates from generic anon boards</span></h2>
+    <p class="phase-sub">This is what makes "it's an problem" different from Reddit or a campus subreddit. Don't ship until the P0 loop works.</p>
+    <div class="items">
+
+      <div class="item">
+        <div class="item-head"><h3>Friend graph</h3><span class="effort">1 week</span></div>
+        <p>Add friends by email or username. Mutual confirmation. Friend count visible only to the user.</p>
+        <div class="why"><strong>Why next.</strong> Unlocks the founder's killer use case: "tell a friend something true without hurting them." But meaningless until enough people are on the platform to have friends.</div>
+        <div class="needs">needs · <code>friendships</code> table · friend-request flow · contact import (later)</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Friend-anon posts</h3><span class="effort">1 week</span></div>
+        <p>"Share with friends only" toggle on the composer. Friends see it; the rest of the site doesn't. Within the friend group, the OP is still anonymous.</p>
+        <div class="why"><strong>Why next.</strong> The "tell a friend feedback they need to hear" thesis from the founder brief. The hard part isn't shipping it — it's the anonymity guardrail (see Risks below).</div>
+        <div class="needs">needs · <code>audiences</code> table · <code>min_audience</code> enforcement</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Tags &amp; rooms</h3><span class="effort">3 days</span></div>
+        <p>Six seed tags: academic, relationships, money, mental-health, housing, career. Post one tag per problem. Tag pages = a feed of just that tag.</p>
+        <div class="why"><strong>Why next.</strong> A user looking for advice on a specific thing wants to find peer experiences fast. Also makes the AI training pipeline cleaner later.</div>
+        <div class="needs">needs · <code>tags</code> + <code>post_tags</code> tables · seed data</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>College verification</h3><span class="effort">3 days</span></div>
+        <p>If the signup email matches a known <code>.edu</code> domain, auto-tag the user as verified at that college. Show a campus-only feed.</p>
+        <div class="why"><strong>Why next.</strong> Founder said "start with college students." Verified campuses are the wedge — go-to-market is one club at one school, not "everyone".</div>
+        <div class="needs">needs · <code>colleges</code> table · domain match on signup</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Badges</h3><span class="effort">2 days</span></div>
+        <p>Auto-awarded chips on profile: "honest neighbor" (3+ helpful replies), "first post," "10 marked helpful," etc.</p>
+        <div class="why"><strong>Why next.</strong> Cheap dopamine. Reinforces commenting (the behavior you actually want to encourage) more than posting.</div>
+        <div class="needs">needs · <code>user_stats.badges</code> jsonb · cron job</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Search</h3><span class="effort">2 days</span></div>
+        <p>Top-of-page search by title + body. Postgres <code>pg_trgm</code> is enough at this scale; don't introduce Elasticsearch.</p>
+        <div class="why"><strong>Why next.</strong> Returning users need to find a thread they replied to. New users want to know "has anyone else dealt with X."</div>
+        <div class="needs">needs · GIN index · simple ranked query</div>
+      </div>
+
+    </div>
+
+    <!-- =================== LATER =================== -->
+    <h2 class="phase">Later · only after traction <span class="tag p2">P2 · data-dependent</span></h2>
+    <p class="phase-sub">Don't build any of these speculatively. Need real users and real data first — otherwise you'll over-invest in features no one validates.</p>
+    <div class="items">
+
+      <div class="item">
+        <div class="item-head"><h3>AI advisor</h3><span class="effort">large</span></div>
+        <p>Fine-tune (or RAG) over comments that earned ≥ N helpful marks. Frame as "what other people would say" — not as professional advice.</p>
+        <div class="why"><strong>Why later.</strong> Founder's long-term vision. Won't work without a dataset, and bad early AI replies will torch trust. Don't ship until you have 10k+ helpful-marked replies and a clear safety guardrail (no medical / no legal / hand-off to real humans in crisis).</div>
+        <div class="needs">needs · <code>ai_responses</code> table · safety filter · evals</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Premium tier</h3><span class="effort">medium</span></div>
+        <p>"Plus" tier: drafts, multiple tags per post, advanced filters, badge boost. "College" tier: school-wide access for student services.</p>
+        <div class="why"><strong>Why later.</strong> Founder asked about non-ad monetization. Premium tiers only work after users <em>love</em> the free product. Trying to charge for "advanced filters" before then will tank conversion.</div>
+        <div class="needs">needs · <code>subscriptions</code> table · Stripe</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>University partnerships</h3><span class="effort">non-technical</span></div>
+        <p>Sell anonymized, aggregated insights to school counseling / student services. "Top problems on your campus this month."</p>
+        <div class="why"><strong>Why later.</strong> Highest-value monetization but requires (a) trust at scale, (b) airtight anonymization, (c) ethics review. Six-month minimum before this is even a pitch.</div>
+        <div class="needs">needs · aggregation pipeline · k-anonymity guarantees · legal review</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Mobile app</h3><span class="effort">large</span></div>
+        <p>Start as a PWA — the React app already has the right shape. Native (React Native or Expo) only if push-notification engagement materially beats web push.</p>
+        <div class="why"><strong>Why later.</strong> Don't fragment your engineering effort until you've proven the web app retains.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Audio "vents"</h3><span class="effort">medium</span></div>
+        <p>Short voice posts. Auto-transcribed. Voice obviously breaks anonymity by default — this is text-first.</p>
+        <div class="why"><strong>Why later.</strong> Interesting differentiator but expensive (storage, transcription, moderation). Not on the critical path.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-head"><h3>Memes / image posts</h3><span class="effort">small</span></div>
+        <p>Founder explicitly named memes as part of the vibe. Allow an optional image attachment to posts and comments.</p>
+        <div class="why"><strong>Why later.</strong> Images dramatically raise the moderation burden. Wait until <code>flags</code> + a real mod queue exist.</div>
+      </div>
+
+    </div>
+
+    <!-- =================== OPEN QUESTIONS =================== -->
+    <div class="questions">
+      <h2>Open questions for the founder</h2>
+      <p class="lede">From the brief — these need a decision before anything in "Next" gets built.</p>
+
+      <div class="q">
+        <span class="num">Q1</span>
+        <h4>How do you incentivize the first 100 users to keep coming back?</h4>
+        <p>The reputation system + notifications are the lever. But neither matters without seed content. Possibilities: (a) launch with the founder + close friends seeding 50 honest problems, (b) partner with one campus club, (c) "anonymous AMA" launches with verified people.</p>
+        <div class="answer-hint"><strong>My recommendation:</strong> Pick one campus. Seed it. Don't open public registration until that one campus retains.</div>
+      </div>
+
+      <div class="q">
+        <span class="num">Q2</span>
+        <h4>How does anonymity hold in a small friend group?</h4>
+        <p>You named this in the brief: in a 3-person group, the OP is obvious. The <code>audiences.min_audience</code> guardrail (default 5) refuses to publish a friend-anon post if the group is too small. There's no UX way around this — the math leaks the identity.</p>
+        <div class="answer-hint"><strong>My recommendation:</strong> Hard floor of 5 friends. Below that, the friend-anon toggle is disabled with copy: "Add more friends — fewer than 5 isn't anonymous enough."</div>
+      </div>
+
+      <div class="q">
+        <span class="num">Q3</span>
+        <h4>How do you stop wrong advice from polluting AI training data?</h4>
+        <p>You raised this directly. The helpful-mark system is the answer — only comments with ≥ N marks from distinct users feed the training set. But "helpful" ≠ "correct." A confidently wrong reply can still get hearts.</p>
+        <div class="answer-hint"><strong>My recommendation:</strong> Don't train an AI until you have a separate annotation layer (clinician / counselor review on a sample). Until then, surface the top-3 community replies; don't auto-generate.</div>
+      </div>
+
+      <div class="q">
+        <span class="num">Q4</span>
+        <h4>What does monetization look like that isn't ads?</h4>
+        <p>From the brief. Three plausible paths: <strong>premium individual</strong> ($3–5/mo, drafts/filters), <strong>college site licenses</strong> (counseling services pay for aggregate insights), <strong>verified-expert AMAs</strong> (sponsored — a therapist hosts a thread, the platform takes a cut).</p>
+        <div class="answer-hint"><strong>My recommendation:</strong> Aim for college site licenses. Highest ARPU, defensible, aligned with the brand. Premium individual is a fallback.</div>
+      </div>
+
+      <div class="q">
+        <span class="num">Q5</span>
+        <h4>What's the canonical name? IAP / TAP / ATP / thatsanproblem.com?</h4>
+        <p>The brief lists four. The repo is named <code>itsanproblem</code>. The frontend HTML title is "It's a problem." The design system lands on "It's An Problem" with the intentional grammatical play.</p>
+        <div class="answer-hint"><strong>My recommendation:</strong> Pick one. "It's An Problem" (full name) + IAP (shorthand) + thatsanproblem.com (URL). Drop TAP/ATP — three names is one too many.</div>
+      </div>
+
+    </div>
+
+    <!-- =================== RISKS =================== -->
+    <h2 class="phase" style="margin-top: 40px;">Risks worth naming <span class="tag future">be honest about these</span></h2>
+    <p class="phase-sub">From the founder brief + things I noticed reading the code.</p>
+
+    <div class="risks">
+
+      <div class="risk">
+        <h4>Anonymity is a DB layout, not a feature.</h4>
+        <p>Today, <code>posts.user_id</code> is a non-null FK. The "anonymous" label is purely cosmetic — set in <code>Post#as_json</code>.</p>
+        <div class="mitigation"><strong>Fix:</strong> Move authorship off <code>posts</code> entirely. Use <code>anon_handles</code> for display, and an opt-in <code>post_authors</code> ledger if you need recovery. Don't trust serialization alone.</div>
+      </div>
+
+      <div class="risk">
+        <h4>Cold start = no posts = no one returns.</h4>
+        <p>Anonymous boards die without inertia. A user who visits twice and sees the same three posts is gone.</p>
+        <div class="mitigation"><strong>Fix:</strong> Seed manually with 50+ real problems before public launch. The single-campus wedge solves this.</div>
+      </div>
+
+      <div class="risk">
+        <h4>Wrong advice will hurt people.</h4>
+        <p>The brief acknowledges this. Mental-health adjacent tags (suicidal ideation, self-harm, abuse) need a different track than "my roommate smells."</p>
+        <div class="mitigation"><strong>Fix:</strong> Crisis-keyword detector → static safety banner ("If you're in crisis, please call …"). Optionally block public replies on flagged posts pending human review.</div>
+      </div>
+
+      <div class="risk">
+        <h4>The friend-anon use case can be weaponized.</h4>
+        <p>"Anonymous feedback to friends" can become anonymous bullying. The 5-friend floor helps but doesn't fix it.</p>
+        <div class="mitigation"><strong>Fix:</strong> Friend-anon replies must be marked "helpful" by the recipient to remain visible. Negative-only feedback can be muted by recipient.</div>
+      </div>
+
+      <div class="risk">
+        <h4>Helpful marks ≠ helpful comments.</h4>
+        <p>Reddit-style upvoting rewards confidence and snark over correctness.</p>
+        <div class="mitigation"><strong>Fix:</strong> Only the OP's mark counts toward commenter reputation. Other users' marks count for sorting only. Means: rep is "the person you helped said you helped," not "the crowd liked you."</div>
+      </div>
+
+      <div class="risk">
+        <h4>The codebase has zero tests.</h4>
+        <p><code>spec/</code> exists but is empty. No CI. Adding features to this base is going to be load-bearing on you not breaking things.</p>
+        <div class="mitigation"><strong>Fix:</strong> Before P0 work, add RSpec request specs for the 5 existing endpoints + GitHub Actions CI. Otherwise every new table is a regression risk.</div>
+      </div>
+
+    </div>
+
+  </div>
+</body>
+</html>

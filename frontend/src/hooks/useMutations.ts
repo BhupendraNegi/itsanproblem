@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from '../api'
-import type { AuthResponse, Post, User, Comment } from '../types'
+import type { AuthResponse, Post, User, Comment, UserProfile } from '../types'
 
 type AuthFields = {
   name: string
@@ -86,5 +86,13 @@ export function usePosts() {
   return useQuery<Post[]>({
     queryKey: ['posts'],
     queryFn: api.fetchPosts,
+  })
+}
+
+export function useUserProfile(userId: number) {
+  return useQuery<UserProfile>({
+    queryKey: ['user', userId],
+    queryFn: () => api.fetchUserProfile(userId),
+    enabled: !!userId,
   })
 }

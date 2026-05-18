@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 interface PostFormProps {
   title: string
   setTitle: (title: string) => void
@@ -8,21 +10,49 @@ interface PostFormProps {
 }
 
 export function PostForm({ title, setTitle, body, setBody, onSubmit, isLoading }: PostFormProps) {
+  const [focused, setFocused] = useState(false)
+
   return (
-    <section className="form-card">
-      <h2>Create Post</h2>
+    <section className="card">
+      <div className="composer-header">
+        <h2>What&apos;s an problem?</h2>
+        <span className="anon-indicator">
+          <img src="/assets/icons/user-x.svg" alt="" />
+          posting anonymously
+        </span>
+      </div>
       <form onSubmit={onSubmit} className="stack">
-        <label>
-          Title
-          <input value={title} onChange={(event) => setTitle(event.target.value)} required />
+        <label className="field">
+          <span>Title</span>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onFocus={() => setFocused(true)}
+            placeholder="One line — what's actually bothering you"
+            required
+          />
         </label>
-        <label>
-          Add Details
-          <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={4} required />
-        </label>
-        <button type="submit" className="primary-button" disabled={isLoading}>
-          {isLoading ? 'Posting...' : 'Post Details'}
-        </button>
+        {(focused || body || title) && (
+          <label className="field">
+            <span>Add details</span>
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Set the scene. No need to be tidy."
+              rows={4}
+              required
+            />
+          </label>
+        )}
+        <div className="composer-actions">
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={isLoading || !title.trim() || !body.trim()}
+          >
+            {isLoading ? 'Posting…' : 'Post anonymously'}
+          </button>
+        </div>
       </form>
     </section>
   )
