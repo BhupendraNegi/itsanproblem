@@ -7,7 +7,7 @@ module Api
         if user.save
           render json: { user: user_response(user), token: encode_token(user_id: user.id) }, status: :created
         else
-          render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+          render json: { errors: user.errors.full_messages }, status: :unprocessable_content
         end
       end
 

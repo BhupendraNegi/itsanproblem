@@ -239,9 +239,10 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.3.0)
-    rdoc (6.14.2)
+    rdoc (7.2.0)
       erb
       psych (>= 4.0.0)
+      tsort
     redis (5.4.1)
       redis-client (>= 0.22.0)
     redis-client (0.25.2)
@@ -342,6 +343,7 @@ GEM
     thruster (0.1.15-arm64-darwin)
     thruster (0.1.15-x86_64-linux)
     timeout (0.4.3)
+    tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (3.2.0)
@@ -386,6 +388,7 @@ DEPENDENCIES
   rack-attack (~> 6.7)
   rack-cors
   rails (~> 8.0.2, >= 8.0.2.1)
+  rdoc (>= 7.2)
   redis (~> 5.4)
   rspec-rails (~> 8.0)
   rubocop-rails-omakase
@@ -397,10 +400,11 @@ DEPENDENCIES
   solid_queue
   sqlite3 (>= 2.1)
   thruster
+  tsort
   tzinfo-data
 
 RUBY VERSION
    ruby 4.0.3p0
 
 BUNDLED WITH
-   2.6.2
+   4.0.11
