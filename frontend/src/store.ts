@@ -9,14 +9,20 @@ type AuthState = {
 }
 
 const getSavedUser = () => {
-  if (typeof window === 'undefined') return null
-  const value = localStorage.getItem('authUser')
-  return value ? JSON.parse(value) as User : null
+  try {
+    const value = localStorage.getItem('authUser')
+    return value ? JSON.parse(value) as User : null
+  } catch {
+    return null
+  }
 }
 
 const getSavedToken = () => {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem('authToken')
+  try {
+    return localStorage.getItem('authToken')
+  } catch {
+    return null
+  }
 }
 
 const useAuth = create<AuthState>((set) => ({
