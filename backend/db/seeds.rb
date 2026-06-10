@@ -8,7 +8,7 @@
 # ┌──────────────────────────────────────────────────────────────────────┐
 # │  Demo login (all seeded users share this password)                     │
 # │    email:     demo@itsanproblem.test                                   │
-# │    password:  password123                                              │
+# │    password:  strongpassword@123itsap                                              │
 # │                                                                        │
 # │  Other seeded users: priya@ / sam@ / lena@ itsanproblem.test           │
 # │  (same password)                                                       │
@@ -19,7 +19,7 @@ if Rails.env.production?
   return
 end
 
-password = "password123"
+password = "strongpassword@123itsap"
 
 # ── Users ──────────────────────────────────────────────────────────────────
 demo = User.find_or_create_by!(email: "demo@itsanproblem.test") do |u|
