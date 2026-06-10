@@ -2,15 +2,17 @@ module Api
   module V1
     class PostsController < ApplicationController
       before_action :authenticate_user!, only: [:create]
+      before_action :set_current_user, only: [:index, :show]
       before_action :set_post, only: [:show]
 
       def index
-        posts = Post.includes(:comments, :user).order(created_at: :desc)
-        render json: posts.map(&:as_json)
+        posts = Post.visible.includes(:post_author, :helpful_marks, comments: [:user, :helpful_marks])
+        posts = (params[:sort] == "hot") ? posts.hot : posts.order(created_at: :desc)
+        render json: posts.map { |post| post.as_json(viewer: current_user) }
       end
 
       def show
-        render json: @post.as_json
+        render json: @post.as_json(viewer: current_user)
       end
 
       def create
@@ -26,7 +28,7 @@ module Api
       private
 
       def set_post
-        @post = Post.find(params[:id])
+        @post = Post.visible.find(params[:id])
       rescue ActiveRecord::RecordNotFound
         render json: {error: "Post not found"}, status: :not_found
       end

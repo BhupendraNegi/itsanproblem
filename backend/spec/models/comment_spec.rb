@@ -1,8 +1,9 @@
 require "rails_helper"
 
 RSpec.describe Comment, type: :model do
+  let(:op) { User.create!(name: "Olive", email: "olive@example.com", password: "password123") }
   let(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }
-  let(:post) { user.posts.create!(title: "My problem", body: "It is bad.") }
+  let(:post) { op.posts.create!(title: "My problem", body: "It is bad.") }
   subject(:comment) { post.comments.build(body: "Have you tried turning it off?", user: user) }
 
   describe "validations" do
@@ -37,6 +38,16 @@ RSpec.describe Comment, type: :model do
 
     it "does not expose user_id directly" do
       expect(comment.as_json.keys).not_to include("user_id")
+    end
+
+    context "when the commenter is the OP" do
+      subject(:comment) { post.comments.build(body: "Replying in my own thread", user: op) }
+
+      it "shows the post's anon handle instead of the real name" do
+        json = comment.as_json
+        expect(json["author"]).to eq(post.anon_handle)
+        expect(json["author_id"]).to be_nil
+      end
     end
   end
 end

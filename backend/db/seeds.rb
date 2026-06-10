@@ -88,7 +88,7 @@ end
 User.find_each do |user|
   stat = UserStat.for_user(user)
   # helpful_points = comments other people left on this user's posts.
-  helpful = Comment.joins(:post).where(posts: {user_id: user.id}).count
+  helpful = Comment.joins(post: :post_author).where(post_authors: {user_id: user.id}).count
   stat.update!(comment_count: user.comments.count, helpful_points: helpful)
 end
 

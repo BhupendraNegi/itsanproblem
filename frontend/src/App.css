@@ -335,6 +335,67 @@ button { font-family: inherit; }
   filter: brightness(0) invert(1);
 }
 
+/* ---- Notification bell ---- */
+.notification-bell { position: relative; }
+
+.notification-bell .logout-icon-btn { position: relative; }
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  max-height: 360px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-card);
+  z-index: 30;
+}
+
+.notification-dropdown ul { list-style: none; margin: 0; padding: 6px; }
+
+.notification-dropdown li {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--fg2);
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.notification-dropdown li.is-unread {
+  color: var(--fg1);
+  font-weight: 500;
+  background: var(--bg-card-sunken);
+}
+
+.notification-dropdown li + li { margin-top: 2px; }
+
+.notification-empty {
+  margin: 0;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--fg2);
+}
+
 /* ---- Layout ---- */
 .app-shell {
   display: grid;
@@ -376,6 +437,38 @@ button { font-family: inherit; }
   gap: 12px;
   font-size: 14px;
   color: var(--fg2);
+}
+
+/* ---- Segmented control (feed sort) ---- */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-card-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+}
+
+.segmented button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--fg2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+  transition: background var(--motion-fast) var(--ease-standard),
+              color var(--motion-fast) var(--ease-standard);
+}
+
+.segmented button:hover { color: var(--fg1); }
+
+.segmented button.is-active {
+  background: var(--bg-card);
+  color: var(--fg1);
+  box-shadow: var(--shadow-card);
 }
 
 /* ---- Stack ---- */
@@ -699,6 +792,19 @@ button { font-family: inherit; }
 
 .comment-meta { font-size: 12px; color: var(--fg2); font-family: var(--font-mono); }
 .comment-meta strong { color: var(--fg1); font-weight: 600; }
+
+.action-btn.comment-helpful { padding: 2px 6px; font-size: 12px; font-family: var(--font-mono); }
+
+.flag-menu {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-card-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.flag-menu .action-btn { padding: 4px 10px; font-size: 12px; }
 
 /* ---- Comment form ---- */
 .comment-form {

@@ -8,7 +8,10 @@ export type Comment = {
   id: number
   body: string
   author: string
-  author_id: number
+  // null when the comment is by the OP, who stays anonymous in their thread
+  author_id: number | null
+  helpful_count?: number
+  viewer_marked?: boolean
   created_at: string
 }
 
@@ -19,6 +22,7 @@ export type Post = {
   author: string
   anon_handle?: string
   helpful_count?: number
+  viewer_marked?: boolean
   created_at: string
   comments: Comment[]
 }
@@ -34,6 +38,20 @@ export type ProfileComment = {
   created_at: string
   post_id: number
   post_title: string
+}
+
+export type Notification = {
+  id: number
+  event: 'reply' | 'helpful_mark'
+  post_id: number
+  post_title: string
+  read: boolean
+  created_at: string
+}
+
+export type NotificationsResponse = {
+  notifications: Notification[]
+  unread_count: number
 }
 
 export type UserProfile = {

@@ -20,6 +20,28 @@ RSpec.describe "Api::V1::Posts", type: :request do
       expect(body.first.keys).not_to include("user_id")
     end
 
+    context "with ?sort=hot" do
+      it "orders by helpful marks (last 7 days) instead of recency" do
+        popular = user.posts.create!(title: "Older but loved", body: "Help me.", created_at: 2.days.ago)
+        fan = User.create!(name: "Fan", email: "fan@example.com", password: "password123")
+        popular.helpful_marks.create!(user: fan)
+
+        get "/api/v1/posts?sort=hot"
+        titles = JSON.parse(response.body).pluck("title")
+        expect(titles.first).to eq("Older but loved")
+      end
+
+      it "excludes posts older than 7 days" do
+        stale = user.posts.create!(title: "Ancient", body: "Old news.", created_at: 8.days.ago)
+        fan = User.create!(name: "Fan", email: "fan@example.com", password: "password123")
+        stale.helpful_marks.create!(user: fan)
+
+        get "/api/v1/posts?sort=hot"
+        titles = JSON.parse(response.body).pluck("title")
+        expect(titles).not_to include("Ancient")
+      end
+    end
+
     it "includes comments nested in each post" do
       commenter = User.create!(name: "Bob", email: "bob@example.com", password: "password123")
       post_record.comments.create!(body: "Here to help", user: commenter)

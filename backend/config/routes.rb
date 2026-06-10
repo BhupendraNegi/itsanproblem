@@ -11,6 +11,17 @@ Rails.application.routes.draw do
 
       resources :posts, only: [:index, :show, :create] do
         resources :comments, only: [:create]
+        resource :helpful_mark, only: [:create, :destroy]
+        resource :flag, only: [:create]
+      end
+
+      resources :comments, only: [] do
+        resource :helpful_mark, only: [:create, :destroy]
+        resource :flag, only: [:create]
+      end
+
+      resources :notifications, only: [:index] do
+        patch :read_all, on: :collection
       end
 
       resources :users, only: [:show]

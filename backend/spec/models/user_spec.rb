@@ -31,8 +31,16 @@ RSpec.describe User, type: :model do
   end
 
   describe "associations" do
-    it { is_expected.to have_many(:posts).dependent(:destroy) }
+    it { is_expected.to have_many(:post_authors).dependent(:destroy) }
+    it { is_expected.to have_many(:posts).through(:post_authors) }
     it { is_expected.to have_many(:comments).dependent(:destroy) }
     it { is_expected.to have_one(:user_stat).dependent(:destroy) }
+
+    it "destroys authored posts when the account is destroyed" do
+      user.save!
+      post = user.posts.create!(title: "t", body: "b")
+      user.destroy!
+      expect(Post.exists?(post.id)).to be(false)
+    end
   end
 end
