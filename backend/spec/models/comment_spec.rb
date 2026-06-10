@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe Comment, type: :model do
   let(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }

@@ -16,15 +16,30 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 - All tests: `bundle exec rspec`
 - Single test file: `bundle exec rspec spec/requests/api/v1/posts_spec.rb`
 - Single example: `bundle exec rspec spec/path/to_spec.rb:42`
-- Lint: `bundle exec rubocop` (rubocop-rails-omakase style)
+- Lint: `bin/standardrb` (Ruby Standard style; `--fix` to autocorrect)
 - Security scan: `bundle exec brakeman`
 - Dependency CVE scan: `bundle exec bundler-audit check --update`
 
-### Quality (monorepo, run from repo root)
+### Linting & security (monorepo, run from repo root)
 
-- **`bin/lint`** — RuboCop (backend) + ESLint (frontend) + markdownlint (docs); `bin/lint fix` autocorrects. Per-tool subcommands: `bin/lint rb|js|md`.
-- **`bin/audit`** — bundler-audit (dependency CVEs) + Brakeman (static analysis).
-- **CI** ([.github/workflows/](.github/workflows/)): `lint.yml` (markdownlint), `security.yml` (bundler-audit + Gitleaks), `backend-ci.yml` (RuboCop + Brakeman), `frontend-ci.yml` (Vitest + tsc + ESLint), `rspec.yml`. Gitleaks config is [.gitleaks.toml](.gitleaks.toml) (allowlists SOPS-encrypted `secrets/*.yml` and Rails-generated initializers). markdownlint config is [.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc).
+Two aggregator scripts run the same checks CI does; both delegate to the backend
+gems via `mise exec` when mise is present.
+
+- **`bin/lint`** — runs every linter and reports all (exits non-zero if any fail):
+  - `bin/lint` — StandardRB (backend) + ESLint (frontend) + markdownlint (docs)
+  - `bin/lint fix` — autocorrect all three
+  - `bin/lint rb|js|md [args]` — run a single linter; extra args pass through (e.g. `bin/lint rb app/models`)
+- **`bin/audit`** — `bundler-audit check --update` (dependency CVEs vs ruby-advisory-db) + Brakeman (Rails static analysis). bundler-audit is a **blocking** gate: fix flagged gems with `bundle update <gem>` rather than ignoring; [backend/.bundler-audit.yml](backend/.bundler-audit.yml) is for justified, commented exceptions only.
+
+Config files: [.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc) (MD040/MD060 disabled for the legacy-doc backlog) and [.gitleaks.toml](.gitleaks.toml) (allowlists the SOPS-encrypted `secrets/*.yml`, `.sops.yaml`, and Rails-generated initializers — Devise's commented default `secret_key` is a known false positive).
+
+### CI ([.github/workflows/](.github/workflows/))
+
+Run on every push to `main` + all PRs:
+
+- `lint.yml` — markdownlint · `security.yml` — bundler-audit + Gitleaks (full-history secret scan)
+- `backend-ci.yml` — StandardRB + Brakeman · `frontend-ci.yml` — Vitest + `tsc --noEmit` + ESLint · `rspec.yml` — RSpec
+- `dependabot.yml` — daily bundler / npm / github-actions update PRs
 
 ### Frontend (run from `frontend/`)
 
@@ -69,7 +84,7 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 
 ## Conventions & gotchas
 
-- **Ruby version mismatch:** the repo targets Ruby **4.0.3** ([.ruby-version](backend/.ruby-version), Gemfile), but RuboCop's `TargetRubyVersion` is pinned to **3.3** in [.rubocop.yml](backend/.rubocop.yml) because the parser does not yet support 4.0.
+- **Ruby version mismatch:** the repo targets Ruby **4.0.3** ([.ruby-version](backend/.ruby-version), Gemfile), but StandardRB's analyzer (RuboCop's parser) does not yet support Ruby 4.0, so `ruby_version` is pinned to **3.3** in [.standard.yml](backend/.standard.yml).
 - Error responses use a consistent shape: `{ error: "..." }` for single messages, `{ errors: [...] }` (from `model.errors.full_messages`) for validation failures, with `422 :unprocessable_content` for invalid input and `401 :unauthorized` for auth failures.
 - API param wrapping: posts are sent as `{ post: {...} }`, comments as `{ comment: {...} }`, auth as `{ user: {...} }`. The frontend camelCase `passwordConfirmation` is mapped to `password_confirmation` in [src/api.ts](frontend/src/api.ts).
 

@@ -5,9 +5,9 @@ module Api
         user = User.new(register_params)
 
         if user.save
-          render json: { user: user_response(user), token: encode_token(user_id: user.id) }, status: :created
+          render json: {user: user_response(user), token: encode_token(user_id: user.id)}, status: :created
         else
-          render json: { errors: user.errors.full_messages }, status: :unprocessable_content
+          render json: {errors: user.errors.full_messages}, status: :unprocessable_content
         end
       end
 
@@ -15,14 +15,14 @@ module Api
         user = User.find_for_database_authentication(email: params[:email])
 
         if user&.valid_password?(params[:password])
-          render json: { user: user_response(user), token: encode_token(user_id: user.id) }
+          render json: {user: user_response(user), token: encode_token(user_id: user.id)}
         else
-          render json: { error: "Invalid email or password" }, status: :unauthorized
+          render json: {error: "Invalid email or password"}, status: :unauthorized
         end
       end
 
       def logout
-        render json: { success: true }
+        render json: {success: true}
       end
 
       private

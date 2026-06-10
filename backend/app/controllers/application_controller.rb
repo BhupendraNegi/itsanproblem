@@ -5,12 +5,12 @@ class ApplicationController < ActionController::API
 
   def authenticate_user!
     token = request.headers["Authorization"]&.split(" ")&.last
-    return render json: { error: "Missing Authorization token" }, status: :unauthorized unless token
+    return render json: {error: "Missing Authorization token"}, status: :unauthorized unless token
 
     payload = decode_token(token)
     @current_user = User.find(payload["user_id"])
   rescue JWT::DecodeError, ActiveRecord::RecordNotFound, JWT::ExpiredSignature
-    render json: { error: "Not authorized" }, status: :unauthorized
+    render json: {error: "Not authorized"}, status: :unauthorized
   end
 
   def encode_token(payload)

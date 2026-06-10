@@ -1,9 +1,9 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "Api::V1::Auth", type: :request do
   describe "POST /api/v1/auth/register" do
     let(:valid_params) do
-      { user: { name: "Alice", email: "alice@example.com", password: "password123", password_confirmation: "password123" } }
+      {user: {name: "Alice", email: "alice@example.com", password: "password123", password_confirmation: "password123"}}
     end
 
     it "creates a user and returns a token" do
@@ -17,7 +17,7 @@ RSpec.describe "Api::V1::Auth", type: :request do
     end
 
     it "returns errors for missing name" do
-      post "/api/v1/auth/register", params: { user: { email: "alice@example.com", password: "password123", password_confirmation: "password123" } }, as: :json
+      post "/api/v1/auth/register", params: {user: {email: "alice@example.com", password: "password123", password_confirmation: "password123"}}, as: :json
       expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body)["errors"]).to be_present
     end
@@ -29,7 +29,7 @@ RSpec.describe "Api::V1::Auth", type: :request do
     end
 
     it "returns errors for mismatched password confirmation" do
-      post "/api/v1/auth/register", params: { user: { name: "Alice", email: "alice@example.com", password: "password123", password_confirmation: "wrong" } }, as: :json
+      post "/api/v1/auth/register", params: {user: {name: "Alice", email: "alice@example.com", password: "password123", password_confirmation: "wrong"}}, as: :json
       expect(response).to have_http_status(:unprocessable_content)
     end
   end
@@ -38,19 +38,19 @@ RSpec.describe "Api::V1::Auth", type: :request do
     let!(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }
 
     it "returns a token on valid credentials" do
-      post "/api/v1/auth/login", params: { email: "alice@example.com", password: "password123" }, as: :json
+      post "/api/v1/auth/login", params: {email: "alice@example.com", password: "password123"}, as: :json
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)["token"]).to be_present
     end
 
     it "returns 401 on wrong password" do
-      post "/api/v1/auth/login", params: { email: "alice@example.com", password: "wrong" }, as: :json
+      post "/api/v1/auth/login", params: {email: "alice@example.com", password: "wrong"}, as: :json
       expect(response).to have_http_status(:unauthorized)
       expect(JSON.parse(response.body)["error"]).to be_present
     end
 
     it "returns 401 for unknown email" do
-      post "/api/v1/auth/login", params: { email: "nobody@example.com", password: "password123" }, as: :json
+      post "/api/v1/auth/login", params: {email: "nobody@example.com", password: "password123"}, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
   end

@@ -1,0 +1,13 @@
+# Ruby Standard config — https://github.com/standardrb/standard
+#
+# Standard runs on RuboCop's parser, which does not yet support Ruby 4.0, so
+# pin the analyzed version to 3.3 (the highest supported) until it catches up.
+ruby_version: 3.3
+
+plugins:
+  - standard-rails
+
+ignore:
+  # Generated files — not worth retroactive cleanup.
+  - "db/migrate/**/*"
+  - "db/schema.rb"
