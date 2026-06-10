@@ -1,5 +1,13 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useFlagMutation, useHelpfulMutation } from '../hooks/useMutations'
 import type { Comment, Post } from '../types'
+
+const FLAG_REASONS = [
+  { value: 'harm', label: 'Harmful' },
+  { value: 'spam', label: 'Spam' },
+  { value: 'identifying_info', label: 'Identifying info' },
+]
 
 interface PostCardProps {
   post: Post
@@ -31,6 +39,18 @@ export function PostCard({
   const helpfulCount = post.helpful_count ?? 0
   const isHot = helpfulCount >= 10
   const handle = post.anon_handle ?? 'anonymous'
+  const helpfulMutation = useHelpfulMutation()
+  const flagMutation = useFlagMutation()
+  const [flagMenuOpen, setFlagMenuOpen] = useState(false)
+  const [reported, setReported] = useState(false)
+
+  function handleFlag(reason: string) {
+    flagMutation.mutate(
+      { target: 'posts', id: post.id, reason },
+      { onSuccess: () => setReported(true) }
+    )
+    setFlagMenuOpen(false)
+  }
 
   return (
     <article className="post-card">
@@ -57,15 +77,32 @@ export function PostCard({
       </div>
 
       <div className="post-actions" onClick={(e) => e.stopPropagation()}>
-        <button className="action-btn">
+        <button
+          className={`action-btn${post.viewer_marked ? ' is-active' : ''}`}
+          onClick={() => helpfulMutation.mutate({ target: 'posts', id: post.id, marked: !!post.viewer_marked })}
+          disabled={helpfulMutation.isPending}
+        >
           <img src="/assets/icons/heart.svg" alt="" />
-          Mark helpful
+          {post.viewer_marked ? 'Marked helpful' : 'Mark helpful'}
           {helpfulCount > 0 && <> · {helpfulCount}</>}
         </button>
-        <button className="action-btn">
-          <img src="/assets/icons/flag.svg" alt="" />
-          Flag
-        </button>
+        {reported ? (
+          <span className="action-btn is-active">Reported ✓</span>
+        ) : (
+          <button className="action-btn" onClick={() => setFlagMenuOpen((open) => !open)}>
+            <img src="/assets/icons/flag.svg" alt="" />
+            Flag
+          </button>
+        )}
+        {flagMenuOpen && !reported && (
+          <span className="flag-menu">
+            {FLAG_REASONS.map(({ value, label }) => (
+              <button key={value} className="action-btn" onClick={() => handleFlag(value)} disabled={flagMutation.isPending}>
+                {label}
+              </button>
+            ))}
+          </span>
+        )}
       </div>
 
       <div className="comments-section">
@@ -78,10 +115,22 @@ export function PostCard({
               <li key={comment.id} className="comment-item">
                 <p>{comment.body}</p>
                 <span className="comment-meta">
-                  <Link to={`/users/${comment.author_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                  {comment.author_id != null ? (
+                    <Link to={`/users/${comment.author_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                      <strong>{comment.author}</strong>
+                    </Link>
+                  ) : (
                     <strong>{comment.author}</strong>
-                  </Link>
+                  )}
                   {' '}· {formatRelative(comment.created_at)}
+                  {' '}·{' '}
+                  <button
+                    className={`action-btn comment-helpful${comment.viewer_marked ? ' is-active' : ''}`}
+                    onClick={() => helpfulMutation.mutate({ target: 'comments', id: comment.id, marked: !!comment.viewer_marked })}
+                    disabled={helpfulMutation.isPending}
+                  >
+                    Helpful{(comment.helpful_count ?? 0) > 0 && <> · {comment.helpful_count}</>}
+                  </button>
                 </span>
               </li>
             ))}

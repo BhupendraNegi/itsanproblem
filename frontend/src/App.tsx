@@ -21,8 +21,9 @@ function AppContent() {
   const [postTitle, setPostTitle] = useState('')
   const [postBody, setPostBody] = useState('')
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({})
+  const [sort, setSort] = useState<'recent' | 'hot'>('recent')
 
-  const { data, isLoading, error } = usePosts()
+  const { data, isLoading, error } = usePosts(sort)
   const posts = data ?? []
 
   const authMutation = useAuthMutation(setAlertMessage, setAuthFields, login)
@@ -109,8 +110,26 @@ function AppContent() {
 
       <section className="posts-grid">
         <header className="section-header">
-          <h2>Latest posts</h2>
+          <h2>{sort === 'hot' ? 'Hot this week' : 'Latest posts'}</h2>
           <div className="right">
+            <div className="segmented" role="tablist" aria-label="Sort posts">
+              <button
+                role="tab"
+                aria-selected={sort === 'recent'}
+                className={sort === 'recent' ? 'is-active' : ''}
+                onClick={() => setSort('recent')}
+              >
+                Recent
+              </button>
+              <button
+                role="tab"
+                aria-selected={sort === 'hot'}
+                className={sort === 'hot' ? 'is-active' : ''}
+                onClick={() => setSort('hot')}
+              >
+                Hot
+              </button>
+            </div>
             <span>{isLoading ? 'Loading…' : `${posts.length} post${posts.length === 1 ? '' : 's'}`}</span>
             <button
               className="btn-ghost"

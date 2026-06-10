@@ -19,8 +19,23 @@ RSpec.describe Post, type: :model do
   end
 
   describe "associations" do
-    it { is_expected.to belong_to(:user) }
+    it { is_expected.to have_one(:post_author).dependent(:destroy) }
+    it { is_expected.to have_one(:author_user).through(:post_author).source(:user) }
     it { is_expected.to have_many(:comments).dependent(:destroy) }
+  end
+
+  describe "anon handle" do
+    it "assigns a stable handle on creation" do
+      post.save!
+      expect(post.anon_handle).to match(/\Aanon_\h{4}\z/)
+      expect(post.reload.anon_handle).to eq(post.anon_handle)
+    end
+
+    it "records authorship in the post_authors ledger, not on the post" do
+      post.save!
+      expect(post.attributes).not_to have_key("user_id")
+      expect(post.author_user_id).to eq(user.id)
+    end
   end
 
   describe "#as_json" do

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Post, UserProfile } from './types'
+import type { AuthResponse, NotificationsResponse, Post, UserProfile } from './types'
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -32,8 +32,10 @@ export async function login(data: { email: string; password: string }) {
   return response.data
 }
 
-export async function fetchPosts() {
-  const response = await api.get<Post[]>('/posts')
+export async function fetchPosts(sort: 'recent' | 'hot' = 'recent') {
+  const response = await api.get<Post[]>('/posts', {
+    params: sort === 'hot' ? { sort } : undefined,
+  })
   return response.data
 }
 
@@ -44,6 +46,27 @@ export async function createPost(data: { title: string; body: string }) {
 
 export async function createComment(postId: number, data: { body: string }) {
   const response = await api.post(`/posts/${postId}/comments`, { comment: data })
+  return response.data
+}
+
+export async function toggleHelpful(target: 'posts' | 'comments', id: number, marked: boolean) {
+  const url = `/${target}/${id}/helpful_mark`
+  const response = marked ? await api.delete(url) : await api.post(url)
+  return response.data as { helpful_count: number; viewer_marked: boolean }
+}
+
+export async function flagContent(target: 'posts' | 'comments', id: number, reason: string) {
+  const response = await api.post(`/${target}/${id}/flag`, { flag: { reason } })
+  return response.data as { flagged: boolean }
+}
+
+export async function fetchNotifications() {
+  const response = await api.get<NotificationsResponse>('/notifications')
+  return response.data
+}
+
+export async function markAllNotificationsRead() {
+  const response = await api.patch<{ unread_count: number }>('/notifications/read_all')
   return response.data
 }
 

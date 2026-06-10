@@ -10,6 +10,7 @@ export const mockPost = {
   author: 'Anonymous',
   anon_handle: 'anon_a91f',
   helpful_count: 0,
+  viewer_marked: false,
   created_at: new Date().toISOString(),
   comments: [],
 }
@@ -39,6 +40,20 @@ export const mockProfile = {
   ],
 }
 
+export const mockNotifications = {
+  notifications: [
+    {
+      id: 1,
+      event: 'reply',
+      post_id: 1,
+      post_title: 'My problem',
+      read: false,
+      created_at: new Date().toISOString(),
+    },
+  ],
+  unread_count: 1,
+}
+
 export const handlers = [
   http.post('/api/v1/auth/register', () =>
     HttpResponse.json({ user: mockUser, token: mockToken }, { status: 201 })
@@ -66,5 +81,37 @@ export const handlers = [
 
   http.get('/api/v1/users/:id', () =>
     HttpResponse.json(mockProfile)
+  ),
+
+  http.post('/api/v1/posts/:postId/helpful_mark', () =>
+    HttpResponse.json({ helpful_count: 1, viewer_marked: true }, { status: 201 })
+  ),
+
+  http.delete('/api/v1/posts/:postId/helpful_mark', () =>
+    HttpResponse.json({ helpful_count: 0, viewer_marked: false })
+  ),
+
+  http.post('/api/v1/comments/:commentId/helpful_mark', () =>
+    HttpResponse.json({ helpful_count: 1, viewer_marked: true }, { status: 201 })
+  ),
+
+  http.delete('/api/v1/comments/:commentId/helpful_mark', () =>
+    HttpResponse.json({ helpful_count: 0, viewer_marked: false })
+  ),
+
+  http.post('/api/v1/posts/:postId/flag', () =>
+    HttpResponse.json({ flagged: true }, { status: 201 })
+  ),
+
+  http.post('/api/v1/comments/:commentId/flag', () =>
+    HttpResponse.json({ flagged: true }, { status: 201 })
+  ),
+
+  http.get('/api/v1/notifications', () =>
+    HttpResponse.json(mockNotifications)
+  ),
+
+  http.patch('/api/v1/notifications/read_all', () =>
+    HttpResponse.json({ unread_count: 0 })
   ),
 ]

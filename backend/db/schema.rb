@@ -10,24 +10,71 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_18_151226) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_10_000004) do
   create_table "comments", force: :cascade do |t|
     t.text "body", null: false
     t.integer "user_id", null: false
     t.integer "post_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "hidden_at"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "flags", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "flaggable_type", null: false
+    t.integer "flaggable_id", null: false
+    t.string "reason", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flaggable_type", "flaggable_id"], name: "index_flags_on_flaggable"
+    t.index ["user_id", "flaggable_type", "flaggable_id"], name: "index_flags_uniqueness", unique: true
+    t.index ["user_id"], name: "index_flags_on_user_id"
+  end
+
+  create_table "helpful_marks", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "markable_type", null: false
+    t.integer "markable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["markable_type", "markable_id"], name: "index_helpful_marks_on_markable"
+    t.index ["user_id", "markable_type", "markable_id"], name: "index_helpful_marks_uniqueness", unique: true
+    t.index ["user_id"], name: "index_helpful_marks_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "event", null: false
+    t.integer "post_id", null: false
+    t.integer "comment_id"
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["comment_id"], name: "index_notifications_on_comment_id"
+    t.index ["post_id"], name: "index_notifications_on_post_id"
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "post_authors", force: :cascade do |t|
+    t.integer "post_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id"], name: "index_post_authors_on_post_id", unique: true
+    t.index ["user_id"], name: "index_post_authors_on_user_id"
   end
 
   create_table "posts", force: :cascade do |t|
     t.string "title", null: false
     t.text "body", null: false
-    t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_posts_on_user_id"
+    t.string "anon_handle", null: false
+    t.datetime "hidden_at"
   end
 
   create_table "user_stats", force: :cascade do |t|
@@ -55,6 +102,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_18_151226) do
 
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
-  add_foreign_key "posts", "users"
+  add_foreign_key "flags", "users"
+  add_foreign_key "helpful_marks", "users"
+  add_foreign_key "notifications", "comments"
+  add_foreign_key "notifications", "posts"
+  add_foreign_key "notifications", "users"
+  add_foreign_key "post_authors", "posts"
+  add_foreign_key "post_authors", "users"
   add_foreign_key "user_stats", "users"
 end

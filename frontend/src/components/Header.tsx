@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { NotificationBell } from './NotificationBell'
 import type { User } from '../types'
 
 interface HeaderProps {
@@ -19,6 +20,7 @@ export function Header({ user, onLogout }: HeaderProps) {
         </div>
 
         <div className="navbar-user">
+          <NotificationBell />
           <Link to={`/users/${user.id}`} className="user-pill" style={{ textDecoration: 'none' }}>
             <span className="user-name">{user.name}</span>
             <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>

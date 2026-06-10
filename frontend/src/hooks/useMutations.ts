@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from '../api'
-import type { AuthResponse, Post, User, Comment, UserProfile } from '../types'
+import type { AuthResponse, NotificationsResponse, Post, User, Comment, UserProfile } from '../types'
 
 type AuthFields = {
   name: string
@@ -82,10 +82,51 @@ export function useCommentMutation(
   })
 }
 
-export function usePosts() {
+export function useHelpfulMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation<{ helpful_count: number; viewer_marked: boolean }, Error, { target: 'posts' | 'comments'; id: number; marked: boolean }>({
+    mutationFn: ({ target, id, marked }) => api.toggleHelpful(target, id, marked),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
+export function useFlagMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation<{ flagged: boolean }, Error, { target: 'posts' | 'comments'; id: number; reason: string }>({
+    mutationFn: ({ target, id, reason }) => api.flagContent(target, id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
+export function usePosts(sort: 'recent' | 'hot' = 'recent') {
   return useQuery<Post[]>({
-    queryKey: ['posts'],
-    queryFn: api.fetchPosts,
+    queryKey: ['posts', sort],
+    queryFn: () => api.fetchPosts(sort),
+  })
+}
+
+export function useNotifications() {
+  return useQuery<NotificationsResponse>({
+    queryKey: ['notifications'],
+    queryFn: api.fetchNotifications,
+    refetchInterval: 30_000,
+  })
+}
+
+export function useReadAllNotifications() {
+  const queryClient = useQueryClient()
+
+  return useMutation<{ unread_count: number }, Error, void>({
+    mutationFn: api.markAllNotificationsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    },
   })
 }
 
