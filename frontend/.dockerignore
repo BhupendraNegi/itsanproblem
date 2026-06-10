@@ -1,0 +1,20 @@
+# Rebuilt inside the image
+node_modules/
+dist/
+
+# Local env + git
+.env*
+.git/
+.gitignore
+
+# Test / build artefacts
+coverage/
+
+# Editor / OS noise
+.DS_Store
+.vscode/
+.idea/
+
+# Docker files themselves
+.dockerignore
+Dockerfile*

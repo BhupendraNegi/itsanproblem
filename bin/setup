@@ -1,0 +1,328 @@
+#!/usr/bin/env bash
+#
+# bin/setup — first-time itsanproblem setup (dev laptop / CI).
+#
+# Single entry point, modeled on the `code` project's bin/setup. Each step is a
+# subcommand so it can be run in isolation, and the whole walk is idempotent
+# and re-runnable.
+#
+#   bin/setup                  # run every step in order (default)
+#   bin/setup install-docker   # run just one step
+#   bin/setup --check          # dry-run: report drift, change nothing
+#   bin/setup doctor           # read-only health report
+#   bin/setup --skip-stack     # toolchain only (implies --skip-db)
+#   bin/setup --help
+#
+# Walks: toolchain (mise → ruby → node) → container runtime → app deps
+# (backend bundle, frontend npm) → services + data (compose up, db prepare).
+#
+# Supported platforms: macOS and Ubuntu/Debian.
+#
+# Exit codes: 0 success · 1 blocking failure · 2 --check found drift.
+
+set -Eeuo pipefail
+
+# Reset leaked Ruby env (VS Code Ruby LSP exports BUNDLE_GEMFILE into terminals,
+# which breaks bundle in other projects). Mirrors code/bin/setup.
+for __v in BUNDLE_GEMFILE BUNDLE_PATH BUNDLE_BIN GEM_HOME GEM_PATH RUBYOPT RUBYLIB; do
+  unset "$__v" 2>/dev/null || true
+done
+unset __v
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[ -n "$REPO_ROOT" ] || { echo "ERROR: run from inside the itsanproblem repo." >&2; exit 1; }
+cd "$REPO_ROOT"
+
+# ─── State ─────────────────────────────────────────────────────────────────
+CHECK_ONLY=0
+SKIP_DB=0
+SKIP_STACK=0
+SUBCOMMAND=""
+STEP_NUM=0
+WARN_COUNT=0
+DRIFT_COUNT=0
+PWX_CURRENT_STEP=""
+
+# ─── Colors ────────────────────────────────────────────────────────────────
+if [ -t 1 ]; then
+  C_GRN=$'\033[32m'; C_YEL=$'\033[33m'; C_RED=$'\033[31m'; C_DIM=$'\033[2m'; C_BLU=$'\033[34m'; C_RESET=$'\033[0m'
+else
+  C_GRN=""; C_YEL=""; C_RED=""; C_DIM=""; C_BLU=""; C_RESET=""
+fi
+
+# ─── Output helpers ────────────────────────────────────────────────────────
+step()  { STEP_NUM=$((STEP_NUM + 1)); printf '\n%s[%s/%s] %s%s\n' "$C_BLU" "$STEP_NUM" "$STEP_TOTAL" "$1" "$C_RESET"; }
+ok()    { printf '  %sok%s   %s\n'   "$C_GRN" "$C_RESET" "$1"; }
+skip()  { printf '  %sskip%s %s\n'   "$C_DIM" "$C_RESET" "$1"; }
+warn()  { printf '  %swarn%s %s\n'   "$C_YEL" "$C_RESET" "$1"; WARN_COUNT=$((WARN_COUNT + 1)); }
+err()   { printf '  %serr%s  %s\n'   "$C_RED" "$C_RESET" "$1" >&2; }
+hint()  { printf '       %s%s%s\n'   "$C_DIM" "$1" "$C_RESET"; }
+runlog(){ printf '  %s$%s %s\n'      "$C_DIM" "$C_RESET" "$*"; }
+die()   { err "$1"; exit 1; }
+have()  { command -v "$1" >/dev/null 2>&1; }
+
+# Per-step log capture (gitignored). Best-effort.
+LOG_DIR="$REPO_ROOT/tmp/setup-logs"
+mkdir -p "$LOG_DIR" 2>/dev/null || LOG_DIR=""
+PWX_STEP_LOG=""
+
+run_capture() {
+  if [ -n "$PWX_STEP_LOG" ]; then "$@" 2>&1 | tee -a "$PWX_STEP_LOG"; else "$@"; fi
+}
+# Side-effecting: skipped (just reported) in --check mode.
+do_or_check() {
+  if [ "$CHECK_ONLY" = "1" ]; then runlog "(check) $*"; DRIFT_COUNT=$((DRIFT_COUNT + 1));
+  else runlog "$*"; run_capture "$@"; fi
+}
+# Always run (read-only checks), regardless of --check.
+do_always() { runlog "$*"; run_capture "$@"; }
+did() { [ "$CHECK_ONLY" = "1" ] || ok "$1"; }
+
+# Failure banner.
+on_error() {
+  local code=$?
+  err "step '${PWX_CURRENT_STEP:-?}' failed (exit $code)"
+  [ -n "$PWX_CURRENT_STEP" ] && hint "re-run just this step: bin/setup ${PWX_CURRENT_STEP}"
+  [ -n "$PWX_STEP_LOG" ] && [ -f "$PWX_STEP_LOG" ] && hint "log: $PWX_STEP_LOG"
+  exit "$code"
+}
+trap on_error ERR
+
+# ─── OS detection ──────────────────────────────────────────────────────────
+case "$(uname -s)" in
+  Darwin) OS_FAMILY="macos";  OS_PRETTY="macOS $(sw_vers -productVersion 2>/dev/null || echo '')" ;;
+  Linux)
+    if [ -f /etc/debian_version ]; then OS_FAMILY="ubuntu"; OS_PRETTY="$(. /etc/os-release 2>/dev/null; echo "${PRETTY_NAME:-Debian/Ubuntu}")"
+    else OS_FAMILY="unsupported"; OS_PRETTY="$(uname -sr)"; fi ;;
+  *) OS_FAMILY="unsupported"; OS_PRETTY="$(uname -sr)" ;;
+esac
+
+# ─── Walk definition ───────────────────────────────────────────────────────
+WALK_STEPS=(
+  detect-os
+  ensure-package-manager
+  install-mise
+  install-ruby
+  install-node
+  install-docker
+  backend-bundle
+  frontend-npm
+  start-stack
+  db-setup
+)
+STEP_TOTAL=${#WALK_STEPS[@]}
+ALL_STEPS=( "${WALK_STEPS[@]}" doctor )
+
+is_step() { local s; for s in "${ALL_STEPS[@]}"; do [ "$s" = "$1" ] && return 0; done; return 1; }
+
+usage() {
+  cat <<'EOF'
+bin/setup — itsanproblem environment bootstrap (macOS / Ubuntu / Debian).
+
+Usage:
+  bin/setup                     Run every step in order (idempotent).
+  bin/setup <step> [--check]    Run one step (or dry-run with --check).
+  bin/setup doctor              Read-only health report.
+  bin/setup --help              This message.
+
+Flags:
+  --check         Dry-run: print what would change, change nothing (exit 2 on drift).
+  --skip-db       Skip database create/prepare.
+  --skip-stack    Skip docker stack startup (implies --skip-db).
+  -h, --help      Show this message.
+
+Steps (default run executes in this order; each is idempotent):
+  detect-os               Confirm macOS or Ubuntu/Debian.
+  ensure-package-manager  Homebrew on macOS, apt-get on Ubuntu.
+  install-mise            Toolchain manager (pins Ruby/Node via mise.toml).
+  install-ruby            mise install Ruby (backend/.ruby-version).
+  install-node            mise install Node (frontend).
+  install-docker          Delegate to bin/docker setup (colima 'itsaprom' on macOS).
+  backend-bundle          bundle install in backend/ (skip if bundle check passes).
+  frontend-npm            npm ci/install in frontend/.
+  start-stack             bin/docker up (db, valkey, backend, frontend).
+  db-setup                rails db:prepare inside the backend container.
+  doctor                  Diagnose health (sibling; not part of the walk).
+
+Examples:
+  bin/setup                  # full bootstrap
+  bin/setup --check          # report what would change
+  bin/setup install-docker   # just the container runtime
+  bin/setup doctor           # health check
+EOF
+  exit 0
+}
+
+# ─── Arg parsing ───────────────────────────────────────────────────────────
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --check)      CHECK_ONLY=1 ;;
+    --skip-db)    SKIP_DB=1 ;;
+    --skip-stack) SKIP_STACK=1; SKIP_DB=1 ;;
+    -h|--help)    usage ;;
+    *)
+      if is_step "$1"; then
+        [ -n "$SUBCOMMAND" ] && die "more than one subcommand: '$SUBCOMMAND' and '$1'"
+        SUBCOMMAND="$1"
+      else
+        die "unknown arg: $1 (try --help; valid steps: ${ALL_STEPS[*]})"
+      fi ;;
+  esac
+  shift
+done
+
+should_run() {
+  if [ -z "$SUBCOMMAND" ] || [ "$SUBCOMMAND" = "$1" ]; then
+    PWX_CURRENT_STEP="$1"
+    [ -n "$LOG_DIR" ] && PWX_STEP_LOG="$LOG_DIR/$1.log" && : > "$PWX_STEP_LOG" 2>/dev/null || true
+    return 0
+  fi
+  return 1
+}
+
+mise_install() { # $1 tool name for messaging
+  if ! have mise; then warn "mise not installed — run: bin/setup install-mise"; return 0; fi
+  if [ "$CHECK_ONLY" = "1" ]; then
+    if mise install --dry-run >/dev/null 2>&1; then ok "$1 satisfied"; else runlog "(check) mise install"; DRIFT_COUNT=$((DRIFT_COUNT+1)); fi
+  else
+    do_always mise install
+    did "$1 installed via mise"
+  fi
+}
+
+# ════════════════════════════════════════════════════════════════════════════
+# doctor — read-only health report (never mutates)
+# ════════════════════════════════════════════════════════════════════════════
+if [ "${SUBCOMMAND:-}" = "doctor" ]; then
+  printf '%sitsanproblem doctor%s — read-only health report\n' "$C_BLU" "$C_RESET"
+  fail=0
+  check() { # $1 label  $2 cmd...
+    local label="$1"; shift
+    if "$@" >/dev/null 2>&1; then ok "$label"; else warn "$label"; fail=$((fail+1)); fi
+  }
+  ok "OS: $OS_PRETTY"
+  check "Homebrew (macOS)"      bash -c '[ "$(uname -s)" != Darwin ] || command -v brew'
+  check "mise on PATH"          have mise
+  check "ruby 4.0.3 resolvable" bash -c 'command -v mise && mise which ruby'
+  check "node resolvable"       bash -c 'command -v mise && mise which node'
+  check "docker CLI"            have docker
+  check "docker daemon up"      docker info
+  check "sops"                  have sops
+  check "age key present"       test -r "$HOME/.config/sops/age/keys.txt"
+  check "secrets decrypt"       bash -c 'command -v sops && SOPS_AGE_KEY_FILE=$HOME/.config/sops/age/keys.txt sops -d secrets/development.yml'
+  check "backend bundle"        bash -c 'cd backend && command -v bundle && bundle check'
+  check "frontend node_modules" test -d frontend/node_modules
+  if docker info >/dev/null 2>&1; then
+    docker compose ps 2>/dev/null | sed 's/^/  /' || true
+  fi
+  echo
+  if [ "$fail" -gt 0 ]; then printf '%s%s check(s) need attention.%s\n' "$C_YEL" "$fail" "$C_RESET"; exit 1; fi
+  printf '%sall green.%s\n' "$C_GRN" "$C_RESET"; exit 0
+fi
+
+# ════════════════════════════════════════════════════════════════════════════
+# The walk
+# ════════════════════════════════════════════════════════════════════════════
+
+if should_run detect-os; then
+  step "Detect OS"
+  [ "$OS_FAMILY" = "unsupported" ] && die "unsupported OS: $OS_PRETTY (macOS or Ubuntu/Debian only)"
+  ok "$OS_PRETTY"
+fi
+
+if should_run ensure-package-manager; then
+  step "Verify package manager"
+  case "$OS_FAMILY" in
+    macos)
+      if have brew; then ok "Homebrew $(brew --version 2>/dev/null | awk 'NR==1{print $2}')"
+      else err "Homebrew not installed"; hint 'install: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'; die "Homebrew required on macOS"; fi ;;
+    ubuntu) have apt-get || die "apt-get not found"; ok "apt-get available" ;;
+  esac
+fi
+
+if should_run install-mise; then
+  step "Install mise"
+  if have mise; then ok "mise $(mise --version 2>/dev/null | awk 'NR==1')"
+  elif [ "$CHECK_ONLY" = "1" ]; then runlog "(check) install mise"; DRIFT_COUNT=$((DRIFT_COUNT+1))
+  else
+    case "$OS_FAMILY" in
+      macos)  do_always brew install mise ;;
+      ubuntu) do_always bash -c 'curl -fsSL https://mise.run | sh'; export PATH="$HOME/.local/bin:$PATH" ;;
+    esac
+    have mise && did "mise installed" || warn "mise installed but not on PATH — add: eval \"\$(mise activate $(basename "$SHELL"))\""
+  fi
+fi
+
+if should_run install-ruby; then
+  step "Install Ruby (mise)"
+  mise_install "ruby $(cat backend/.ruby-version 2>/dev/null | tr -d 'ruby-')"
+fi
+
+if should_run install-node; then
+  step "Install Node (mise)"
+  mise_install "node"
+fi
+
+if should_run install-docker; then
+  step "Install Docker runtime"
+  if [ -x bin/docker ]; then
+    if [ "$CHECK_ONLY" = "1" ]; then
+      if have docker && docker info >/dev/null 2>&1; then ok "docker daemon reachable"
+      else runlog "(check) bin/docker setup"; DRIFT_COUNT=$((DRIFT_COUNT+1)); fi
+    else
+      do_always bin/docker setup
+    fi
+  else warn "bin/docker missing — verify docker manually"; fi
+fi
+
+if should_run backend-bundle; then
+  step "Backend: bundle install"
+  if ! have mise && ! have bundle; then warn "no ruby/bundler on PATH — run install-ruby first"
+  elif (cd backend && mise exec -- bundle check >/dev/null 2>&1); then skip "bundle already satisfied"
+  elif [ "$CHECK_ONLY" = "1" ]; then runlog "(check) (cd backend && bundle install)"; DRIFT_COUNT=$((DRIFT_COUNT+1))
+  else do_always bash -c 'cd backend && mise exec -- bundle install'; did "gems installed"; fi
+fi
+
+if should_run frontend-npm; then
+  step "Frontend: npm install"
+  if [ -d frontend/node_modules ] && [ frontend/node_modules -nt frontend/package-lock.json ]; then skip "node_modules up to date"
+  elif [ "$CHECK_ONLY" = "1" ]; then runlog "(check) (cd frontend && npm ci)"; DRIFT_COUNT=$((DRIFT_COUNT+1))
+  elif have mise; then do_always bash -c 'cd frontend && mise exec -- npm ci'; did "node_modules installed"
+  else do_always bash -c 'cd frontend && npm ci'; did "node_modules installed"; fi
+fi
+
+if should_run start-stack; then
+  step "Start Docker stack"
+  if [ "$SKIP_STACK" = "1" ]; then skip "--skip-stack: not starting stack"
+  elif ! have docker; then warn "docker not on PATH — run install-docker"
+  elif ! docker info >/dev/null 2>&1; then warn "docker daemon unreachable"; hint "macOS: bin/docker setup   Linux: sudo systemctl start docker"
+  elif [ "$CHECK_ONLY" = "1" ]; then [ -x bin/docker ] && do_always bin/docker ps || true
+  else do_always bin/docker up; fi
+fi
+
+if should_run db-setup; then
+  step "Database setup"
+  if [ "$SKIP_DB" = "1" ]; then skip "--skip-db: not preparing database"
+  elif ! docker info >/dev/null 2>&1; then warn "docker unreachable — skipping db setup"
+  elif [ "$CHECK_ONLY" = "1" ]; then runlog "(check) bin/docker compose exec backend ./bin/rails db:prepare"
+  else
+    # The compose `command` already runs db:prepare on boot; run it again here
+    # so a standalone `bin/setup db-setup` is meaningful and idempotent.
+    do_always docker compose exec -T backend ./bin/rails db:prepare
+    did "database prepared"
+  fi
+fi
+
+# ─── Summary ───────────────────────────────────────────────────────────────
+echo
+if [ "$CHECK_ONLY" = "1" ]; then
+  if [ "$DRIFT_COUNT" -gt 0 ]; then printf '%s--check: %s item(s) would change.%s\n' "$C_YEL" "$DRIFT_COUNT" "$C_RESET"; exit 2; fi
+  printf '%s--check: clean, nothing to do.%s\n' "$C_GRN" "$C_RESET"; exit 0
+fi
+if [ -z "$SUBCOMMAND" ]; then
+  printf '%sDone.%s' "$C_GRN" "$C_RESET"
+  [ "$WARN_COUNT" -gt 0 ] && printf ' %s(%s warning(s))%s' "$C_YEL" "$WARN_COUNT" "$C_RESET"
+  printf '\n'
+  hint "frontend → http://localhost:${FRONTEND_PORT:-5173}   backend → http://localhost:${BACKEND_PORT:-3000}/api/v1"
+  hint "stack:    bin/docker ps | logs | down      health: bin/setup doctor"
+fi

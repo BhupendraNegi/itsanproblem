@@ -1,0 +1,22 @@
+# SOPS creation rules for itsanproblem.
+#
+# Two environments only — development and production. Each secrets/*.yml is
+# value-encrypted (ENC[...]) for the age recipients below; only the small set
+# of non-sensitive keys in `unencrypted_regex` stays plaintext.
+#
+# Decrypt requires the operator's age private key at
+#   ~/.config/sops/age/keys.txt   (or $SOPS_AGE_KEY_FILE)
+#
+# Adding/removing an operator: edit the recipient list, then run
+#   sops updatekeys secrets/development.yml secrets/production.yml
+#
+# Edit a secret with:
+#   sops secrets/development.yml
+
+creation_rules:
+  - path_regex: secrets/(development|production)\.yml$
+    key_groups:
+      - age:
+          # Bhupendra (bhupendranegi92@gmail.com)
+          - age10e4t2qf24xrscvj72293s0f3fd5uqkd6f6wlv7ky86ds37d2n42q32vwlh
+    unencrypted_regex: '^(user|database|host|port)$'

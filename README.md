@@ -12,37 +12,67 @@ An anonymous problem-sharing platform where users can post problems anonymously,
 ## Setup
 
 ### Prerequisites
-- Ruby 3.4+
-- Node.js 18+
-- SQLite (for development)
+- Ruby 4.0.3 (pinned in [mise.toml](mise.toml) / [backend/.ruby-version](backend/.ruby-version))
+- Node.js 20
+- SQLite (local dev); PostgreSQL is used by the Docker stack
+- For the Docker stack on macOS: [colima](https://github.com/abiosoft/colima) (installed by `bin/docker setup`)
+- For decrypting secrets: `sops`, `age`, `yq`, and an age key at `~/.config/sops/age/keys.txt`
 
-### Local Development
+### Quick start (recommended)
 
-#### Backend
+A single idempotent entry point bootstraps everything — toolchain (via `mise`),
+the colima `itsaprom` runtime, dependencies, the container stack, and the
+database:
+
 ```bash
-cd backendnpm
-bundle install
-bundle exec rails db:migrate
-bundle exec rails server
+bin/setup            # full bootstrap (re-runnable)
+bin/setup --check    # dry-run: report what would change, mutate nothing
+bin/setup doctor     # read-only health report
 ```
-The backend will run on http://localhost:3000
 
-#### Frontend
+Once up: frontend → http://localhost:5173, backend → http://localhost:3000/api/v1
+
+### Docker stack lifecycle
+
 ```bash
-cd frontend
-npm install
-npm run dev
+bin/docker setup     # one-time: install + start the colima 'itsaprom' VM (macOS)
+bin/docker up        # build images + start db, valkey, backend, frontend
+bin/docker ps        # status + health
+bin/docker logs backend
+bin/docker down      # stop (named volumes survive)
+bin/docker clean -y  # DESTRUCTIVE: down + wipe db/valkey/bundle volumes
 ```
-The frontend will run on http://localhost:5173
 
-### Docker Development
+The stack runs **PostgreSQL** plus **Valkey** (Redis-compatible). Local
+(non-Docker) development still uses **SQLite** — [backend/config/database.yml](backend/config/database.yml)
+selects the adapter from `DATABASE_URL`, so no per-developer config is needed.
+
+### Local development without Docker
+
+Run **both** the backend (Rails, SQLite) and frontend (Vite) with a single
+command via [bin/dev](bin/dev) (overmind/foreman + [Procfile.dev](Procfile.dev)):
+
 ```bash
-docker-compose up --build
+bin/dev                      # backend :3000 + frontend :5173 together (Ctrl-C stops both)
+BACKEND_PORT=4000 bin/dev    # override ports
 ```
-- Backend: http://localhost:3000
-- Frontend: http://localhost:5173
 
-Note: The Docker setup uses PostgreSQL, while local development uses SQLite. Adjust database configuration as needed.
+Or run them separately:
+
+```bash
+# Backend (http://localhost:3000, SQLite)
+cd backend && bundle install && bundle exec rails db:prepare && bundle exec rails server
+
+# Frontend (http://localhost:5173)
+cd frontend && npm install && npm run dev
+```
+
+### Secrets (SOPS + age)
+
+Environment secrets live in [secrets/development.yml](secrets/development.yml) and
+[secrets/production.yml](secrets/production.yml), value-encrypted with SOPS for the
+age recipients in [.sops.yaml](.sops.yaml). `bin/docker` decrypts development
+secrets and injects them into the containers. Edit with `sops secrets/development.yml`.
 
 ## API Endpoints
 - `POST /api/v1/auth/register` - Register new user

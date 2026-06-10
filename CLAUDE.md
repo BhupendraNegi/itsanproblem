@@ -20,15 +20,22 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 
 ### Frontend (run from `frontend/`)
 - Install: `npm install`
-- Dev server: `npm run dev` (port 5173, proxies `/api` → `http://127.0.0.1:3000`)
+- Dev server: `npm run dev` (port 5173, proxies `/api` → `http://127.0.0.1:3000`; the target is overridable via `VITE_API_PROXY_TARGET`, set to `http://backend:3000` in the Docker stack — see [vite.config.ts](frontend/vite.config.ts))
 - Build: `npm run build` (`tsc -b && vite build`)
 - All tests: `npm test` (Vitest, single run); watch with `npm run test:watch`
 - Single test file: `npx vitest run src/__tests__/components/PostCard.test.tsx`
 - Coverage: `npm run test:coverage`
 - Lint: `npm run lint` (ESLint)
 
+### Local dev, both processes at once
+- **`bin/dev`** runs the Rails backend (:3000, SQLite) and Vite frontend (:5173) together via overmind/foreman + [Procfile.dev](Procfile.dev). It loads `secrets/development.yml` (JWT_SECRET_KEY etc.), clears a stale Puma pidfile, and runs `db:prepare`. This is **local, non-container** dev — distinct from the Docker stack below.
+
 ### Full stack via Docker
-- `docker-compose up --build` — backend on 3000, frontend on 5173. **Docker uses PostgreSQL while local development uses SQLite**, so database config differs between the two environments.
+- **`bin/setup`** is the single idempotent bootstrap entry point (modeled on a larger reference project): an ordered subcommand walk (`bin/setup install-docker`, etc.), a `--check` dry-run, a read-only `doctor`, and per-step logs in `tmp/setup-logs/`. It pins the toolchain via `mise` ([mise.toml](mise.toml)).
+- **`bin/docker`** is the container lifecycle delegate: `setup` (installs + starts the **colima `itsaprom`** profile on macOS), `up`, `down`, `restart`, `logs`, `ps`, `build`, `clean`. It loads `secrets/development.yml` via [bin/_sops_env.sh](bin/_sops_env.sh) and injects the secrets into the containers.
+- The stack ([docker-compose.yml](docker-compose.yml)) runs **PostgreSQL** + **Valkey** (Redis-compatible) + backend (3000) + frontend (5173). **Docker uses PostgreSQL while local development uses SQLite**: [backend/config/database.yml](backend/config/database.yml) is env-driven — when `DATABASE_URL` is set (Docker), it uses the `pg` adapter; otherwise it falls back to SQLite. Production routes `solid_cache`/`solid_queue`/`solid_cable` to the same Postgres database.
+- **`postgres:latest` is v18+**, which stores data in a major-version subdir; the compose volume mounts at `/var/lib/postgresql` (not `.../data`).
+- **Secrets:** two SOPS-encrypted envs only — `secrets/development.yml` and `secrets/production.yml` — encrypted for the age recipients in [.sops.yaml](.sops.yaml) (key at `~/.config/sops/age/keys.txt`). Nested keys flatten to `UPPERCASE_UNDERSCORE` env vars (e.g. `jwt.secret_key` → `JWT_SECRET_KEY`).
 
 ## Architecture
 
@@ -38,7 +45,7 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 - **JSON serialization is done via model `as_json` overrides**, not Blueprinter (the gem is in the Gemfile but unused). [Post#as_json](backend/app/models/post.rb) forces `"author" => "Anonymous"` and embeds ordered comments — this is the core anonymity guarantee. [Comment#as_json](backend/app/models/comment.rb) exposes the real `author` name and `author_id`. When changing post output, preserve the Anonymous override.
 - Data model: `User` has many `posts` and `comments` and one `user_stat`; `Post` belongs to a user (hidden from output) and has many comments. `UserStat` tracks `helpful_points` and `comment_count`, lazily created via `UserStat.for_user`.
 - CORS ([config/initializers/cors.rb](backend/config/initializers/cors.rb)) is wide open (`origins "*"`) — intended for development.
-- Solid Queue / Solid Cache / Solid Cable are configured; Sidekiq + Redis and Sentry gems are also present.
+- Solid Queue / Solid Cache / Solid Cable are configured; Sidekiq + Redis and Sentry gems are also present. The Docker stack provides a Valkey (Redis-compatible) service exposed as `REDIS_URL` for the sidekiq/redis gems, though the core path uses the `solid_*` adapters.
 
 ### Frontend (React 19 + Vite + TypeScript)
 - **Server state vs. client state are deliberately separated.** TanStack React Query owns all API data; all queries and mutations are centralized in [src/hooks/useMutations.ts](frontend/src/hooks/useMutations.ts) (`usePosts`, `useUserProfile`, `useAuthMutation`, `usePostMutation`, `useCommentMutation`). Mutations invalidate the `['posts']` query key to refresh. Auth state (current user + token) lives in a Zustand store ([src/store.ts](frontend/src/store.ts)) and is persisted to `localStorage` (`authUser`, `authToken`).
@@ -48,6 +55,9 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 - Styling is Tailwind CSS v4. See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) and [frontend/README_ARCHITECTURE.md](frontend/README_ARCHITECTURE.md).
 
 ## Conventions & gotchas
-- **Ruby version mismatch:** the repo targets Ruby **4.0.3** ([.ruby-version](backend/.ruby-version), Gemfile), but RuboCop's `TargetRubyVersion` is pinned to **3.3** in [.rubocop.yml](backend/.rubocop.yml) because the parser does not yet support 4.0. The root README's "Ruby 3.4+" note is stale.
+- **Ruby version mismatch:** the repo targets Ruby **4.0.3** ([.ruby-version](backend/.ruby-version), Gemfile), but RuboCop's `TargetRubyVersion` is pinned to **3.3** in [.rubocop.yml](backend/.rubocop.yml) because the parser does not yet support 4.0.
 - Error responses use a consistent shape: `{ error: "..." }` for single messages, `{ errors: [...] }` (from `model.errors.full_messages`) for validation failures, with `422 :unprocessable_content` for invalid input and `401 :unauthorized` for auth failures.
 - API param wrapping: posts are sent as `{ post: {...} }`, comments as `{ comment: {...} }`, auth as `{ user: {...} }`. The frontend camelCase `passwordConfirmation` is mapped to `password_confirmation` in [src/api.ts](frontend/src/api.ts).
+
+- **Explicit `git add`, never `git add -A` / `git add .`.** Parallel work is often pre-staged in the index; a global add sweeps it into your commit. Prefer `git commit -m "..." -- <paths>` to commit only specific files without touching the index.
+

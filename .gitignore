@@ -1,0 +1,12 @@
+# Local dev env (copy from .env.example). Secrets live in secrets/*.yml (SOPS).
+.env
+.env.*
+!.env.example
+
+# bin/setup per-step logs
+/tmp/
+
+# OS / editor noise
+.DS_Store
+.idea/
+*.swp

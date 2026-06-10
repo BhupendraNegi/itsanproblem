@@ -1,0 +1,5 @@
+# Toolchain pins for itsanproblem (managed by mise — https://mise.jdx.dev).
+# `mise install` materializes these; bin/setup installs mise + runs it.
+[tools]
+ruby = "4.0.3"   # keep in sync with backend/.ruby-version
+node = "20"      # keep in sync with frontend/Dockerfile

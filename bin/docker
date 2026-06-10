@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+#
+# bin/docker — itsanproblem Docker runtime + dev-stack lifecycle.
+#
+# Modeled on the `code` project's bin/pwx-docker, scaled to this repo.
+#
+# Subcommands:
+#   setup            One-time install of the Docker runtime.
+#                      macOS: brew install colima + docker + docker-compose,
+#                             compute a CPU/memory budget capped at 25% of the
+#                             host, then `colima start -p itsaprom` (Apple
+#                             Silicon → vz; Intel → qemu) with the repo's
+#                             parent dir bind-mounted writable.
+#                      Linux: verify docker + compose v2, add $USER to the
+#                             docker group, enable + start docker.service.
+#   up               Start the stack (db, valkey, backend, frontend).
+#                    Blocks on healthchecks (--wait).
+#   down             Stop + remove containers. Named volumes survive.
+#   restart [svc…]   Restart services in place.
+#   logs [svc…]      Tail logs (-f --tail=200).
+#   ps               Service status + health.
+#   build [svc…]     (Re)build images.
+#   clean [-y]       DESTRUCTIVE — down + wipe named volumes (db/valkey/bundle).
+#
+# Usage:
+#   bin/docker setup
+#   bin/docker up
+#   bin/docker logs backend
+#   bin/docker clean -y
+#
+# colima resource overrides (env or .env): ITSAPROM_COLIMA_CPU / _MEMORY /
+# _DISK / _MOUNT. Skip the setup confirm with ITSAPROM_ASSUME_YES=1.
+
+set -Eeuo pipefail
+
+PROFILE_NAME="itsaprom"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[ -n "$REPO_ROOT" ] || { echo "ERROR: run from inside the itsanproblem repo (no .git found)." >&2; exit 1; }
+cd "$REPO_ROOT"
+
+SUB="${1:-}"
+shift || true
+
+# ─── Helpers ──────────────────────────────────────────────────────────────
+have() { command -v "$1" >/dev/null 2>&1; }
+die()  { echo "ERROR: $1" >&2; exit 1; }
+
+# docker compose wrapper. Loads development secrets (best-effort) so values like
+# JWT_SECRET_KEY flow from secrets/development.yml into the containers, and
+# sources .env via compose's own mechanism.
+compose() {
+  if [ -f "$REPO_ROOT/bin/_sops_env.sh" ]; then
+    # shellcheck disable=SC1091
+    . "$REPO_ROOT/bin/_sops_env.sh"
+    sops_load_into_env "$REPO_ROOT/secrets/development.yml" || true
+  fi
+  docker compose "$@"
+}
+
+# Ensure the docker daemon is reachable; on macOS bring colima up first.
+ensure_daemon() {
+  if docker info >/dev/null 2>&1; then return 0; fi
+  if [ "$(uname -s)" = "Darwin" ] && have colima; then
+    echo "Starting colima profile '$PROFILE_NAME' ..."
+    colima start -p "$PROFILE_NAME" >/dev/null 2>&1 || true
+  fi
+  docker info >/dev/null 2>&1 || die "docker daemon unreachable. Run: bin/docker setup"
+}
+
+# ─── setup: one-time runtime install ───────────────────────────────────────
+if [ "$SUB" = "setup" ]; then
+  OS="$(uname -s)"
+  ARCH="$(uname -m)"
+
+  if [ "$OS" = "Linux" ]; then
+    echo "Linux host — checking docker + compose ..."
+    have docker || die "docker not installed. Ubuntu/Debian: sudo apt install docker.io docker-compose-v2"
+    docker compose version >/dev/null 2>&1 || die "docker compose v2 missing (apt: docker-compose-v2)."
+    if id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
+      echo "ok: $USER already in docker group"
+    else
+      echo "Adding $USER to docker group (log out/in or 'newgrp docker' after) ..."
+      sudo usermod -aG docker "$USER"
+      exit 0
+    fi
+    sudo systemctl is-active --quiet docker 2>/dev/null || sudo systemctl enable --now docker
+    docker info >/dev/null 2>&1 || die "docker daemon unreachable. 'sudo systemctl status docker'."
+    echo "ok: $(docker --version); $(docker compose version | head -1)"
+    exit 0
+  fi
+
+  [ "$OS" = "Darwin" ] || die "unsupported OS '$OS' (macOS or Linux only)."
+  have brew || die "Homebrew required. https://brew.sh"
+
+  for pkg in colima docker docker-compose; do
+    if have "$pkg"; then
+      echo "ok: $pkg on PATH"
+    elif brew list --formula "$pkg" >/dev/null 2>&1; then
+      echo "$pkg installed but unlinked — linking ..."
+      brew link --overwrite "$pkg" || brew reinstall "$pkg"
+    else
+      echo "Installing $pkg ..."
+      brew install "$pkg"
+    fi
+  done
+  have docker || die "docker CLI still not on PATH. Fix: brew link --overwrite docker"
+
+  # Apple Silicon → vz; Intel → qemu.
+  if [ "$ARCH" = "arm64" ]; then COLIMA_ARCH="aarch64"; COLIMA_VM="vz"
+  else COLIMA_ARCH="x86_64"; COLIMA_VM="qemu"; fi
+
+  # Optional overrides from .env.
+  [ -f "$REPO_ROOT/.env" ] && { set -a; . "$REPO_ROOT/.env"; set +a; }
+
+  SYS_CPU="$(sysctl -n hw.ncpu)"
+  SYS_MEM_GB=$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))
+  CAP_CPU=$(( SYS_CPU / 4 ));    [ "$CAP_CPU" -lt 1 ] && CAP_CPU=1
+  CAP_MEM=$(( SYS_MEM_GB / 4 )); [ "$CAP_MEM" -lt 1 ] && CAP_MEM=1
+
+  COLIMA_CPU="${ITSAPROM_COLIMA_CPU:-$CAP_CPU}"
+  [ "$COLIMA_CPU" -gt "$CAP_CPU" ] && { echo "warn: clamping CPU to 25% cap ($CAP_CPU)"; COLIMA_CPU="$CAP_CPU"; }
+  COLIMA_MEMORY="${ITSAPROM_COLIMA_MEMORY:-$CAP_MEM}"
+  [ "$COLIMA_MEMORY" -gt "$CAP_MEM" ] && { echo "warn: clamping memory to 25% cap ($CAP_MEM GiB)"; COLIMA_MEMORY="$CAP_MEM"; }
+  COLIMA_DISK="${ITSAPROM_COLIMA_DISK:-40}"
+  # Mount the repo's parent dir writable so bind-mounts (log/, tmp/, storage/,
+  # source edits) work inside the VM.
+  COLIMA_MOUNT="${ITSAPROM_COLIMA_MOUNT:-$(dirname "$REPO_ROOT"):w}"
+
+  cat <<EOF
+
+Colima profile (-p ${PROFILE_NAME}) — computed config
+  host    : ${SYS_CPU} CPU, ${SYS_MEM_GB} GiB RAM   (capped at 25% → ${CAP_CPU} CPU / ${CAP_MEM} GiB)
+  cpu     : ${COLIMA_CPU}
+  memory  : ${COLIMA_MEMORY} GiB
+  disk    : ${COLIMA_DISK} GiB
+  vm-type : ${COLIMA_VM}    arch: ${COLIMA_ARCH}
+  mount   : ${COLIMA_MOUNT}   (':w' = writable)
+
+Override via env/.env: ITSAPROM_COLIMA_CPU/_MEMORY/_DISK/_MOUNT.
+EOF
+
+  if colima status -p "$PROFILE_NAME" >/dev/null 2>&1; then
+    echo "ok: colima profile '$PROFILE_NAME' already running"
+  else
+    if [ "${ITSAPROM_ASSUME_YES:-0}" != "1" ]; then
+      printf "Create/start colima profile '%s' with the above? [y/N] " "$PROFILE_NAME"
+      read -r ans; case "$ans" in y|Y|yes) ;; *) echo "aborted."; exit 0;; esac
+    fi
+    colima start -p "$PROFILE_NAME" \
+      --cpu "$COLIMA_CPU" --memory "$COLIMA_MEMORY" --disk "$COLIMA_DISK" \
+      --vm-type "$COLIMA_VM" --arch "$COLIMA_ARCH" --mount "$COLIMA_MOUNT"
+  fi
+  docker info >/dev/null 2>&1 || die "docker still unreachable after colima start."
+  echo "ok: $(docker --version)"
+  exit 0
+fi
+
+# ─── Lifecycle subcommands (need a running daemon) ─────────────────────────
+case "$SUB" in
+  up)
+    ensure_daemon
+    compose up -d --wait "$@"
+    echo
+    echo "Stack up:  frontend → http://localhost:${FRONTEND_PORT:-5173}   backend → http://localhost:${BACKEND_PORT:-3000}/api/v1"
+    ;;
+  down)     ensure_daemon; compose down "$@" ;;
+  restart)  ensure_daemon; compose restart "$@" ;;
+  logs)     ensure_daemon; compose logs -f --tail=200 "$@" ;;
+  ps)       ensure_daemon; compose ps "$@" ;;
+  build)    ensure_daemon; compose build "$@" ;;
+  clean)
+    ensure_daemon
+    yes=0; case "${1:-}" in -y|--yes) yes=1 ;; esac
+    if [ "$yes" != "1" ]; then
+      printf "Remove containers AND wipe named volumes (db_data, valkey_data, bundle_cache)? [y/N] "
+      read -r ans; case "$ans" in y|Y|yes) ;; *) echo "aborted."; exit 0;; esac
+    fi
+    compose down -v
+    echo "cleaned: containers + named volumes removed."
+    ;;
+  ""|-h|--help)
+    sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'
+    ;;
+  *)
+    die "unknown subcommand '$SUB' (try: bin/docker --help)"
+    ;;
+esac

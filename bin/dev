@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#
+# bin/dev — run the full LOCAL dev stack (Rails backend + Vite frontend) with a
+# single command, via overmind/foreman + Procfile.dev.
+#
+# This is local development on SQLite — no containers. For the containerized
+# Postgres + Valkey stack, use `bin/docker up` instead.
+#
+#   bin/dev                 # start backend (:3000) + frontend (:5173)
+#   BACKEND_PORT=4000 bin/dev
+#
+# Ctrl-C stops everything. Tail one process with `overmind connect backend`.
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[ -n "$REPO_ROOT" ] || { echo "ERROR: run from inside the itsanproblem repo." >&2; exit 1; }
+cd "$REPO_ROOT"
+
+# Load .env (port overrides) then development secrets (JWT_SECRET_KEY,
+# SECRET_KEY_BASE) so locally-signed tokens match the Docker stack. The dev
+# secrets carry no DATABASE_URL, so the backend stays on SQLite here.
+[ -f .env ] && { set -a; . ./.env; set +a; }
+if [ -f bin/_sops_env.sh ]; then
+  # shellcheck disable=SC1091
+  . bin/_sops_env.sh
+  sops_load_into_env "$REPO_ROOT/secrets/development.yml" || true
+fi
+
+# Dependency sanity — hint instead of silently failing inside a watcher.
+if ! (cd backend && mise exec -- bundle check >/dev/null 2>&1); then
+  echo "backend gems missing — run: bin/setup backend-bundle  (or: cd backend && bundle install)" >&2
+  exit 1
+fi
+if [ ! -d frontend/node_modules ]; then
+  echo "frontend deps missing — run: bin/setup frontend-npm  (or: cd frontend && npm install)" >&2
+  exit 1
+fi
+
+# Clear a stale Puma pidfile (left by a crashed run, or leaked from a previous
+# Docker container before the tmp/pids volume existed) so Rails can boot.
+rm -f backend/tmp/pids/server.pid
+
+# Ensure the local SQLite database exists (idempotent, fast).
+(cd backend && mise exec -- ./bin/rails db:prepare >/dev/null 2>&1) || true
+
+# Pick a process manager (overmind preferred, like the reference project).
+if command -v overmind >/dev/null 2>&1; then
+  exec overmind start -f Procfile.dev "$@"
+elif command -v foreman >/dev/null 2>&1; then
+  exec foreman start -f Procfile.dev "$@"
+else
+  cat >&2 <<'EOF'
+No process manager found. Install one:
+  macOS:  brew install overmind tmux
+  any:    gem install foreman
+EOF
+  exit 1
+fi
