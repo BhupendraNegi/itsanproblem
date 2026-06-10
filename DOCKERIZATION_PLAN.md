@@ -50,7 +50,7 @@ The repo already has Docker files, but they don't work as a set:
 
 | File | Problem |
 |------|---------|
-| [docker-compose.yml](docker-compose.yml) | Line 12 is a stray `cd ` — invalid YAML/garbage. Wires **Postgres + Redis**, but… |
+| [docker-compose.yml](docker-compose.yml) | Line 12 is a stray `cd` — invalid YAML/garbage. Wires **Postgres + Redis**, but… |
 | [backend/config/database.yml](backend/config/database.yml) | …is **SQLite-only for every env**, and there is **no `pg` gem** in the Gemfile. The compose `DATABASE_URL: postgres://…` cannot connect. |
 | backend cache/queue/cable | Use `solid_cache` / `solid_queue` / `solid_cable` (SQLite-backed), **not Redis** — so the compose `redis` service is currently unused by the app. |
 | [backend/Dockerfile](backend/Dockerfile) | A mess: a commented-out production multi-stage, a live `FROM base` that references the now-commented `base` stage (won't build), then a second duplicate `FROM ruby:4.0.3` dev stage appended at the bottom. |
@@ -125,6 +125,7 @@ bin/setup --skip-stack    # toolchain only, no containers
 ```
 
 Notes:
+
 - `mise` is optional but recommended — it's how `code` pins Ruby/Node. If you'd
   rather not adopt `mise` here, the `install-mise/ruby/node` steps can instead
   just **verify** that the right Ruby/Node are on PATH and point at install
@@ -263,7 +264,7 @@ you both drive the stack the same way.
 2. Rewrite `backend/Dockerfile` and `frontend/Dockerfile`; add `mise.toml`.
 3. Rewrite `docker-compose.yml` (postgres + valkey + backend + frontend) + `.env.example`.
 4. SOPS: add `.sops.yaml`, `bin/_sops_env.sh`, encrypted `secrets/development.yml`
-   + `secrets/production.yml` (age key already present).
+   - `secrets/production.yml` (age key already present).
 5. Add `bin/docker` (colima `itsaprom` + compose delegate), make executable.
 6. Add `bin/setup` (the walk + `--check`/`doctor`), make executable.
 7. Verify: `bin/setup --check`, then `bin/setup`, then hit
@@ -272,4 +273,5 @@ you both drive the stack the same way.
 
 Per repo convention I'll stage files explicitly (no `git add -A`) and only
 commit when you ask.
+
 ```

@@ -1,0 +1,42 @@
+# Gitleaks config for itsanproblem (extends the default ruleset).
+# Scanned in CI (.github/workflows/security.yml). See bin/audit for local use.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "itsanproblem project allowlist"
+
+paths = [
+  # SOPS-encrypted secrets — high-entropy ciphertext, not plaintext keys.
+  "secrets/.*\\.yml",
+  "\\.sops\\.yaml",
+  # Env + tooling files hold placeholders/templates, not live secrets.
+  "\\.env\\.example",
+  "mise\\.toml",
+  "docker-compose\\.yml",
+  # Test fixtures / specs carry test-only placeholder tokens.
+  "backend/spec/.*",
+  # Rails-generated initializers ship commented example tokens (e.g. Devise's
+  # default config.secret_key) that trip the entropy rules but are templates,
+  # not live secrets — the app reads secret_key_base / ENV.
+  "backend/config/initializers/.*",
+  # Lockfiles and docs.
+  ".*\\.lock$",
+  "docs/.*",
+]
+
+# Match against the whole line so these patterns work regardless of value.
+regexTarget = "line"
+regexes = [
+  # The age *public* recipient key (safe to commit; not a secret).
+  "age1[0-9a-z]{58}",
+]
+
+stopwords = [
+  "EXAMPLE",
+  "PLACEHOLDER",
+  "REDACTED",
+  "CHANGEME",
+  # SOPS ciphertext envelope marker.
+  "ENC[AES256_GCM",
+]

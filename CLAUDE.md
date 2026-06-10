@@ -9,6 +9,7 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 ## Commands
 
 ### Backend (run from `backend/`)
+
 - Install: `bundle install`
 - DB setup: `bundle exec rails db:migrate` (development uses SQLite)
 - Run server: `bundle exec rails server` (port 3000)
@@ -17,8 +18,16 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 - Single example: `bundle exec rspec spec/path/to_spec.rb:42`
 - Lint: `bundle exec rubocop` (rubocop-rails-omakase style)
 - Security scan: `bundle exec brakeman`
+- Dependency CVE scan: `bundle exec bundler-audit check --update`
+
+### Quality (monorepo, run from repo root)
+
+- **`bin/lint`** — RuboCop (backend) + ESLint (frontend) + markdownlint (docs); `bin/lint fix` autocorrects. Per-tool subcommands: `bin/lint rb|js|md`.
+- **`bin/audit`** — bundler-audit (dependency CVEs) + Brakeman (static analysis).
+- **CI** ([.github/workflows/](.github/workflows/)): `lint.yml` (markdownlint), `security.yml` (bundler-audit + Gitleaks), `backend-ci.yml` (RuboCop + Brakeman), `frontend-ci.yml` (Vitest + tsc + ESLint), `rspec.yml`. Gitleaks config is [.gitleaks.toml](.gitleaks.toml) (allowlists SOPS-encrypted `secrets/*.yml` and Rails-generated initializers). markdownlint config is [.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc).
 
 ### Frontend (run from `frontend/`)
+
 - Install: `npm install`
 - Dev server: `npm run dev` (port 5173, proxies `/api` → `http://127.0.0.1:3000`; the target is overridable via `VITE_API_PROXY_TARGET`, set to `http://backend:3000` in the Docker stack — see [vite.config.ts](frontend/vite.config.ts))
 - Build: `npm run build` (`tsc -b && vite build`)
@@ -28,9 +37,11 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 - Lint: `npm run lint` (ESLint)
 
 ### Local dev, both processes at once
+
 - **`bin/dev`** runs the Rails backend (:3000, SQLite) and Vite frontend (:5173) together via overmind/foreman + [Procfile.dev](Procfile.dev). It loads `secrets/development.yml` (JWT_SECRET_KEY etc.), clears a stale Puma pidfile, and runs `db:prepare`. This is **local, non-container** dev — distinct from the Docker stack below.
 
 ### Full stack via Docker
+
 - **`bin/setup`** is the single idempotent bootstrap entry point (modeled on a larger reference project): an ordered subcommand walk (`bin/setup install-docker`, etc.), a `--check` dry-run, a read-only `doctor`, and per-step logs in `tmp/setup-logs/`. It pins the toolchain via `mise` ([mise.toml](mise.toml)).
 - **`bin/docker`** is the container lifecycle delegate: `setup` (installs + starts the **colima `itsaprom`** profile on macOS), `up`, `down`, `restart`, `logs`, `ps`, `build`, `clean`. It loads `secrets/development.yml` via [bin/_sops_env.sh](bin/_sops_env.sh) and injects the secrets into the containers.
 - The stack ([docker-compose.yml](docker-compose.yml)) runs **PostgreSQL** + **Valkey** (Redis-compatible) + backend (3000) + frontend (5173). **Docker uses PostgreSQL while local development uses SQLite**: [backend/config/database.yml](backend/config/database.yml) is env-driven — when `DATABASE_URL` is set (Docker), it uses the `pg` adapter; otherwise it falls back to SQLite. Production routes `solid_cache`/`solid_queue`/`solid_cable` to the same Postgres database.
@@ -40,6 +51,7 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 ## Architecture
 
 ### Backend (Rails 8 API-only)
+
 - All endpoints live under the `api/v1` namespace ([config/routes.rb](backend/config/routes.rb)); controllers are in [app/controllers/api/v1/](backend/app/controllers/api/v1/) and inherit from `ActionController::API`.
 - **Authentication is hand-rolled JWT, not Devise's session/JWT flow.** [ApplicationController](backend/app/controllers/application_controller.rb) implements `authenticate_user!`, `encode_token`, and `decode_token` directly. Tokens are HS256, expire in 24h, and are signed with `ENV["JWT_SECRET_KEY"]` falling back to `Rails.application.secret_key_base`. Clients send `Authorization: Bearer <token>`. Devise is still used by the `User` model for password hashing/validation (`valid_password?`, `find_for_database_authentication`), and `devise-jwt`/`rack-attack` gems are present but the request auth path does not route through them.
 - **JSON serialization is done via model `as_json` overrides**, not Blueprinter (the gem is in the Gemfile but unused). [Post#as_json](backend/app/models/post.rb) forces `"author" => "Anonymous"` and embeds ordered comments — this is the core anonymity guarantee. [Comment#as_json](backend/app/models/comment.rb) exposes the real `author` name and `author_id`. When changing post output, preserve the Anonymous override.
@@ -48,6 +60,7 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 - Solid Queue / Solid Cache / Solid Cable are configured; Sidekiq + Redis and Sentry gems are also present. The Docker stack provides a Valkey (Redis-compatible) service exposed as `REDIS_URL` for the sidekiq/redis gems, though the core path uses the `solid_*` adapters.
 
 ### Frontend (React 19 + Vite + TypeScript)
+
 - **Server state vs. client state are deliberately separated.** TanStack React Query owns all API data; all queries and mutations are centralized in [src/hooks/useMutations.ts](frontend/src/hooks/useMutations.ts) (`usePosts`, `useUserProfile`, `useAuthMutation`, `usePostMutation`, `useCommentMutation`). Mutations invalidate the `['posts']` query key to refresh. Auth state (current user + token) lives in a Zustand store ([src/store.ts](frontend/src/store.ts)) and is persisted to `localStorage` (`authUser`, `authToken`).
 - All HTTP goes through [src/api.ts](frontend/src/api.ts), a single axios instance with `baseURL: '/api/v1'` and a request interceptor that injects the bearer token from `localStorage`. Add new endpoints here.
 - Routing is React Router; [src/App.tsx](frontend/src/App.tsx) holds the main feed and most local form state (`useState`), `ProfilePage` is the other route.
@@ -55,9 +68,9 @@ itsanproblem is an anonymous problem-sharing platform. Users post problems that 
 - Styling is Tailwind CSS v4. See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) and [frontend/README_ARCHITECTURE.md](frontend/README_ARCHITECTURE.md).
 
 ## Conventions & gotchas
+
 - **Ruby version mismatch:** the repo targets Ruby **4.0.3** ([.ruby-version](backend/.ruby-version), Gemfile), but RuboCop's `TargetRubyVersion` is pinned to **3.3** in [.rubocop.yml](backend/.rubocop.yml) because the parser does not yet support 4.0.
 - Error responses use a consistent shape: `{ error: "..." }` for single messages, `{ errors: [...] }` (from `model.errors.full_messages`) for validation failures, with `422 :unprocessable_content` for invalid input and `401 :unauthorized` for auth failures.
 - API param wrapping: posts are sent as `{ post: {...} }`, comments as `{ comment: {...} }`, auth as `{ user: {...} }`. The frontend camelCase `passwordConfirmation` is mapped to `password_confirmation` in [src/api.ts](frontend/src/api.ts).
 
 - **Explicit `git add`, never `git add -A` / `git add .`.** Parallel work is often pre-staged in the index; a global add sweeps it into your commit. Prefer `git commit -m "..." -- <paths>` to commit only specific files without touching the index.
-

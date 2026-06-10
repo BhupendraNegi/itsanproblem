@@ -195,13 +195,17 @@ npm run lint
 ## 🔐 State Management
 
 ### Zustand Store (Auth)
+
 Manages:
+
 - Current logged-in user
 - Auth token
 - Login/Logout actions
 
 ### TanStack Query (Server State)
+
 Manages:
+
 - Posts cache
 - Automatic refetching
 - Mutation handling
@@ -209,21 +213,25 @@ Manages:
 ## 📋 Component Details
 
 ### AuthPanel.tsx
+
 - Displays login/register form
 - Handles form input and submission
 - Shows validation errors and loading states
 
 ### Header.tsx
+
 - Shows app title and subtitle
 - Displays logged-in user info
 - Provides logout button
 
 ### PostForm.tsx
+
 - Form to create new anonymous posts
 - Validates title and body
 - Shows loading state while posting
 
 ### PostCard.tsx
+
 - Displays individual post with title, body, and metadata
 - Lists all comments for the post
 - Provides comment form for adding new comments
