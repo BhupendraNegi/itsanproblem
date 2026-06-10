@@ -70,6 +70,10 @@ cd backend && bundle install && bundle exec rails db:prepare && bundle exec rail
 cd frontend && npm install && npm run dev
 ```
 
+**Seed data:** `cd backend && bundle exec rails db:seed` populates demo posts and
+comments (idempotent; skipped in production). Log in with **`demo@itsanproblem.test`
+/ `password123`** — see [backend/db/seeds.rb](backend/db/seeds.rb).
+
 ### Secrets (SOPS + age)
 
 Environment secrets live in [secrets/development.yml](secrets/development.yml) and

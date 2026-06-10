@@ -11,3 +11,6 @@ ignore:
   # Generated files — not worth retroactive cleanup.
   - "db/migrate/**/*"
   - "db/schema.rb"
+  # seeds.rb legitimately prints progress to stdout.
+  - "db/seeds.rb":
+    - Rails/Output
