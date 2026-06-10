@@ -47,6 +47,28 @@ All five P0 items shipped (June 2026):
 Remaining from P0 scope:
 
 - [ ] **Email digest** — ActionMailer + digest job for the same two notification events.
+- [x] **6. User profile, expanded** — `bio` shown on the profile page; on **your own** profile,
+  a "Your posts" list shows your anonymous posts with their handles, hidden status, and counts
+  (resolved through the `post_authors` ledger, visible to no one else). Editing happens in
+  Settings (#7).
+- [x] **7. Settings** — `/settings` page with three sections: **profile** (name, email, bio →
+  `PATCH /profile`), **password** (current password required, verified via Devise
+  `valid_password?` → `PATCH /profile/password`), and **appearance** (Light / Dark / System
+  theme, persisted as `themePref`; dark mode now keys off `data-theme` instead of the media
+  query, with an inline pre-resolve script in `index.html` to avoid a flash).
+- [x] **8. Admin role & moderation** — `role` on users (`member`/`admin`) with
+  [ActionPolicy](https://actionpolicy.evilmartians.io) (deny-by-default policies, 403 on
+  violation). Shipped under `/api/v1/admin/*` + an `/admin` SPA page (header link and route
+  gated on role; seeded admin: `admin@itsanproblem.test`):
+  - **Moderation queue** — flagged posts/comments with reason tallies and hidden status;
+    restore (unhide + clear flags) or delete permanently.
+  - **User management** — list/search users, promote/demote admins, delete accounts
+    (admins can't change their own role or delete themselves).
+  - **Impersonation** — issues a JWT for the target with an `impersonator_id` claim and writes
+    an `impersonations` audit row (who, whom, when); the SPA switches session and returns to
+    the feed.
+  - **Site stats** — users / posts / comments / flags / hidden-content totals.
+  - Still open: account deactivation (soft suspend) as a gentler option than deletion.
 
 ## Next — P1, the founder thesis
 

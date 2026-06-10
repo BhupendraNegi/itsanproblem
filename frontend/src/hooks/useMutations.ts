@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from '../api'
-import type { AuthResponse, NotificationsResponse, Post, User, Comment, UserProfile } from '../types'
+import type {
+  AdminFlagsResponse,
+  AdminStats,
+  AdminUser,
+  AuthResponse,
+  NotificationsResponse,
+  Post,
+  User,
+  Comment,
+  UserProfile,
+} from '../types'
 
 type AuthFields = {
   name: string
@@ -111,6 +121,23 @@ export function usePosts(sort: 'recent' | 'hot' = 'recent') {
   })
 }
 
+export function useProfileMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation<User & { bio: string | null }, Error, { name: string; email: string; bio: string }>({
+    mutationFn: api.updateProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] })
+    },
+  })
+}
+
+export function usePasswordMutation() {
+  return useMutation<{ success: boolean }, Error, { currentPassword: string; password: string; passwordConfirmation: string }>({
+    mutationFn: api.changePassword,
+  })
+}
+
 export function useNotifications() {
   return useQuery<NotificationsResponse>({
     queryKey: ['notifications'],
@@ -135,5 +162,64 @@ export function useUserProfile(userId: number) {
     queryKey: ['user', userId],
     queryFn: () => api.fetchUserProfile(userId),
     enabled: !!userId,
+  })
+}
+
+// ---- Admin ----
+
+export function useAdminStats() {
+  return useQuery<AdminStats>({ queryKey: ['admin', 'stats'], queryFn: api.fetchAdminStats })
+}
+
+export function useAdminFlags() {
+  return useQuery<AdminFlagsResponse>({ queryKey: ['admin', 'flags'], queryFn: api.fetchAdminFlags })
+}
+
+export function useAdminUsers(q: string) {
+  return useQuery<AdminUser[]>({
+    queryKey: ['admin', 'users', q],
+    queryFn: () => api.fetchAdminUsers(q),
+  })
+}
+
+export function useAdminModerationMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation<unknown, Error, { action: 'restore' | 'delete'; target: 'posts' | 'comments'; id: number }>({
+    mutationFn: ({ action, target, id }) =>
+      action === 'restore' ? api.adminRestoreContent(target, id) : api.adminDeleteContent(target, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
+export function useAdminRoleMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation<AdminUser, Error, { id: number; role: 'member' | 'admin' }>({
+    mutationFn: ({ id, role }) => api.adminSetUserRole(id, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+    },
+  })
+}
+
+export function useAdminDeleteUserMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation<{ deleted: boolean }, Error, { id: number }>({
+    mutationFn: ({ id }) => api.adminDeleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
+export function useImpersonateMutation() {
+  return useMutation<AuthResponse, Error, { id: number }>({
+    mutationFn: ({ id }) => api.adminImpersonateUser(id),
   })
 }

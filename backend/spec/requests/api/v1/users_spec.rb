@@ -27,6 +27,24 @@ RSpec.describe "Api::V1::Users", type: :request do
         expect(body["recent_comments"].first["post_title"]).to eq("My problem")
       end
 
+      it "includes the bio" do
+        user.update!(bio: "Just here to help.")
+        get "/api/v1/users/#{user.id}", headers: auth_headers_for(user), as: :json
+        expect(JSON.parse(response.body)["bio"]).to eq("Just here to help.")
+      end
+
+      it "shows your own anonymous posts only to you" do
+        post_record = user.posts.create!(title: "My secret problem", body: "Don't tell.")
+        other = User.create!(name: "Eve", email: "eve@example.com", password: "password123")
+
+        get "/api/v1/users/#{user.id}", headers: auth_headers_for(user), as: :json
+        own = JSON.parse(response.body)["posts"]
+        expect(own.first).to include("title" => "My secret problem", "anon_handle" => post_record.anon_handle)
+
+        get "/api/v1/users/#{user.id}", headers: auth_headers_for(other), as: :json
+        expect(JSON.parse(response.body)).not_to have_key("posts")
+      end
+
       it "does not expose email or encrypted_password" do
         get "/api/v1/users/#{user.id}", headers: auth_headers_for(user), as: :json
         body = JSON.parse(response.body)

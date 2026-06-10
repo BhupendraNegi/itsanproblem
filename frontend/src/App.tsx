@@ -8,6 +8,8 @@ import { Header } from './components/Header'
 import { PostForm } from './components/PostForm'
 import { PostCard } from './components/PostCard'
 import { ProfilePage } from './pages/ProfilePage'
+import { SettingsPage } from './pages/SettingsPage'
+import { AdminPage } from './pages/AdminPage'
 import { useAuthMutation, usePostMutation, useCommentMutation, usePosts } from './hooks/useMutations'
 import './App.css'
 
@@ -162,6 +164,8 @@ function AppContent() {
     <Routes>
       <Route path="/" element={feed} />
       <Route path="/users/:id" element={<ProfilePage currentUser={user} onLogout={logout} />} />
+      <Route path="/settings" element={<SettingsPage currentUser={user} onLogout={logout} />} />
+      <Route path="/admin" element={<AdminPage currentUser={user} onLogout={logout} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

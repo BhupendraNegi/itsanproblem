@@ -26,9 +26,21 @@ export const mockComment = {
 export const mockProfile = {
   id: 1,
   name: 'Alice',
+  bio: 'Just here to help.',
   joined_at: new Date('2025-01-01').toISOString(),
   helpful_points: 5,
   comment_count: 3,
+  posts: [
+    {
+      id: 1,
+      title: 'My secret problem',
+      anon_handle: 'anon_a91f',
+      created_at: new Date().toISOString(),
+      helpful_count: 2,
+      comment_count: 1,
+      hidden: false,
+    },
+  ],
   recent_comments: [
     {
       id: 1,
@@ -53,6 +65,35 @@ export const mockNotifications = {
   ],
   unread_count: 1,
 }
+
+export const mockAdminStats = {
+  users: 4,
+  posts: 5,
+  comments: 7,
+  flags: 2,
+  hidden_posts: 1,
+  hidden_comments: 0,
+}
+
+export const mockAdminFlags = {
+  posts: [
+    {
+      id: 3,
+      title: 'Spammy post',
+      body: 'Buy my stuff',
+      hidden: true,
+      flag_count: 3,
+      reasons: { spam: 3 },
+      created_at: new Date().toISOString(),
+    },
+  ],
+  comments: [],
+}
+
+export const mockAdminUsers = [
+  { id: 1, name: 'Alice', email: 'alice@example.com', role: 'admin', joined_at: new Date('2025-01-01').toISOString(), post_count: 2, comment_count: 3 },
+  { id: 2, name: 'Bob', email: 'bob@example.com', role: 'member', joined_at: new Date('2025-02-01').toISOString(), post_count: 1, comment_count: 4 },
+]
 
 export const handlers = [
   http.post('/api/v1/auth/register', () =>
@@ -113,5 +154,49 @@ export const handlers = [
 
   http.patch('/api/v1/notifications/read_all', () =>
     HttpResponse.json({ unread_count: 0 })
+  ),
+
+  http.patch('/api/v1/profile', () =>
+    HttpResponse.json({ id: 1, name: 'Alice B', email: 'aliceb@example.com', bio: 'Updated bio.' })
+  ),
+
+  http.patch('/api/v1/profile/password', () =>
+    HttpResponse.json({ success: true })
+  ),
+
+  http.get('/api/v1/admin/stats', () =>
+    HttpResponse.json(mockAdminStats)
+  ),
+
+  http.get('/api/v1/admin/flags', () =>
+    HttpResponse.json(mockAdminFlags)
+  ),
+
+  http.get('/api/v1/admin/users', () =>
+    HttpResponse.json(mockAdminUsers)
+  ),
+
+  http.patch('/api/v1/admin/:target/:id/restore', () =>
+    HttpResponse.json({ restored: true })
+  ),
+
+  http.delete('/api/v1/admin/posts/:id', () =>
+    HttpResponse.json({ deleted: true })
+  ),
+
+  http.delete('/api/v1/admin/comments/:id', () =>
+    HttpResponse.json({ deleted: true })
+  ),
+
+  http.patch('/api/v1/admin/users/:id/role', () =>
+    HttpResponse.json({ ...mockAdminUsers[1], role: 'admin' })
+  ),
+
+  http.post('/api/v1/admin/users/:id/impersonate', () =>
+    HttpResponse.json({ user: { id: 2, name: 'Bob', email: 'bob@example.com', role: 'member' }, token: 'impersonation-token' })
+  ),
+
+  http.delete('/api/v1/admin/users/:id', () =>
+    HttpResponse.json({ deleted: true })
   ),
 ]

@@ -20,17 +20,42 @@ module Api
             }
           end
 
-        render json: {
+        profile = {
           id: @user.id,
           name: @user.name,
+          bio: @user.bio,
           joined_at: @user.created_at,
           helpful_points: stat.helpful_points,
           comment_count: @user.comments.count,
           recent_comments: recent_comments
         }
+
+        # Only you can see your own anonymous posts — resolved through the
+        # post_authors ledger, never exposed on anyone else's profile.
+        profile[:posts] = own_posts if @user == current_user
+
+        render json: profile
       end
 
       private
+
+      def own_posts
+        current_user.posts
+          .includes(:comments, :helpful_marks)
+          .order(created_at: :desc)
+          .limit(20)
+          .map do |post|
+            {
+              id: post.id,
+              title: post.title,
+              anon_handle: post.anon_handle,
+              created_at: post.created_at,
+              helpful_count: post.helpful_marks.size,
+              comment_count: post.comments.size,
+              hidden: post.hidden_at.present?
+            }
+          end
+      end
 
       def set_user
         @user = User.find(params[:id])

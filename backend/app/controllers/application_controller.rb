@@ -1,5 +1,13 @@
 class ApplicationController < ActionController::API
+  include ActionPolicy::Controller
+
   attr_reader :current_user
+
+  authorize :user, through: :current_user
+
+  rescue_from ActionPolicy::Unauthorized do
+    render json: {error: "Forbidden"}, status: :forbidden
+  end
 
   private
 

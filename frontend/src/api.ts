@@ -1,5 +1,14 @@
 import axios from 'axios'
-import type { AuthResponse, NotificationsResponse, Post, UserProfile } from './types'
+import type {
+  AdminFlagsResponse,
+  AdminStats,
+  AdminUser,
+  AuthResponse,
+  NotificationsResponse,
+  Post,
+  User,
+  UserProfile,
+} from './types'
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -60,6 +69,22 @@ export async function flagContent(target: 'posts' | 'comments', id: number, reas
   return response.data as { flagged: boolean }
 }
 
+export async function updateProfile(data: { name: string; email: string; bio: string }) {
+  const response = await api.patch<User & { bio: string | null }>('/profile', { user: data })
+  return response.data
+}
+
+export async function changePassword(data: { currentPassword: string; password: string; passwordConfirmation: string }) {
+  const response = await api.patch<{ success: boolean }>('/profile/password', {
+    user: {
+      current_password: data.currentPassword,
+      password: data.password,
+      password_confirmation: data.passwordConfirmation,
+    },
+  })
+  return response.data
+}
+
 export async function fetchNotifications() {
   const response = await api.get<NotificationsResponse>('/notifications')
   return response.data
@@ -72,5 +97,47 @@ export async function markAllNotificationsRead() {
 
 export async function fetchUserProfile(userId: number) {
   const response = await api.get<UserProfile>(`/users/${userId}`)
+  return response.data
+}
+
+// ---- Admin (requires an admin token; backend enforces via ActionPolicy) ----
+
+export async function fetchAdminStats() {
+  const response = await api.get<AdminStats>('/admin/stats')
+  return response.data
+}
+
+export async function fetchAdminFlags() {
+  const response = await api.get<AdminFlagsResponse>('/admin/flags')
+  return response.data
+}
+
+export async function fetchAdminUsers(q: string) {
+  const response = await api.get<AdminUser[]>('/admin/users', { params: q ? { q } : undefined })
+  return response.data
+}
+
+export async function adminRestoreContent(target: 'posts' | 'comments', id: number) {
+  const response = await api.patch<{ restored: boolean }>(`/admin/${target}/${id}/restore`)
+  return response.data
+}
+
+export async function adminDeleteContent(target: 'posts' | 'comments', id: number) {
+  const response = await api.delete<{ deleted: boolean }>(`/admin/${target}/${id}`)
+  return response.data
+}
+
+export async function adminSetUserRole(id: number, role: 'member' | 'admin') {
+  const response = await api.patch<AdminUser>(`/admin/users/${id}/role`, { role })
+  return response.data
+}
+
+export async function adminImpersonateUser(id: number) {
+  const response = await api.post<AuthResponse>(`/admin/users/${id}/impersonate`)
+  return response.data
+}
+
+export async function adminDeleteUser(id: number) {
+  const response = await api.delete<{ deleted: boolean }>(`/admin/users/${id}`)
   return response.data
 }
