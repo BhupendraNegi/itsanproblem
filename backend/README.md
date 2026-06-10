@@ -277,18 +277,22 @@ bundle exec rubocop
 ## ⚙️ Configuration
 
 ### CORS Setup
+
 Configured to accept requests from frontend (see `config/initializers/cors.rb`)
 
 ### Devise Configuration
+
 Configured for API mode with JWT authentication (see `config/initializers/devise.rb`)
 
 ### Database
+
 - Type: PostgreSQL
 - Configuration: `config/database.yml`
 
 ## 📝 Key Endpoints Examples
 
 ### Register User
+
 ```bash
 POST /api/users
 Content-Type: application/json
@@ -304,6 +308,7 @@ Content-Type: application/json
 ```
 
 ### Login User
+
 ```bash
 POST /api/users/login
 Content-Type: application/json
@@ -317,6 +322,7 @@ Content-Type: application/json
 ```
 
 ### Create Post (with auth token)
+
 ```bash
 POST /api/posts
 Content-Type: application/json
@@ -331,6 +337,7 @@ Authorization: Bearer <token>
 ```
 
 ### Add Comment (with auth token)
+
 ```bash
 POST /api/posts/1/comments
 Content-Type: application/json
@@ -346,6 +353,7 @@ Authorization: Bearer <token>
 ## 🔄 API Response Format
 
 ### Success Response
+
 ```json
 {
   "status": "success",
@@ -361,6 +369,7 @@ Authorization: Bearer <token>
 ```
 
 ### Error Response
+
 ```json
 {
   "status": "error",

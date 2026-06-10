@@ -1,0 +1,3 @@
+# Advisory IDs to ignore (with a justification comment each). Empty = enforce
+# every advisory. Keep this list short and revisit regularly.
+ignore: []
