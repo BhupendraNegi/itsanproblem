@@ -1,2 +1,2 @@
 backend:  cd backend && mise exec -- bundle exec rails server -p ${BACKEND_PORT:-3000}
-frontend: cd frontend && mise exec -- npm run dev -- --port ${FRONTEND_PORT:-5173}
+frontend: cd frontend && mise exec -- npm run dev -- --port ${FRONTEND_PORT:-3001}

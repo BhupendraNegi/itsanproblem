@@ -196,9 +196,9 @@ services:
 
   frontend:
     build: ./frontend
-    command: npm run dev -- --host 0.0.0.0 --port 5173
+    command: npm run dev -- --host 0.0.0.0 --port 3001
     volumes: ["./frontend:/app", "/app/node_modules"]
-    ports: ["5173:5173"]
+    ports: ["3001:3001"]
     depends_on: [backend]
 
 volumes:
@@ -253,7 +253,7 @@ you both drive the stack the same way.
 | db       | `postgres:latest`        | App database (Q5). |
 | valkey   | `valkey/valkey:8-alpine` | Redis-compatible, mirrors `code` (Q4); `REDIS_URL`. |
 | backend  | `./backend` (Ruby 4.0.3) | Rails API on :3000. |
-| frontend | `./frontend` (Node)      | Vite SPA on :5173. |
+| frontend | `./frontend` (Node)      | Vite SPA on :3001. |
 
 ---
 
@@ -268,7 +268,7 @@ you both drive the stack the same way.
 5. Add `bin/docker` (colima `itsaprom` + compose delegate), make executable.
 6. Add `bin/setup` (the walk + `--check`/`doctor`), make executable.
 7. Verify: `bin/setup --check`, then `bin/setup`, then hit
-   `localhost:5173` (frontend) and `localhost:3000/api/v1` (backend).
+   `localhost:3001` (frontend) and `localhost:3000/api/v1` (backend).
 8. Update `README.md` / CLAUDE.md to document the new entry points.
 
 Per repo convention I'll stage files explicitly (no `git add -A`) and only

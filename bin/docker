@@ -161,7 +161,7 @@ case "$SUB" in
     ensure_daemon
     compose up -d --wait "$@"
     echo
-    echo "Stack up:  frontend → http://localhost:${FRONTEND_PORT:-5173}   backend → http://localhost:${BACKEND_PORT:-3000}/api/v1"
+    echo "Stack up:  frontend → http://localhost:${FRONTEND_PORT:-3001}   backend → http://localhost:${BACKEND_PORT:-3000}/api/v1"
     ;;
   down)     ensure_daemon; compose down "$@" ;;
   restart)  ensure_daemon; compose restart "$@" ;;
