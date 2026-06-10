@@ -10,7 +10,7 @@ module Api
         if comment.save
           render json: comment.as_json, status: :created
         else
-          render json: { errors: comment.errors.full_messages }, status: :unprocessable_content
+          render json: {errors: comment.errors.full_messages}, status: :unprocessable_content
         end
       end
 
@@ -19,7 +19,7 @@ module Api
       def set_post
         @post = Post.find(params[:post_id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Post not found" }, status: :not_found
+        render json: {error: "Post not found"}, status: :not_found
       end
 
       def comment_params

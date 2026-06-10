@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 #
-# bin/lint — run all linters across the monorepo: RuboCop (backend), ESLint
+# bin/lint — run all linters across the monorepo: StandardRB (backend), ESLint
 # (frontend), and markdownlint (docs). Mirrors the `code` project's bin/lint.
 #
 #   bin/lint            # everything (non-fatal per linter; reports all)
-#   bin/lint rb         # RuboCop only (pass paths/args after)
+#   bin/lint rb         # StandardRB only (pass paths/args after)
 #   bin/lint js         # ESLint only
 #   bin/lint md         # markdownlint only
-#   bin/lint fix        # autocorrect RuboCop + ESLint + markdownlint
+#   bin/lint fix        # autocorrect StandardRB + ESLint + markdownlint
 set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 RUN=""; command -v mise >/dev/null 2>&1 && RUN="mise exec --"
 CMD="${1:-all}"
 
-rb() { (cd backend  && $RUN bin/rubocop "$@"); }
+rb() { (cd backend  && $RUN bin/standardrb "$@"); }
 js() { (cd frontend && $RUN npm run lint -- "$@"); }
 md() { $RUN npx --yes markdownlint-cli2 "$@"; }
 
@@ -23,13 +23,13 @@ case "$CMD" in
   js|frontend) js "${@:2}" ;;
   md|markdown) md "${@:2}" ;;
   fix)
-    echo "==> RuboCop -A";        rb -A || true
-    echo "==> ESLint --fix";      js --fix || true
+    echo "==> StandardRB --fix";   rb --fix || true
+    echo "==> ESLint --fix";       js --fix || true
     echo "==> markdownlint --fix"; md --fix || true
     ;;
   all|*)
     rc=0
-    echo "==> RuboCop";      rb || rc=1
+    echo "==> StandardRB";   rb || rc=1
     echo "==> ESLint";       js || rc=1
     echo "==> markdownlint"; md || rc=1
     exit $rc

@@ -80,14 +80,14 @@ secrets and injects them into the containers. Edit with `sops secrets/developmen
 ## Linting & security
 
 ```bash
-bin/lint     # RuboCop (backend) + ESLint (frontend) + markdownlint (docs)
+bin/lint     # StandardRB (backend) + ESLint (frontend) + markdownlint (docs)
 bin/lint fix # autocorrect all of the above
 bin/audit    # bundler-audit (dependency CVEs) + Brakeman (static analysis)
 ```
 
 CI runs these on every push/PR via GitHub Actions:
 
-- **Lint** — RuboCop, ESLint, TypeScript (`tsc`), markdownlint
+- **Lint** — StandardRB, ESLint, TypeScript (`tsc`), markdownlint
 - **Security** — Brakeman, bundler-audit, Gitleaks (secret scanning)
 - **Tests** — RSpec (backend), Vitest (frontend)
 - **Dependabot** — daily bundler / npm / github-actions updates

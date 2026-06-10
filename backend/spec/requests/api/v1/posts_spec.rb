@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "Api::V1::Posts", type: :request do
   let!(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }
@@ -45,7 +45,7 @@ RSpec.describe "Api::V1::Posts", type: :request do
   end
 
   describe "POST /api/v1/posts" do
-    let(:valid_params) { { post: { title: "New problem", body: "Details here." } } }
+    let(:valid_params) { {post: {title: "New problem", body: "Details here."}} }
 
     context "when authenticated" do
       it "creates a post and returns it" do
@@ -57,7 +57,7 @@ RSpec.describe "Api::V1::Posts", type: :request do
       end
 
       it "returns errors for missing title" do
-        post "/api/v1/posts", params: { post: { body: "Details." } }, headers: auth_headers_for(user), as: :json
+        post "/api/v1/posts", params: {post: {body: "Details."}}, headers: auth_headers_for(user), as: :json
         expect(response).to have_http_status(:unprocessable_content)
         expect(JSON.parse(response.body)["errors"]).to be_present
       end

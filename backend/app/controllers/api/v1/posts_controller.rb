@@ -1,8 +1,8 @@
 module Api
   module V1
     class PostsController < ApplicationController
-      before_action :authenticate_user!, only: [ :create ]
-      before_action :set_post, only: [ :show ]
+      before_action :authenticate_user!, only: [:create]
+      before_action :set_post, only: [:show]
 
       def index
         posts = Post.includes(:comments, :user).order(created_at: :desc)
@@ -19,7 +19,7 @@ module Api
         if post.save
           render json: post.as_json, status: :created
         else
-          render json: { errors: post.errors.full_messages }, status: :unprocessable_content
+          render json: {errors: post.errors.full_messages}, status: :unprocessable_content
         end
       end
 
@@ -28,7 +28,7 @@ module Api
       def set_post
         @post = Post.find(params[:id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Post not found" }, status: :not_found
+        render json: {error: "Post not found"}, status: :not_found
       end
 
       def post_params
