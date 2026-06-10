@@ -1,87 +1,43 @@
-# # syntax=docker/dockerfile:1
-# # check=error=true
+# syntax=docker/dockerfile:1
+#
+# Development image for the itsanproblem Rails API.
+#
+# This image is built for the `docker compose` dev stack: the working tree is
+# bind-mounted over /rails at runtime, while gems live in the image at
+# /usr/local/bundle (not overmounted), so `bundle install` is cached across
+# code edits. Production deploys go through Kamal with Rails' own prod
+# Dockerfile — this file is intentionally dev-shaped, not slimmed for prod.
+#
+# Keep RUBY_VERSION in sync with backend/.ruby-version.
+ARG RUBY_VERSION=4.0.3
+FROM docker.io/library/ruby:${RUBY_VERSION}-slim
 
-# # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# # docker build -t backend .
-# # docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name backend backend
+WORKDIR /rails
 
-# # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
+# OS packages:
+#   build-essential / pkg-config / libyaml-dev  → native gem builds
+#   libpq-dev                                   → pg (PostgreSQL client)
+#   sqlite3                                      → local SQLite tooling / tests
+#   git, curl                                    → bundler git gems, healthchecks
+#   libjemalloc2                                 → enabled by bin/docker-entrypoint
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential git curl pkg-config \
+      libpq-dev libyaml-dev sqlite3 libjemalloc2 && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-# ARG RUBY_VERSION=4.0.3
-# FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+ENV BUNDLE_PATH=/usr/local/bundle
 
-# # Rails app lives here
-# WORKDIR /rails
-
-# # Install base packages
-# RUN apt-get update -qq && \
-#     apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
-#     rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# # Set production environment
-# ENV RAILS_ENV="production" \
-#     BUNDLE_DEPLOYMENT="1" \
-#     BUNDLE_PATH="/usr/local/bundle" \
-#     BUNDLE_WITHOUT="development"
-
-# # Throw-away build stage to reduce size of final image
-# FROM base AS build
-
-# # Install packages needed to build gems
-# RUN apt-get update -qq && \
-#     apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config && \
-#     rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# # Install application gems
-# COPY Gemfile Gemfile.lock ./
-# RUN bundle install && \
-#     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-#     bundle exec bootsnap precompile --gemfile
-
-# # Copy application code
-# COPY . .
-
-# # Precompile bootsnap code for faster boot times
-# RUN bundle exec bootsnap precompile app/ lib/
-
-
-
-
-# Final stage for app image
-FROM base
-
-# Copy built artifacts: gems, application
-COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
-COPY --from=build /rails /rails
-
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
-USER 1000:1000
-
-# Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
-
-# Start server via Thruster by default, this can be overwritten at runtime
-EXPOSE 80
-CMD ["./bin/thrust", "./bin/rails", "server"]
-
-
-
-
-
-FROM ruby:4.0.3
-
-WORKDIR /app
-
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
-
-COPY Gemfile* ./
+# Install gems first so a source-only change doesn't bust the bundle layer.
+COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
+# Copy the rest of the app (overlaid by the compose bind-mount in dev).
 COPY . .
 
-CMD ["rails", "s", "-b", "0.0.0.0", "-p", "3000"]
+EXPOSE 3000
 
+# docker-entrypoint enables jemalloc; the compose `command` runs db:prepare
+# before booting the server.
+ENTRYPOINT ["./bin/docker-entrypoint"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]

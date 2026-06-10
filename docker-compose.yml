@@ -1,45 +1,90 @@
-version: "3.9"
+# itsanproblem local dev stack.
+#
+# Brought up by `bin/docker up` (which boots the colima `itsaprom` VM first on
+# macOS). Mirrors the service shape of the `code` project, scaled down:
+#   db       — PostgreSQL (the app database in Docker; local non-Docker dev
+#              still uses SQLite via backend/config/database.yml)
+#   valkey   — Redis-compatible store (same image `code` uses); exposed as
+#              REDIS_URL for the sidekiq/redis gems even though the core path
+#              uses solid_* on Postgres
+#   backend  — Rails API on :3000
+#   frontend — Vite SPA on :5173 (proxies /api → backend)
+#
+# Values come from .env (copy .env.example). Secrets for richer setups live in
+# secrets/*.yml (SOPS) and are loaded by bin/docker via bin/_sops_env.sh.
+
 services:
   db:
-    image: postgres:15
+    image: postgres:latest
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-itsanproblem}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-itsanproblem}
+      POSTGRES_DB: ${POSTGRES_DB:-itsanproblem_development}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      # postgres:latest is v18+, which stores data in a major-version subdir;
+      # the supported mount point is /var/lib/postgresql (not .../data).
+      - db_data:/var/lib/postgresql
     ports:
-      - "5432:5432"
-cd 
-  redis:
-    image: redis:7
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-itsanproblem}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--save", "60", "1"]
+    volumes:
+      - valkey_data:/data
     ports:
-      - "6379:6379"
+      - "${VALKEY_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build: ./backend
-    command: bash -c "bundle exec rails db:prepare && bundle exec rails s -b 0.0.0.0 -p 3000"
-    volumes:
-      - ./backend:/app
-    working_dir: /app
+    command: bash -c "./bin/rails db:prepare && ./bin/rails server -b 0.0.0.0 -p 3000"
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
-      REDIS_URL: redis://redis:6379/0
+      RAILS_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER:-itsanproblem}:${POSTGRES_PASSWORD:-itsanproblem}@db:5432/${POSTGRES_DB:-itsanproblem_development}
+      REDIS_URL: redis://valkey:6379/0
+      # Loaded from secrets/development.yml by `bin/docker` (SOPS → host env →
+      # here). Falls back to Rails' secret_key_base when unset.
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-}
+    volumes:
+      - ./backend:/rails
+      - bundle_cache:/usr/local/bundle
+      # Keep the container's pidfile out of the host bind-mount, otherwise its
+      # tmp/pids/server.pid (pid 1) blocks a local `bin/dev` Rails server.
+      - /rails/tmp/pids
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT:-3000}:3000"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
     command: npm run dev -- --host 0.0.0.0 --port 5173
+    environment:
+      # Vite proxies /api → this URL (see frontend/vite.config.*)
+      VITE_API_PROXY_TARGET: http://backend:3000
     volumes:
       - ./frontend:/app
-    working_dir: /app
+      - /app/node_modules
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
       - backend
 
 volumes:
   db_data:
+  valkey_data:
+  bundle_cache:

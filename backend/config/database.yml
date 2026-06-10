@@ -1,41 +1,52 @@
-# SQLite. Versions 3.8.0 and up are supported.
-#   gem install sqlite3
+# Env-driven database config.
 #
-#   Ensure the SQLite 3 gem is defined in your Gemfile
-#   gem "sqlite3"
+#   • Local (non-Docker) development & test  → SQLite (no DATABASE_URL set).
+#   • Docker dev stack & production           → PostgreSQL (DATABASE_URL set,
+#                                               e.g. postgres://user:pw@db:5432/itsanproblem_development).
 #
+# Rails reads ENV["DATABASE_URL"] at boot; we branch the adapter on its
+# presence so a laptop keeps using SQLite while the container uses Postgres
+# with zero per-developer config.
+<%
+  pg_url = ENV["DATABASE_URL"]
+%>
 default: &default
-  adapter: sqlite3
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+sqlite: &sqlite
+  <<: *default
+  adapter: sqlite3
   timeout: 5000
 
-development:
+postgres: &postgres
   <<: *default
-  database: storage/development.sqlite3
+  adapter: postgresql
+  encoding: unicode
+  url: <%= pg_url %>
 
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
+development:
+  <<: *<%= pg_url ? "postgres" : "sqlite" %>
+  <% unless pg_url %>database: storage/development.sqlite3<% end %>
+
+# Warning: The database defined as "test" will be erased and re-generated
+# from your development database when you run "rake". Tests always run on
+# SQLite locally for speed; CI can override with DATABASE_URL if desired.
 test:
-  <<: *default
+  <<: *sqlite
   database: storage/test.sqlite3
 
-
-# Store production database in the storage/ directory, which by default
-# is mounted as a persistent Docker volume in config/deploy.yml.
+# Production runs on PostgreSQL. The solid_cache / solid_queue / solid_cable
+# adapters live in the SAME Postgres database as the primary (separate
+# connections, distinct migration paths) — see config/cable.yml & cache.yml.
 production:
   primary:
-    <<: *default
-    database: storage/production.sqlite3
+    <<: *postgres
   cache:
-    <<: *default
-    database: storage/production_cache.sqlite3
+    <<: *postgres
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    database: storage/production_queue.sqlite3
+    <<: *postgres
     migrations_paths: db/queue_migrate
   cable:
-    <<: *default
-    database: storage/production_cable.sqlite3
+    <<: *postgres
     migrations_paths: db/cable_migrate

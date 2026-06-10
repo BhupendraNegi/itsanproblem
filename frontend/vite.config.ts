@@ -6,7 +6,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:3000',
+        // Local dev → 127.0.0.1:3000; Docker dev → http://backend:3000
+        // (set via VITE_API_PROXY_TARGET in docker-compose.yml).
+        target: process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
     },
