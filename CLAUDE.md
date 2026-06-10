@@ -6,6 +6,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 itsanproblem is an anonymous problem-sharing platform. Users post problems that always appear as "Anonymous", while comments are attributed to the commenter's name. It is a split monorepo: a Rails 8 API in [backend/](backend/) and a React + TypeScript SPA in [frontend/](frontend/). The two communicate over a JSON API under `/api/v1`.
 
+## Keeping this file current (read first)
+
+**When you make an architectural change, update this file in the same commit as the code.** CLAUDE.md is the first thing the agent reads each session — stale guidance is worse than none. README.md is user-facing; this file is the contributor/agent map.
+
+What counts as an architectural change, and which section to edit:
+
+| Change | Section to update |
+|--------|-------------------|
+| New/removed service, port, container, or env var | **Commands › Full stack via Docker** |
+| New `bin/` entry point or top-level command | **Commands** (the matching subsection) |
+| Auth flow, JSON serialization, or error-shape convention | **Architecture › Backend** |
+| New model or changed association | **Architecture › Backend** (data-model line) |
+| New frontend state/store/data-fetching/routing pattern | **Architecture › Frontend** |
+| Dependency swap that changes how code is built/run/linted (e.g. RuboCop→StandardRB, SQLite→Postgres) | the relevant section **+ Conventions & gotchas** |
+| A new non-obvious constraint or footgun | **Conventions & gotchas** |
+
+How: edit the **most specific existing section** (don't append a changelog or a dated entry), keep it to *what + why* (not a step-by-step history), link files as `[path](path)`, and **delete anything the change made untrue**. Code and its doc update land together — never one without the other. After editing, `bin/lint md` must stay green.
+
 ## Commands
 
 ### Backend (run from `backend/`)
