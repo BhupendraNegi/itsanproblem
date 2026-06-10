@@ -323,6 +323,6 @@ if [ -z "$SUBCOMMAND" ]; then
   printf '%sDone.%s' "$C_GRN" "$C_RESET"
   [ "$WARN_COUNT" -gt 0 ] && printf ' %s(%s warning(s))%s' "$C_YEL" "$WARN_COUNT" "$C_RESET"
   printf '\n'
-  hint "frontend → http://localhost:${FRONTEND_PORT:-5173}   backend → http://localhost:${BACKEND_PORT:-3000}/api/v1"
+  hint "frontend → http://localhost:${FRONTEND_PORT:-3001}   backend → http://localhost:${BACKEND_PORT:-3000}/api/v1"
   hint "stack:    bin/docker ps | logs | down      health: bin/setup doctor"
 fi

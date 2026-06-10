@@ -62,7 +62,7 @@ Run on every push to `main` + all PRs:
 ### Frontend (run from `frontend/`)
 
 - Install: `npm install`
-- Dev server: `npm run dev` (port 5173, proxies `/api` → `http://127.0.0.1:3000`; the target is overridable via `VITE_API_PROXY_TARGET`, set to `http://backend:3000` in the Docker stack — see [vite.config.ts](frontend/vite.config.ts))
+- Dev server: `npm run dev` (port 3001, proxies `/api` → `http://127.0.0.1:3000`; the target is overridable via `VITE_API_PROXY_TARGET`, set to `http://backend:3000` in the Docker stack — see [vite.config.ts](frontend/vite.config.ts))
 - Build: `npm run build` (`tsc -b && vite build`)
 - All tests: `npm test` (Vitest, single run); watch with `npm run test:watch`
 - Single test file: `npx vitest run src/__tests__/components/PostCard.test.tsx`
@@ -71,13 +71,13 @@ Run on every push to `main` + all PRs:
 
 ### Local dev, both processes at once
 
-- **`bin/dev`** runs the Rails backend (:3000, SQLite) and Vite frontend (:5173) together via overmind/foreman + [Procfile.dev](Procfile.dev). It loads `secrets/development.yml` (JWT_SECRET_KEY etc.), clears a stale Puma pidfile, and runs `db:prepare`. This is **local, non-container** dev — distinct from the Docker stack below.
+- **`bin/dev`** runs the Rails backend (:3000, SQLite) and Vite frontend (:3001) together via overmind/foreman + [Procfile.dev](Procfile.dev). It loads `secrets/development.yml` (JWT_SECRET_KEY etc.), clears a stale Puma pidfile, and runs `db:prepare`. This is **local, non-container** dev — distinct from the Docker stack below.
 
 ### Full stack via Docker
 
 - **`bin/setup`** is the single idempotent bootstrap entry point (modeled on a larger reference project): an ordered subcommand walk (`bin/setup install-docker`, etc.), a `--check` dry-run, a read-only `doctor`, and per-step logs in `tmp/setup-logs/`. It pins the toolchain via `mise` ([mise.toml](mise.toml)).
 - **`bin/docker`** is the container lifecycle delegate: `setup` (installs + starts the **colima `itsaprom`** profile on macOS), `up`, `down`, `restart`, `logs`, `ps`, `build`, `clean`. It loads `secrets/development.yml` via [bin/_sops_env.sh](bin/_sops_env.sh) and injects the secrets into the containers.
-- The stack ([docker-compose.yml](docker-compose.yml)) runs **PostgreSQL** + **Valkey** (Redis-compatible) + backend (3000) + frontend (5173). **Docker uses PostgreSQL while local development uses SQLite**: [backend/config/database.yml](backend/config/database.yml) is env-driven — when `DATABASE_URL` is set (Docker), it uses the `pg` adapter; otherwise it falls back to SQLite. Production routes `solid_cache`/`solid_queue`/`solid_cable` to the same Postgres database.
+- The stack ([docker-compose.yml](docker-compose.yml)) runs **PostgreSQL** + **Valkey** (Redis-compatible) + backend (3000) + frontend (3001). **Docker uses PostgreSQL while local development uses SQLite**: [backend/config/database.yml](backend/config/database.yml) is env-driven — when `DATABASE_URL` is set (Docker), it uses the `pg` adapter; otherwise it falls back to SQLite. Production routes `solid_cache`/`solid_queue`/`solid_cable` to the same Postgres database.
 - **`postgres:latest` is v18+**, which stores data in a major-version subdir; the compose volume mounts at `/var/lib/postgresql` (not `.../data`).
 - **Secrets:** two SOPS-encrypted envs only — `secrets/development.yml` and `secrets/production.yml` — encrypted for the age recipients in [.sops.yaml](.sops.yaml) (key at `~/.config/sops/age/keys.txt`). Nested keys flatten to `UPPERCASE_UNDERSCORE` env vars (e.g. `jwt.secret_key` → `JWT_SECRET_KEY`).
 

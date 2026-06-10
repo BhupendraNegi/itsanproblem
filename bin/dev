@@ -6,7 +6,7 @@
 # This is local development on SQLite — no containers. For the containerized
 # Postgres + Valkey stack, use `bin/docker up` instead.
 #
-#   bin/dev                 # start backend (:3000) + frontend (:5173)
+#   bin/dev                 # start backend (:3000) + frontend (:3001)
 #   BACKEND_PORT=4000 bin/dev
 #
 # Ctrl-C stops everything. Tail one process with `overmind connect backend`.

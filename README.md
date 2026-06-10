@@ -33,7 +33,7 @@ bin/setup --check    # dry-run: report what would change, mutate nothing
 bin/setup doctor     # read-only health report
 ```
 
-Once up: frontend → <http://localhost:5173>, backend → <http://localhost:3000/api/v1>
+Once up: frontend → <http://localhost:3001>, backend → <http://localhost:3000/api/v1>
 
 ### Docker stack lifecycle
 
@@ -56,7 +56,7 @@ Run **both** the backend (Rails, SQLite) and frontend (Vite) with a single
 command via [bin/dev](bin/dev) (overmind/foreman + [Procfile.dev](Procfile.dev)):
 
 ```bash
-bin/dev                      # backend :3000 + frontend :5173 together (Ctrl-C stops both)
+bin/dev                      # backend :3000 + frontend :3001 together (Ctrl-C stops both)
 BACKEND_PORT=4000 bin/dev    # override ports
 ```
 
@@ -66,7 +66,7 @@ Or run them separately:
 # Backend (http://localhost:3000, SQLite)
 cd backend && bundle install && bundle exec rails db:prepare && bundle exec rails server
 
-# Frontend (http://localhost:5173)
+# Frontend (http://localhost:3001)
 cd frontend && npm install && npm run dev
 ```
 
