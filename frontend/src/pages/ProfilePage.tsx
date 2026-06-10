@@ -88,6 +88,11 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                   <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--fg2)', fontFamily: 'var(--font-mono)' }}>
                     Joined {formatJoined(profile.joined_at)}
                   </p>
+                  {profile.bio && (
+                    <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--fg1)', lineHeight: 1.5 }}>
+                      {profile.bio}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -121,6 +126,48 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                 </div>
               </div>
             </div>
+
+            {/* Own anonymous posts — only present on your own profile */}
+            {profile.posts && (
+              <section>
+                <h2 style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 20, fontWeight: 600,
+                  letterSpacing: '-0.01em',
+                  margin: '0 0 6px'
+                }}>
+                  Your posts
+                </h2>
+                <p style={{ margin: '0 0 14px', fontSize: 13, color: 'var(--fg2)' }}>
+                  Only you can see this list — everyone else sees these posts as anonymous.
+                </p>
+
+                {profile.posts.length === 0 ? (
+                  <div className="card empty">
+                    <h3>No posts yet</h3>
+                    <p>Problems you post will show up here, visible only to you.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    {profile.posts.map((post) => (
+                      <div key={post.id} className="card" style={{ padding: '16px 20px', gap: 8, display: 'grid' }}>
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{post.title}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--fg2)', fontFamily: 'var(--font-mono)' }}>
+                          <span>{post.anon_handle}</span>
+                          <span style={{ color: 'var(--fg3)' }}>·</span>
+                          <span>{post.comment_count} {post.comment_count === 1 ? 'reply' : 'replies'}</span>
+                          <span style={{ color: 'var(--fg3)' }}>·</span>
+                          <span>{post.helpful_count} helpful</span>
+                          <span style={{ color: 'var(--fg3)' }}>·</span>
+                          <span>{formatRelative(post.created_at)}</span>
+                          {post.hidden && <span style={{ color: 'var(--accent)' }}>· hidden pending review</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* Recent comments */}
             <section>

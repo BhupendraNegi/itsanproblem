@@ -32,7 +32,7 @@ module Api
       end
 
       def user_response(user)
-        user.slice(:id, :name, :email)
+        user.slice(:id, :name, :email, :role)
       end
     end
   end

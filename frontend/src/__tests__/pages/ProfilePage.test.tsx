@@ -77,4 +77,28 @@ describe('ProfilePage', () => {
     renderProfile()
     expect(screen.getByText(/back to feed/i)).toBeInTheDocument()
   })
+
+  it('renders the bio when present', async () => {
+    renderProfile()
+    expect(await screen.findByText('Just here to help.')).toBeInTheDocument()
+  })
+
+  it('shows "Your posts" with anon handles when the API returns own posts', async () => {
+    renderProfile()
+    expect(await screen.findByText('Your posts')).toBeInTheDocument()
+    expect(screen.getByText('My secret problem')).toBeInTheDocument()
+    expect(screen.getByText(/only you can see this list/i)).toBeInTheDocument()
+  })
+
+  it('hides the "Your posts" section when the API omits posts', async () => {
+    const { server } = await import('../../mocks/server')
+    const { http, HttpResponse } = await import('msw')
+    const withoutPosts = { ...mockProfile, posts: undefined }
+    server.use(
+      http.get('/api/v1/users/:id', () => HttpResponse.json(withoutPosts))
+    )
+    renderProfile(otherUser)
+    await screen.findByRole('heading', { name: /alice/i })
+    expect(screen.queryByText('Your posts')).not.toBeInTheDocument()
+  })
 })

@@ -21,6 +21,14 @@ export function Header({ user, onLogout }: HeaderProps) {
 
         <div className="navbar-user">
           <NotificationBell />
+          {user.role === 'admin' && (
+            <Link to="/admin" className="logout-icon-btn" title="Admin" aria-label="Admin">
+              <img src="/assets/icons/users.svg" alt="" />
+            </Link>
+          )}
+          <Link to="/settings" className="logout-icon-btn" title="Settings" aria-label="Settings">
+            <img src="/assets/icons/settings.svg" alt="" />
+          </Link>
           <Link to={`/users/${user.id}`} className="user-pill" style={{ textDecoration: 'none' }}>
             <span className="user-name">{user.name}</span>
             <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>

@@ -20,11 +20,32 @@ Rails.application.routes.draw do
         resource :flag, only: [:create]
       end
 
+      resource :profile, only: [:update], controller: "profiles" do
+        patch :password
+      end
+
       resources :notifications, only: [:index] do
         patch :read_all, on: :collection
       end
 
       resources :users, only: [:show]
+
+      namespace :admin do
+        get :stats, to: "stats#show"
+        resources :flags, only: [:index]
+        resources :posts, only: [:destroy] do
+          patch :restore, on: :member
+        end
+        resources :comments, only: [:destroy] do
+          patch :restore, on: :member
+        end
+        resources :users, only: [:index, :destroy] do
+          member do
+            patch :role
+            post :impersonate
+          end
+        end
+      end
     end
   end
 

@@ -2,6 +2,52 @@ export type User = {
   id: number
   name: string
   email: string
+  role?: 'member' | 'admin'
+}
+
+export type AdminStats = {
+  users: number
+  posts: number
+  comments: number
+  flags: number
+  hidden_posts: number
+  hidden_comments: number
+}
+
+export type AdminFlaggedPost = {
+  id: number
+  title: string
+  body: string
+  hidden: boolean
+  flag_count: number
+  reasons: Record<string, number>
+  created_at: string
+}
+
+export type AdminFlaggedComment = {
+  id: number
+  body: string
+  post_id: number
+  post_title: string
+  hidden: boolean
+  flag_count: number
+  reasons: Record<string, number>
+  created_at: string
+}
+
+export type AdminFlagsResponse = {
+  posts: AdminFlaggedPost[]
+  comments: AdminFlaggedComment[]
+}
+
+export type AdminUser = {
+  id: number
+  name: string
+  email: string
+  role: 'member' | 'admin'
+  joined_at: string
+  post_count: number
+  comment_count: number
 }
 
 export type Comment = {
@@ -54,11 +100,24 @@ export type NotificationsResponse = {
   unread_count: number
 }
 
+export type ProfilePost = {
+  id: number
+  title: string
+  anon_handle: string
+  created_at: string
+  helpful_count: number
+  comment_count: number
+  hidden: boolean
+}
+
 export type UserProfile = {
   id: number
   name: string
+  bio: string | null
   joined_at: string
   helpful_points: number
   comment_count: number
   recent_comments: ProfileComment[]
+  // only present when viewing your own profile
+  posts?: ProfilePost[]
 }

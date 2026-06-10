@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_10_000004) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_10_000006) do
   create_table "comments", force: :cascade do |t|
     t.text "body", null: false
     t.integer "user_id", null: false
@@ -43,6 +43,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_000004) do
     t.index ["markable_type", "markable_id"], name: "index_helpful_marks_on_markable"
     t.index ["user_id", "markable_type", "markable_id"], name: "index_helpful_marks_uniqueness", unique: true
     t.index ["user_id"], name: "index_helpful_marks_on_user_id"
+  end
+
+  create_table "impersonations", force: :cascade do |t|
+    t.integer "admin_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_impersonations_on_admin_id"
+    t.index ["user_id"], name: "index_impersonations_on_user_id"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -95,15 +104,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_000004) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name", default: "", null: false
+    t.text "bio"
+    t.string "role", default: "member", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["name"], name: "index_users_on_name"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["role"], name: "index_users_on_role"
   end
 
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
   add_foreign_key "flags", "users"
   add_foreign_key "helpful_marks", "users"
+  add_foreign_key "impersonations", "users"
+  add_foreign_key "impersonations", "users", column: "admin_id"
   add_foreign_key "notifications", "comments"
   add_foreign_key "notifications", "posts"
   add_foreign_key "notifications", "users"

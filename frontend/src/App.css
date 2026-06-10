@@ -49,7 +49,8 @@
   --red-ink:     #991b1b;
 
   /* ---- Color: semantic aliases (Instagram-style — light theme) ----
-     Dark-theme overrides live in the prefers-color-scheme media query below.
+     Dark-theme overrides live under :root[data-theme="dark"] below; the
+     data-theme attribute is set by the theme store (Light / Dark / System).
      Components reference these aliases, so both themes flow from here. */
   --bg-page:        #fafafa;
   --bg-page-soft:   #ffffff;
@@ -166,9 +167,11 @@
   }
 }
 
-/* ---- Dark theme (follows the browser/OS setting) ---- */
-@media (prefers-color-scheme: dark) {
-  :root {
+/* ---- Dark theme ----
+   Applied via data-theme, set by the theme store: an explicit Light/Dark
+   preference wins; "System" resolves to the OS prefers-color-scheme value
+   (also pre-resolved by the inline script in index.html to avoid a flash). */
+:root[data-theme="dark"] {
     --bg-page:        #000000;
     --bg-page-soft:   #121212;
     --bg-card:        #121212;
@@ -201,11 +204,10 @@
     --shadow-ring-focus: 0 0 0 3px rgba(0, 149, 246, 0.30);
   }
 
-  /* Dark line-icons sit on light surfaces by default; flip them to light in
-     content areas. The nav bar keeps the colorful gradient, so its white
-     icons are excluded (they live in <header>, not <main>). */
-  main img[src*="/assets/icons/"] { filter: invert(0.9) brightness(1.4); }
-}
+/* Dark line-icons sit on light surfaces by default; flip them to light in
+   content areas. The nav bar keeps the colorful gradient, so its white
+   icons are excluded (they live in <header>, not <main>). */
+:root[data-theme="dark"] main img[src*="/assets/icons/"] { filter: invert(0.9) brightness(1.4); }
 
 /* ---- Base ---- */
 html, body, #root { margin: 0; padding: 0; min-height: 100vh; }
