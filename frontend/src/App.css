@@ -48,29 +48,39 @@
   --red-bg:      #fee2e2;
   --red-ink:     #991b1b;
 
-  /* ---- Color: semantic aliases ---- */
-  --bg-page:        var(--slate-100);
-  --bg-page-soft:   var(--slate-50);
-  --bg-card:        var(--slate-0);
-  --bg-card-sunken: var(--slate-50);
-  --bg-input:       var(--slate-50);
+  /* ---- Color: semantic aliases (Instagram-style — light theme) ----
+     Dark-theme overrides live in the prefers-color-scheme media query below.
+     Components reference these aliases, so both themes flow from here. */
+  --bg-page:        #fafafa;
+  --bg-page-soft:   #ffffff;
+  --bg-card:        #ffffff;
+  --bg-card-sunken: #fafafa;
+  --bg-input:       #fafafa;
+  --bg-hover:       #f0f0f0;
 
-  --fg1: var(--slate-900);
-  --fg2: var(--slate-500);
-  --fg3: var(--slate-400);
-  --fg-on-primary: var(--slate-0);
+  --fg1: #262626;
+  --fg2: #8e8e8e;
+  --fg3: #c7c7c7;
+  --fg-on-primary: #ffffff;
 
-  --border-default: var(--slate-200);
-  --border-strong:  var(--slate-300);
-  --border-input:   var(--slate-300);
-  --border-focus:   var(--indigo-700);
+  --border-default: #dbdbdb;
+  --border-strong:  #c7c7c7;
+  --border-subtle:  #efefef;
+  --border-input:   #dbdbdb;
+  --border-focus:   #0095f6;
 
-  --primary:       var(--indigo-700);
-  --primary-hover: var(--indigo-800);
-  --primary-ring:  rgba(67, 56, 202, 0.10);
+  /* Instagram action blue */
+  --primary:          #0095f6;
+  --primary-hover:    #0081d6;
+  --primary-disabled: #b2dffc;
+  --primary-ring:     rgba(0, 149, 246, 0.12);
 
-  --accent:       var(--coral-500);
-  --accent-hover: var(--coral-600);
+  /* Instagram pink — likes / active accents */
+  --accent:       #d62976;
+  --accent-hover: #b81e63;
+
+  --badge-bg: #fde7f0;
+  --badge-fg: #c1306c;
 
   --success-bg: var(--emerald-bg);
   --success-fg: var(--emerald-ink);
@@ -79,9 +89,13 @@
   --danger-bg:  var(--red-bg);
   --danger-fg:  var(--red-ink);
 
-  --gradient-brand: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
-  --gradient-page:  linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
-  --gradient-vent:  linear-gradient(135deg, #f97066 0%, #ff9994 100%);
+  /* The signature Instagram gradient — nav bar, avatars, accents */
+  --gradient-brand: linear-gradient(90deg, #feda75 0%, #fa7e1e 22%, #d62976 52%, #962fbf 78%, #4f5bd5 100%);
+  --gradient-page:  #fafafa;
+  --gradient-vent:  linear-gradient(135deg, #fa7e1e 0%, #d62976 100%);
+
+  /* Tells the browser to render native controls/scrollbars per theme. */
+  color-scheme: light dark;
 
   /* ---- Type ---- */
   --font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
@@ -150,6 +164,47 @@
     --motion-base: 0ms;
     --motion-slow: 0ms;
   }
+}
+
+/* ---- Dark theme (follows the browser/OS setting) ---- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-page:        #000000;
+    --bg-page-soft:   #121212;
+    --bg-card:        #121212;
+    --bg-card-sunken: #1a1a1a;
+    --bg-input:       #1a1a1a;
+    --bg-hover:       #262626;
+
+    --fg1: #f5f5f5;
+    --fg2: #a8a8a8;
+    --fg3: #6e6e6e;
+
+    --border-default: #363636;
+    --border-strong:  #4a4a4a;
+    --border-subtle:  #262626;
+    --border-input:   #363636;
+
+    --primary-disabled: #1d4a63;
+
+    --accent:       #f06595;
+    --accent-hover: #f783ac;
+
+    --badge-bg: rgba(214, 41, 118, 0.18);
+    --badge-fg: #f06595;
+
+    --gradient-page: #000000;
+
+    --shadow-card:       0 1px 3px rgba(0, 0, 0, 0.6);
+    --shadow-nav:        0 4px 12px rgba(0, 0, 0, 0.55);
+    --shadow-pop:        0 12px 28px rgba(0, 0, 0, 0.7);
+    --shadow-ring-focus: 0 0 0 3px rgba(0, 149, 246, 0.30);
+  }
+
+  /* Dark line-icons sit on light surfaces by default; flip them to light in
+     content areas. The nav bar keeps the colorful gradient, so its white
+     icons are excluded (they live in <header>, not <main>). */
+  main img[src*="/assets/icons/"] { filter: invert(0.9) brightness(1.4); }
 }
 
 /* ---- Base ---- */
@@ -354,7 +409,7 @@ button { font-family: inherit; }
 .field textarea:focus {
   outline: none;
   border-color: var(--border-focus);
-  background: white;
+  background: var(--bg-card);
   box-shadow: var(--shadow-ring-focus);
 }
 
@@ -374,11 +429,11 @@ button { font-family: inherit; }
 
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 .btn-primary:active:not(:disabled) { transform: scale(0.98); }
-.btn-primary:disabled { background: var(--indigo-300); cursor: not-allowed; }
+.btn-primary:disabled { background: var(--primary-disabled); cursor: not-allowed; }
 
 .btn-secondary {
   border: 1.5px solid var(--border-default);
-  background: white;
+  background: var(--bg-card);
   color: var(--fg1);
   cursor: pointer;
   border-radius: var(--radius-md);
@@ -389,7 +444,7 @@ button { font-family: inherit; }
               background var(--motion-fast) var(--ease-standard);
 }
 
-.btn-secondary:hover { border-color: var(--primary); background: var(--slate-100); }
+.btn-secondary:hover { border-color: var(--primary); background: var(--bg-hover); }
 
 .auth-submit {
   width: 100%;
@@ -413,7 +468,7 @@ button { font-family: inherit; }
   gap: 6px;
 }
 
-.btn-ghost:hover { background: var(--slate-100); color: var(--fg1); }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--fg1); }
 
 /* ---- Auth tabs (underline style) ---- */
 .auth-tabs {
@@ -571,8 +626,8 @@ button { font-family: inherit; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--coral-100);
-  color: var(--coral-700);
+  background: var(--badge-bg);
+  color: var(--badge-fg);
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 600;
@@ -588,7 +643,7 @@ button { font-family: inherit; }
   display: flex;
   align-items: center;
   gap: 4px;
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 12px;
 }
 
@@ -609,7 +664,7 @@ button { font-family: inherit; }
               color var(--motion-fast) var(--ease-standard);
 }
 
-.action-btn:hover { background: var(--slate-100); color: var(--fg1); }
+.action-btn:hover { background: var(--bg-hover); color: var(--fg1); }
 .action-btn.is-active { color: var(--accent); }
 
 .action-btn img { width: 16px; height: 16px; }
@@ -649,7 +704,7 @@ button { font-family: inherit; }
 .comment-form {
   display: grid;
   gap: 10px;
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 14px;
 }
 
@@ -707,6 +762,58 @@ button { font-family: inherit; }
 }
 
 .empty p { margin: 0; font-size: 14px; }
+
+/* ---- Footer ---- */
+.app-footer {
+  margin-top: var(--space-12);
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-page-soft);
+}
+
+.app-footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-8) 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.app-footer-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-md);
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.app-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-5);
+}
+
+.app-footer-links a {
+  color: var(--fg2);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.app-footer-links a:hover { color: var(--primary); }
+
+.app-footer-copy {
+  color: var(--fg3);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+}
 
 /* ---- Responsive ---- */
 @media (max-width: 720px) {

@@ -77,8 +77,8 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                         marginLeft: 10,
                         fontSize: 12, fontWeight: 600,
                         fontFamily: 'var(--font-mono)',
-                        color: 'var(--indigo-700)',
-                        background: 'var(--indigo-50)',
+                        color: 'var(--fg-on-primary)',
+                        background: 'var(--primary)',
                         padding: '3px 8px',
                         borderRadius: 'var(--radius-pill)',
                         verticalAlign: 'middle'
@@ -95,14 +95,14 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
               <div style={{
                 display: 'grid', gridTemplateColumns: '1fr 1fr',
                 gap: 12, marginTop: 24,
-                borderTop: '1px solid var(--slate-100)', paddingTop: 20
+                borderTop: '1px solid var(--border-subtle)', paddingTop: 20
               }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: 32, fontWeight: 700,
                     letterSpacing: '-0.02em',
-                    color: 'var(--coral-500)'
+                    color: 'var(--accent)'
                   }}>
                     {profile.helpful_points}
                   </div>
@@ -113,7 +113,7 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                     fontFamily: 'var(--font-display)',
                     fontSize: 32, fontWeight: 700,
                     letterSpacing: '-0.02em',
-                    color: 'var(--indigo-700)'
+                    color: 'var(--primary)'
                   }}>
                     {profile.comment_count}
                   </div>
