@@ -8,6 +8,7 @@ import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { PostForm } from './components/PostForm'
 import { PostCard } from './components/PostCard'
+import { PostPage } from './pages/PostPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AdminPage } from './pages/AdminPage'
@@ -176,6 +177,7 @@ function AppContent() {
       <ImpersonationBanner />
       <Routes>
         <Route path="/" element={feed} />
+        <Route path="/posts/:id" element={<PostPage currentUser={user} onLogout={logout} />} />
         <Route path="/users/:handle" element={<ProfilePage currentUser={user} onLogout={logout} />} />
         <Route path="/settings" element={<SettingsPage currentUser={user} onLogout={logout} />} />
         <Route path="/admin" element={<AdminPage currentUser={user} onLogout={logout} />} />

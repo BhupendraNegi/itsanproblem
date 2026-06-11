@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useNotifications, useReadAllNotifications } from '../hooks/useMutations'
 import type { Notification } from '../types'
+
+const BASE_TITLE = "it's an problem."
 
 function describe(notification: Notification) {
   if (notification.event === 'helpful_mark') {
@@ -16,6 +19,12 @@ export function NotificationBell() {
 
   const notifications = data?.notifications ?? []
   const unreadCount = data?.unread_count ?? 0
+
+  // surface unread count in a background tab
+  useEffect(() => {
+    document.title = unreadCount > 0 ? `(${unreadCount}) ${BASE_TITLE}` : BASE_TITLE
+    return () => { document.title = BASE_TITLE }
+  }, [unreadCount])
 
   function toggle() {
     const opening = !open
@@ -45,7 +54,9 @@ export function NotificationBell() {
             <ul>
               {notifications.map((notification) => (
                 <li key={notification.id} className={notification.read ? '' : 'is-unread'}>
-                  {describe(notification)}
+                  <Link to={`/posts/${notification.post_id}`} onClick={() => setOpen(false)}>
+                    {describe(notification)}
+                  </Link>
                 </li>
               ))}
             </ul>

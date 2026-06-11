@@ -115,6 +115,10 @@ export const handlers = [
     HttpResponse.json([mockPost])
   ),
 
+  http.get('/api/v1/posts/:id', () =>
+    HttpResponse.json({ ...mockPost, comments: [mockComment] })
+  ),
+
   http.post('/api/v1/posts', () =>
     HttpResponse.json(mockPost, { status: 201 })
   ),

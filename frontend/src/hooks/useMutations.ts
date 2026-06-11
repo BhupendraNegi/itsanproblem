@@ -62,11 +62,12 @@ export function usePostMutation(
 
   return useMutation<Post, Error, { title: string; body: string }>({
     mutationFn: api.createPost,
-    onSuccess: () => {
+    onSuccess: (post) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setPostTitle('')
       setPostBody('')
-      setAlertMessage('Post created successfully')
+      // surface the thread handle so anon identity feels deliberate
+      setAlertMessage(post.anon_handle ? `Posted anonymously as ${post.anon_handle}` : 'Post created successfully')
     },
     onError: (error: Error) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,6 +122,16 @@ export function usePosts(sort: 'recent' | 'hot' = 'recent') {
   return useQuery<Post[]>({
     queryKey: ['posts', sort],
     queryFn: () => api.fetchPosts(sort),
+  })
+}
+
+// keyed under ['posts', ...] so every mutation that invalidates the feed
+// refreshes open detail pages too
+export function usePost(id: number) {
+  return useQuery<Post>({
+    queryKey: ['posts', 'detail', id],
+    queryFn: () => api.fetchPost(id),
+    enabled: Number.isFinite(id),
   })
 }
 
