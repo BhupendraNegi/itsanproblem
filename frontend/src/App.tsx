@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import useAuth from './store'
 import { AuthPanel } from './components/AuthPanel'
+import { ImpersonationBanner } from './components/ImpersonationBanner'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { PostForm } from './components/PostForm'
@@ -171,13 +172,16 @@ function AppContent() {
   )
 
   return (
-    <Routes>
-      <Route path="/" element={feed} />
-      <Route path="/users/:handle" element={<ProfilePage currentUser={user} onLogout={logout} />} />
-      <Route path="/settings" element={<SettingsPage currentUser={user} onLogout={logout} />} />
-      <Route path="/admin" element={<AdminPage currentUser={user} onLogout={logout} />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <ImpersonationBanner />
+      <Routes>
+        <Route path="/" element={feed} />
+        <Route path="/users/:handle" element={<ProfilePage currentUser={user} onLogout={logout} />} />
+        <Route path="/settings" element={<SettingsPage currentUser={user} onLogout={logout} />} />
+        <Route path="/admin" element={<AdminPage currentUser={user} onLogout={logout} />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   )
 }
 

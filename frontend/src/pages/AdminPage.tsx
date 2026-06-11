@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { Header } from '../components/Header'
 import {
   useAdminDeleteUserMutation,
@@ -36,7 +37,8 @@ function reasonsLabel(reasons: Record<string, number>) {
 
 export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { startImpersonation } = useAuth()
+  const queryClient = useQueryClient()
   const [userQuery, setUserQuery] = useState('')
 
   const { data: stats } = useAdminStats()
@@ -60,7 +62,9 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
       { id },
       {
         onSuccess: ({ user, token }) => {
-          login(user, token)
+          startImpersonation(user, token)
+          // Everything cached so far belongs to the staff session.
+          queryClient.clear()
           navigate('/')
         },
       }

@@ -90,6 +90,10 @@
   --danger-bg:  var(--red-bg);
   --danger-fg:  var(--red-ink);
 
+  /* Impersonation warning bar — amber reads as "caution" in both themes */
+  --banner-warning-bg: #f5a623;
+  --banner-warning-fg: #18181b;
+
   /* The signature Instagram gradient — avatars, footer wordmark, accents */
   --gradient-brand: linear-gradient(90deg, #feda75 0%, #fa7e1e 22%, #d62976 52%, #962fbf 78%, #4f5bd5 100%);
   /* Dark chrome for the global frame — nav bar and footer (same in both themes) */
@@ -234,6 +238,38 @@ body {
 
 h1, h2, h3, h4, p, ul, li { margin: 0; }
 button { font-family: inherit; }
+
+/* ---- Impersonation banner ---- */
+.impersonation-banner {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 40px;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 16px;
+  background: var(--banner-warning-bg);
+  color: var(--banner-warning-fg);
+  font-size: 13px;
+}
+
+.impersonation-banner button {
+  border: 1.5px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.impersonation-banner button:hover { background: rgba(0, 0, 0, 0.1); }
+
+/* Shift the fixed navbar and page content down while the banner shows. */
+body.impersonating { padding-top: 120px; }
+body.impersonating .navbar { top: 40px; }
 
 /* ---- Navbar ---- */
 .navbar {
@@ -941,6 +977,7 @@ button { font-family: inherit; }
   .navbar { height: 100px; }
   body { padding-top: 100px; }
   #root { min-height: calc(100vh - 100px); }
+  body.impersonating { padding-top: 140px; }
 
   .navbar-container {
     flex-direction: column;
