@@ -59,7 +59,7 @@ export function AuthPanel({
           </div>
         ) : (
           <div className="auth-tabs">
-            <span className="auth-tab active" style={{ cursor: 'default' }}>
+            <span className="auth-tab active is-static">
               <span>Sign In</span>
             </span>
           </div>
@@ -127,7 +127,7 @@ export function AuthPanel({
         </form>
       </section>
 
-      <p style={{ textAlign: 'center', marginTop: 24, color: 'var(--fg2)', fontSize: 13 }}>
+      <p className="auth-footnote">
         Your posts are anonymous by default. Comments are signed.
       </p>
     </main>

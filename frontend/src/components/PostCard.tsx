@@ -64,9 +64,7 @@ export function PostCard({
         )}
       </header>
 
-      <p className="post-body" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
-        {post.body}
-      </p>
+      <p className="post-body">{post.body}</p>
 
       <div className="post-meta">
         <span>{handle}</span>
@@ -108,7 +106,7 @@ export function PostCard({
       <div className="comments-section">
         <h4>{post.comments.length === 0 ? 'No comments yet' : `${post.comments.length} ${post.comments.length === 1 ? 'reply' : 'replies'}`}</h4>
         {post.comments.length === 0 ? (
-          <p style={{ color: 'var(--fg2)', fontSize: 14 }}>Be the first to say something useful.</p>
+          <p className="empty-hint">Be the first to say something useful.</p>
         ) : (
           <ul className="comment-list">
             {post.comments.map((comment: Comment) => (
@@ -116,7 +114,7 @@ export function PostCard({
                 <p>{comment.body}</p>
                 <span className="comment-meta">
                   {comment.author_id != null ? (
-                    <Link to={`/users/${comment.author_username ?? comment.author_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                    <Link to={`/users/${comment.author_username ?? comment.author_id}`}>
                       <strong>{comment.author}</strong>
                     </Link>
                   ) : (
