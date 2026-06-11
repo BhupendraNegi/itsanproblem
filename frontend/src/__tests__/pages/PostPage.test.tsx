@@ -18,14 +18,14 @@ function renderPost() {
 describe('PostPage', () => {
   it('renders the full post with its comments', async () => {
     renderPost()
-    expect(await screen.findByText('My problem')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'My problem' })).toBeInTheDocument()
     expect(screen.getByText(/it is really bad/i)).toBeInTheDocument()
     expect(screen.getByText('Have you tried turning it off?')).toBeInTheDocument()
   })
 
   it('does not link the title to itself in expanded mode', async () => {
     renderPost()
-    await screen.findByText('My problem')
+    await screen.findByRole('heading', { name: 'My problem' })
     expect(screen.queryByRole('link', { name: 'My problem' })).not.toBeInTheDocument()
   })
 
