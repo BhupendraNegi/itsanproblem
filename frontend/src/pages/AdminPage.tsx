@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { Header } from '../components/Header'
 import {
   useAdminDeleteUserMutation,
@@ -72,10 +73,7 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
     <>
       <Header user={currentUser} onLogout={onLogout} />
       <main className="app-shell">
-        <Link to="/" className="btn-ghost back-link">
-          <img src="/assets/icons/arrow-right.svg" alt="" />
-          Back to feed
-        </Link>
+        <Breadcrumbs items={[{ label: 'Admin' }]} />
 
         <h1 className="page-title">Admin</h1>
 

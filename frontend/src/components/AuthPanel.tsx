@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { PasswordInput } from './PasswordInput'
 
 interface AuthPanelProps {
   mode: 'login' | 'register'
@@ -102,22 +103,22 @@ export function AuthPanel({
               Password
               {mode === 'register' && <span className="char-count">min 8 characters</span>}
             </span>
-            <input
-              type="password"
+            <PasswordInput
               value={authFields.password}
-              onChange={(e) => setAuthFields({ ...authFields, password: e.target.value })}
+              onChange={(password) => setAuthFields({ ...authFields, password })}
               placeholder={mode === 'register' ? 'At least 8 characters' : 'Your password'}
               minLength={mode === 'register' ? 8 : undefined}
+              autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
               required
             />
           </label>
           {mode === 'register' && (
             <label className="field">
               <span>Confirm password</span>
-              <input
-                type="password"
+              <PasswordInput
                 value={authFields.passwordConfirmation}
-                onChange={(e) => setAuthFields({ ...authFields, passwordConfirmation: e.target.value })}
+                onChange={(passwordConfirmation) => setAuthFields({ ...authFields, passwordConfirmation })}
+                autoComplete="new-password"
               />
             </label>
           )}

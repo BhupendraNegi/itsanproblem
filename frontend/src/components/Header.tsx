@@ -54,17 +54,21 @@ export function Header({ user, onLogout }: HeaderProps) {
             {menuOpen && (
               <nav className="user-menu-dropdown" role="menu">
                 <Link role="menuitem" to={`/users/${user.username ?? user.id}`} onClick={close}>
+                  <img src="/assets/icons/user.svg" alt="" className="menu-icon" />
                   Profile
                 </Link>
                 {isStaff && (
                   <Link role="menuitem" to="/admin" onClick={close}>
+                    <img src="/assets/icons/users.svg" alt="" className="menu-icon" />
                     Admin
                   </Link>
                 )}
                 <Link role="menuitem" to="/settings" onClick={close}>
+                  <img src="/assets/icons/settings.svg" alt="" className="menu-icon" />
                   Settings
                 </Link>
                 <button role="menuitem" onClick={() => { close(); onLogout() }}>
+                  <img src="/assets/icons/log-out.svg" alt="" className="menu-icon" />
                   Log out
                 </button>
               </nav>

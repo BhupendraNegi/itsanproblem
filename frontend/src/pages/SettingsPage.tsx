@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { Header } from '../components/Header'
 import { useProfileMutation, usePasswordMutation, useUserProfile } from '../hooks/useMutations'
 import * as api from '../api'
+import { PasswordInput } from '../components/PasswordInput'
 import useAuth, { useTheme, type ThemePref } from '../store'
 import type { User } from '../types'
 
@@ -110,10 +111,7 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
     <>
       <Header user={currentUser} onLogout={onLogout} />
       <main className="app-shell">
-        <Link to="/" className="btn-ghost back-link">
-          <img src="/assets/icons/arrow-right.svg" alt="" />
-          Back to feed
-        </Link>
+        <Breadcrumbs items={[{ label: 'Settings' }]} />
 
         <h1 className="page-title">Settings</h1>
 
@@ -162,15 +160,15 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
           <form onSubmit={handlePasswordSubmit} className="settings-form">
             <label className="field">
               <span>Current password</span>
-              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoComplete="current-password" />
+              <PasswordInput value={currentPassword} onChange={setCurrentPassword} required autoComplete="current-password" />
             </label>
             <label className="field">
               <span>New password <span className="char-count">min 8 characters</span></span>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required autoComplete="new-password" />
+              <PasswordInput value={password} onChange={setPassword} minLength={8} required autoComplete="new-password" />
             </label>
             <label className="field">
               <span>Confirm new password</span>
-              <input type="password" value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} required autoComplete="new-password" />
+              <PasswordInput value={passwordConfirmation} onChange={setPasswordConfirmation} required autoComplete="new-password" />
             </label>
             <button type="submit" className="btn-primary" disabled={passwordMutation.isPending}>
               {passwordMutation.isPending ? 'Changing…' : 'Change password'}
@@ -228,10 +226,9 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
           <form onSubmit={handleDeleteAccount} className="settings-form">
             <label className="field">
               <span>Confirm with your password</span>
-              <input
-                type="password"
+              <PasswordInput
                 value={deletePassword}
-                onChange={(e) => setDeletePassword(e.target.value)}
+                onChange={setDeletePassword}
                 required
                 autoComplete="current-password"
               />

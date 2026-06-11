@@ -8,6 +8,7 @@ import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { PostForm } from './components/PostForm'
 import { PostCard } from './components/PostCard'
+import { FeedSidebar } from './components/FeedSidebar'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { PostPage } from './pages/PostPage'
@@ -135,7 +136,10 @@ function AppContent() {
 
       {alertMessage && <div className="alert success">{alertMessage}</div>}
 
-      <PostForm
+      <div className="feed-layout">
+        <FeedSidebar user={user} />
+        <div className="feed-main">
+          <PostForm
         title={postTitle}
         setTitle={setPostTitle}
         body={postBody}
@@ -212,6 +216,8 @@ function AppContent() {
           </button>
         )}
       </section>
+        </div>
+      </div>
     </main>
   )
 

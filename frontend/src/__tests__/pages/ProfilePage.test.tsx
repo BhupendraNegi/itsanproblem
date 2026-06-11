@@ -73,14 +73,15 @@ describe('ProfilePage', () => {
     expect(await screen.findByText('No replies yet')).toBeInTheDocument()
   })
 
-  it('renders the Back to feed link', () => {
+  it('renders a breadcrumb back to the feed', () => {
     renderProfile()
-    expect(screen.getByText(/back to feed/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /feed/i })).toHaveAttribute('href', '/')
   })
 
   it('shows the @username in the profile meta', async () => {
     renderProfile()
-    expect(await screen.findByText(/@alice/)).toBeInTheDocument()
+    // appears in both the breadcrumb and the profile meta line
+    expect((await screen.findAllByText(/@alice/)).length).toBeGreaterThan(0)
   })
 
   it('renders the bio when present', async () => {

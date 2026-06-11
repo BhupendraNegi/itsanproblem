@@ -1,5 +1,6 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useUserProfile } from '../hooks/useMutations'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { Header } from '../components/Header'
 import { avatarHueClass } from '../avatar'
 import type { User } from '../types'
@@ -33,10 +34,7 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
     <>
       <Header user={currentUser} onLogout={onLogout} />
       <main className="app-shell">
-        <Link to="/" className="btn-ghost back-link">
-          <img src="/assets/icons/arrow-right.svg" alt="" />
-          Back to feed
-        </Link>
+        <Breadcrumbs items={[{ label: profile ? `@${profile.username}` : 'Profile' }]} />
 
         {isLoading && <div className="card loading-card">Loading…</div>}
 

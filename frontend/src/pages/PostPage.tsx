@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { Header } from '../components/Header'
 import { PostCard } from '../components/PostCard'
 import { useCommentMutation, usePost } from '../hooks/useMutations'
@@ -30,10 +31,7 @@ export function PostPage({ currentUser, onLogout }: PostPageProps) {
     <>
       <Header user={currentUser} onLogout={onLogout} />
       <main className="app-shell">
-        <Link to="/" className="btn-ghost back-link">
-          <img src="/assets/icons/arrow-right.svg" alt="" />
-          Back to feed
-        </Link>
+        <Breadcrumbs items={[{ label: post ? post.title : 'Post' }]} />
 
         {alertMessage && <div className="alert success">{alertMessage}</div>}
         {isLoading && <div className="card loading-card">Loading…</div>}

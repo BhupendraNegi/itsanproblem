@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useHelpfulMutation } from '../hooks/useMutations'
+import { avatarHueClass } from '../avatar'
 import { FlagButton } from './FlagButton'
 import type { Comment, Post } from '../types'
 
@@ -38,8 +39,26 @@ export function PostCard({
   const handle = post.anon_handle ?? 'anonymous'
   const helpfulMutation = useHelpfulMutation()
 
+  const avatarLetter = handle.includes('_') ? handle.split('_')[1].charAt(0).toUpperCase() : handle.charAt(0).toUpperCase()
+
   return (
     <article className="post-card">
+      <div className="post-byline">
+        <span className={`post-avatar ${avatarHueClass(handle)}`}>{avatarLetter}</span>
+        <span className="post-byline-text">
+          <strong>{handle}</strong>
+          <span>
+            {formatRelative(post.created_at)} · {post.comments.length} {post.comments.length === 1 ? 'reply' : 'replies'}
+          </span>
+        </span>
+        {isHot && (
+          <span className="hot-badge">
+            <img src="/assets/icons/flame.svg" alt="" />
+            {helpfulCount}
+          </span>
+        )}
+      </div>
+
       <header className="post-header">
         {expanded ? (
           <h3 className="post-title">{post.title}</h3>
@@ -48,23 +67,9 @@ export function PostCard({
             <h3 className="post-title">{post.title}</h3>
           </Link>
         )}
-        {isHot && (
-          <span className="hot-badge">
-            <img src="/assets/icons/flame.svg" alt="" />
-            {helpfulCount}
-          </span>
-        )}
       </header>
 
       <p className={`post-body${expanded ? ' expanded' : ''}`}>{post.body}</p>
-
-      <div className="post-meta">
-        <span>{handle}</span>
-        <span className="dot">·</span>
-        <span>{formatRelative(post.created_at)}</span>
-        <span className="dot">·</span>
-        <span>{post.comments.length} {post.comments.length === 1 ? 'reply' : 'replies'}</span>
-      </div>
 
       <div className="post-actions" onClick={(e) => e.stopPropagation()}>
         <button

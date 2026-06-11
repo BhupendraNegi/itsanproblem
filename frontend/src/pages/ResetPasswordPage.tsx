@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import * as api from '../api'
+import { PasswordInput } from '../components/PasswordInput'
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
@@ -46,11 +47,11 @@ export function ResetPasswordPage() {
             {error && <div className="alert danger">{error}</div>}
             <label className="field">
               <span>New password <span className="char-count">min 8 characters</span></span>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required autoComplete="new-password" />
+              <PasswordInput value={password} onChange={setPassword} minLength={8} required autoComplete="new-password" />
             </label>
             <label className="field">
               <span>Confirm new password</span>
-              <input type="password" value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} required autoComplete="new-password" />
+              <PasswordInput value={passwordConfirmation} onChange={setPasswordConfirmation} required autoComplete="new-password" />
             </label>
             <button type="submit" className="btn-primary auth-submit" disabled={busy || !token}>
               {busy ? 'Saving…' : 'Set new password'}

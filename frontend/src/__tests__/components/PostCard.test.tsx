@@ -45,9 +45,9 @@ describe('PostCard', () => {
     expect(screen.getByText('anon_a91f')).toBeInTheDocument()
   })
 
-  it('shows reply count in the meta line', () => {
+  it('shows reply count in the byline', () => {
     renderWithProviders(<PostCard {...defaultProps} />)
-    expect(screen.getByText('0 replies')).toBeInTheDocument()
+    expect(screen.getByText(/0 replies/)).toBeInTheDocument()
   })
 
   it('does not show the hot badge when helpful_count < 10', () => {
