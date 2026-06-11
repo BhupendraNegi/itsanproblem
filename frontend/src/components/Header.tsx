@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { NotificationBell } from './NotificationBell'
 import type { User } from '../types'
@@ -8,6 +9,23 @@ interface HeaderProps {
 }
 
 export function Header({ user, onLogout }: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    function onClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [menuOpen])
+
+  const isStaff = user.role === 'admin' || user.role === 'moderator'
+  const close = () => setMenuOpen(false)
+
   return (
     <header className="navbar">
       <div className="navbar-container">
@@ -21,26 +39,36 @@ export function Header({ user, onLogout }: HeaderProps) {
 
         <div className="navbar-user">
           <NotificationBell />
-          {(user.role === 'admin' || user.role === 'moderator') && (
-            <Link to="/admin" className="logout-icon-btn" title="Admin" aria-label="Admin">
-              <img src="/assets/icons/users.svg" alt="" />
-            </Link>
-          )}
-          <Link to="/settings" className="logout-icon-btn" title="Settings" aria-label="Settings">
-            <img src="/assets/icons/settings.svg" alt="" />
-          </Link>
-          <Link to={`/users/${user.username ?? user.id}`} className="user-pill" style={{ textDecoration: 'none' }}>
-            <span className="user-name">{user.name}</span>
-            <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
-          </Link>
-          <button
-            className="logout-icon-btn"
-            onClick={onLogout}
-            title="Log out"
-            aria-label="Log out"
-          >
-            <img src="/assets/icons/log-out.svg" alt="" />
-          </button>
+          <div className="user-menu" ref={menuRef}>
+            <button
+              className="user-pill"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+            >
+              <span className="user-name">{user.name}</span>
+              <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
+              <span className="user-caret" aria-hidden>▾</span>
+            </button>
+            {menuOpen && (
+              <nav className="user-menu-dropdown" role="menu">
+                <Link role="menuitem" to={`/users/${user.username ?? user.id}`} onClick={close}>
+                  Profile
+                </Link>
+                {isStaff && (
+                  <Link role="menuitem" to="/admin" onClick={close}>
+                    Admin
+                  </Link>
+                )}
+                <Link role="menuitem" to="/settings" onClick={close}>
+                  Settings
+                </Link>
+                <button role="menuitem" onClick={() => { close(); onLogout() }}>
+                  Log out
+                </button>
+              </nav>
+            )}
+          </div>
         </div>
       </div>
     </header>
