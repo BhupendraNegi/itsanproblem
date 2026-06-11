@@ -5,7 +5,8 @@ class Post < ApplicationRecord
   has_many :helpful_marks, as: :markable, dependent: :destroy
   has_many :flags, as: :flaggable, dependent: :destroy
 
-  validates :title, :body, presence: true
+  validates :title, presence: true, length: {maximum: 120}
+  validates :body, presence: true, length: {maximum: 5000}
 
   before_create :assign_anon_handle
 

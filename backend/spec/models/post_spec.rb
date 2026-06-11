@@ -16,6 +16,16 @@ RSpec.describe Post, type: :model do
       post.body = ""
       expect(post).not_to be_valid
     end
+
+    it "caps title at 120 and body at 5000 characters" do
+      post.title = "x" * 121
+      expect(post).not_to be_valid
+      post.title = "x" * 120
+      post.body = "x" * 5001
+      expect(post).not_to be_valid
+      post.body = "x" * 5000
+      expect(post).to be_valid
+    end
   end
 
   describe "associations" do
