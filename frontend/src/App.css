@@ -1185,6 +1185,9 @@ body.impersonating .navbar { top: 40px; }
 /* ---- Misc, formerly inline ---- */
 .auth-footnote { text-align: center; margin-top: 24px; color: var(--fg2); font-size: 13px; }
 .auth-tab.is-static { cursor: default; }
+.forgot-link { text-align: center; font-size: 13px; color: var(--fg2); text-decoration: none; }
+.forgot-link:hover { color: var(--primary); text-decoration: underline; }
+.auth-footnote a { color: var(--primary); text-decoration: none; }
 .char-count { float: right; font-size: 11px; color: var(--fg3); font-family: var(--font-mono); font-weight: 400; }
 .comment-meta a { color: inherit; text-decoration: none; }
 

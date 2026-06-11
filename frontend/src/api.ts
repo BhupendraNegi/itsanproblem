@@ -44,6 +44,20 @@ export async function login(data: { email: string; password: string }) {
   return response.data
 }
 
+export async function requestPasswordReset(email: string) {
+  const response = await api.post<{ success: boolean }>('/auth/forgot_password', { email })
+  return response.data
+}
+
+export async function resetPassword(data: { token: string; password: string; passwordConfirmation: string }) {
+  const response = await api.post<{ success: boolean }>('/auth/reset_password', {
+    token: data.token,
+    password: data.password,
+    password_confirmation: data.passwordConfirmation,
+  })
+  return response.data
+}
+
 export async function fetchPosts(sort: 'recent' | 'hot' = 'recent') {
   const response = await api.get<Post[]>('/posts', {
     params: sort === 'hot' ? { sort } : undefined,

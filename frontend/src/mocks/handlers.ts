@@ -111,6 +111,14 @@ export const handlers = [
     HttpResponse.json({ success: true })
   ),
 
+  http.post('/api/v1/auth/forgot_password', () =>
+    HttpResponse.json({ success: true })
+  ),
+
+  http.post('/api/v1/auth/reset_password', () =>
+    HttpResponse.json({ success: true })
+  ),
+
   http.get('/api/v1/posts', () =>
     HttpResponse.json([mockPost])
   ),
