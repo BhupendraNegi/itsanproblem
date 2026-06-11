@@ -135,6 +135,20 @@ describe('PostCard', () => {
     expect(screen.queryByRole('link', { name: 'anon_a91f' })).not.toBeInTheDocument()
   })
 
+  it('lets you flag a comment with a reason', async () => {
+    const postWithComment: Post = {
+      ...basePost,
+      comments: [{ id: 7, body: 'Rude reply.', author: 'Bob', author_id: 2, created_at: new Date().toISOString() }],
+    }
+    renderWithProviders(<PostCard {...defaultProps} post={postWithComment} />)
+    // two Flag buttons now: post-level and comment-level
+    const flagButtons = screen.getAllByRole('button', { name: /^flag$/i })
+    expect(flagButtons).toHaveLength(2)
+    await userEvent.click(flagButtons[1])
+    await userEvent.click(screen.getByRole('button', { name: 'Spam' }))
+    expect(await screen.findByText(/reported/i)).toBeInTheDocument()
+  })
+
   it('renders a helpful button on each comment', () => {
     const postWithComment: Post = {
       ...basePost,
