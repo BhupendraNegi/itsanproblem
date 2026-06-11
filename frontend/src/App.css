@@ -631,6 +631,26 @@ body.impersonating .navbar { top: 40px; }
 .btn-primary:active:not(:disabled) { transform: scale(0.98); }
 .btn-primary:disabled { background: var(--primary-disabled); cursor: not-allowed; }
 
+.btn-danger {
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  background: var(--danger-fg, #c0392b);
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  width: fit-content;
+  transition: opacity var(--motion-fast) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
+}
+
+.btn-danger:hover:not(:disabled) { opacity: 0.88; }
+.btn-danger:active:not(:disabled) { transform: scale(0.98); }
+.btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.danger-zone { border: 1.5px solid var(--danger-fg, #c0392b); }
+
 .btn-secondary {
   border: 1.5px solid var(--border-default);
   background: var(--bg-card);

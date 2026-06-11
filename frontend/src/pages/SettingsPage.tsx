@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Header } from '../components/Header'
 import { useProfileMutation, usePasswordMutation, useUserProfile } from '../hooks/useMutations'
+import * as api from '../api'
 import useAuth, { useTheme, type ThemePref } from '../store'
 import type { User } from '../types'
 
@@ -39,8 +40,26 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [passwordStatus, setPasswordStatus] = useState<{ kind: 'success' | 'danger'; text: string } | null>(null)
 
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteStatus, setDeleteStatus] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
   const profileMutation = useProfileMutation()
   const passwordMutation = usePasswordMutation()
+
+  async function handleDeleteAccount(event: React.FormEvent) {
+    event.preventDefault()
+    if (!window.confirm('Delete your account and all your posts? This cannot be undone.')) return
+    setDeleting(true)
+    setDeleteStatus(null)
+    try {
+      await api.deleteAccount(deletePassword)
+      onLogout()
+    } catch (err) {
+      setDeleteStatus(errorMessage(err, 'Failed to delete account'))
+      setDeleting(false)
+    }
+  }
 
   // Bio, username, and digest preference come from the profile API, not the
   // auth store; prefill once loaded.
@@ -197,6 +216,30 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
           <p className="section-hint">
             System follows your OS appearance; Light and Dark override it.
           </p>
+        </section>
+
+        {/* Danger zone */}
+        <section className="card settings-card danger-zone">
+          <h2 className="section-title">Delete account</h2>
+          <p className="section-hint">
+            Deletes your account, your anonymous posts, and your replies. This cannot be undone.
+          </p>
+          {deleteStatus && <div className="alert danger">{deleteStatus}</div>}
+          <form onSubmit={handleDeleteAccount} className="settings-form">
+            <label className="field">
+              <span>Confirm with your password</span>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </label>
+            <button type="submit" className="btn-danger" disabled={deleting || !deletePassword}>
+              {deleting ? 'Deleting…' : 'Delete my account'}
+            </button>
+          </form>
         </section>
       </main>
     </>

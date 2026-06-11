@@ -22,7 +22,7 @@ Rails.application.routes.draw do
         resource :flag, only: [:create]
       end
 
-      resource :profile, only: [:update], controller: "profiles" do
+      resource :profile, only: [:update, :destroy], controller: "profiles" do
         patch :password
       end
 
