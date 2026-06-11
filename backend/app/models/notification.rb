@@ -10,6 +10,8 @@ class Notification < ApplicationRecord
   validates :event, inclusion: {in: EVENTS}
 
   scope :unread, -> { where(read_at: nil) }
+  # Not seen in-app and not yet emailed — what the next digest should cover.
+  scope :pending_digest, -> { unread.where(digested_at: nil) }
 
   def as_json(options = {})
     super({only: [:id, :event, :post_id, :created_at]}.merge(options)).merge(

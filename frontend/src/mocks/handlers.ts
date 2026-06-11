@@ -30,6 +30,7 @@ export const mockProfile = {
   joined_at: new Date('2025-01-01').toISOString(),
   helpful_points: 5,
   comment_count: 3,
+  email_digest_enabled: true,
   posts: [
     {
       id: 1,
@@ -157,7 +158,7 @@ export const handlers = [
   ),
 
   http.patch('/api/v1/profile', () =>
-    HttpResponse.json({ id: 1, name: 'Alice B', email: 'aliceb@example.com', bio: 'Updated bio.' })
+    HttpResponse.json({ id: 1, name: 'Alice B', email: 'aliceb@example.com', bio: 'Updated bio.', email_digest_enabled: true })
   ),
 
   http.patch('/api/v1/profile/password', () =>

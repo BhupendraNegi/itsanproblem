@@ -45,6 +45,19 @@ describe('SettingsPage', () => {
     expect(screen.getByLabelText('Current password')).toHaveValue('')
   })
 
+  it('renders the email digest toggle prefilled from the profile', async () => {
+    renderSettings()
+    const toggle = await screen.findByRole('checkbox', { name: /email me a daily digest/i })
+    expect(toggle).toBeChecked()
+  })
+
+  it('toggles the email digest preference', async () => {
+    renderSettings()
+    const toggle = await screen.findByRole('checkbox', { name: /email me a daily digest/i })
+    await userEvent.click(toggle)
+    expect(toggle).not.toBeChecked()
+  })
+
   it('switches the theme preference', async () => {
     renderSettings()
     await userEvent.click(screen.getByRole('radio', { name: 'Dark' }))

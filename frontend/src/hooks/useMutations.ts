@@ -124,7 +124,7 @@ export function usePosts(sort: 'recent' | 'hot' = 'recent') {
 export function useProfileMutation() {
   const queryClient = useQueryClient()
 
-  return useMutation<User & { bio: string | null }, Error, { name: string; email: string; bio: string }>({
+  return useMutation<User & { bio: string | null; email_digest_enabled: boolean }, Error, api.ProfileUpdate>({
     mutationFn: api.updateProfile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] })

@@ -32,6 +32,7 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
   const [bio, setBio] = useState<string | null>(null)
   const [profileStatus, setProfileStatus] = useState<{ kind: 'success' | 'danger'; text: string } | null>(null)
 
+  const [digestPref, setDigestPref] = useState<boolean | null>(null)
   const [currentPassword, setCurrentPassword] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -40,8 +41,18 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
   const profileMutation = useProfileMutation()
   const passwordMutation = usePasswordMutation()
 
-  // Bio comes from the profile API, not the auth store; prefill once loaded.
+  // Bio and digest preference come from the profile API, not the auth store;
+  // prefill once loaded.
   const bioValue = bio ?? profile?.bio ?? ''
+  const digestEnabled = digestPref ?? profile?.email_digest_enabled ?? true
+
+  function handleDigestToggle() {
+    const next = !digestEnabled
+    setDigestPref(next)
+    profileMutation.mutate({ email_digest_enabled: next }, {
+      onError: () => setDigestPref(!next),
+    })
+  }
 
   function handleProfileSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -49,7 +60,8 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
       { name: name.trim(), email: email.trim(), bio: bioValue.trim() },
       {
         onSuccess: (updated) => {
-          if (token) login({ id: updated.id, name: updated.name, email: updated.email }, token)
+          // Spread currentUser so fields not in the response (role) survive.
+          if (token) login({ ...currentUser, name: updated.name, email: updated.email }, token)
           setProfileStatus({ kind: 'success', text: 'Profile updated' })
         },
         onError: (error) => setProfileStatus({ kind: 'danger', text: errorMessage(error, 'Failed to update profile') }),
@@ -135,6 +147,24 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
               {passwordMutation.isPending ? 'Changing…' : 'Change password'}
             </button>
           </form>
+        </section>
+
+        {/* Notifications */}
+        <section className="card" style={{ display: 'grid', gap: 14 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, margin: 0 }}>Notifications</h2>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={digestEnabled}
+              onChange={handleDigestToggle}
+              disabled={profileMutation.isPending}
+            />
+            Email me a daily digest
+          </label>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--fg2)' }}>
+            One email a day with new replies to your posts and helpful marks on your replies —
+            it's the only way back to your anonymous posts when you're away.
+          </p>
         </section>
 
         {/* Appearance */}

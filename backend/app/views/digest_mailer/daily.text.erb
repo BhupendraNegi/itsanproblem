@@ -1,0 +1,21 @@
+Hi <%= @user.name %>,
+
+While you were away on it's an problem:
+
+<% if @reply_count.positive? -%>
+New replies to your posts:
+<% @notifications.select { |n| n.event == "reply" }.group_by(&:post).each do |post, group| -%>
+  * <%= post.title %> — <%= group.size %> new <%= "reply".pluralize(group.size) %>
+<% end -%>
+<% end -%>
+<% if @helpful_count.positive? -%>
+Your replies helped people:
+<% @notifications.select { |n| n.event == "helpful_mark" }.group_by(&:post).each do |post, group| -%>
+  * Your reply on "<%= post.title %>" earned <%= group.size %> helpful <%= "mark".pluralize(group.size) %>
+<% end -%>
+<% end -%>
+
+Open it's an problem: <%= @app_url %>
+
+You're getting this because email digests are on.
+Turn them off in Settings -> Notifications.

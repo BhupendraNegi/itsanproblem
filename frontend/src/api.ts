@@ -69,8 +69,15 @@ export async function flagContent(target: 'posts' | 'comments', id: number, reas
   return response.data as { flagged: boolean }
 }
 
-export async function updateProfile(data: { name: string; email: string; bio: string }) {
-  const response = await api.patch<User & { bio: string | null }>('/profile', { user: data })
+export type ProfileUpdate = {
+  name?: string
+  email?: string
+  bio?: string
+  email_digest_enabled?: boolean
+}
+
+export async function updateProfile(data: ProfileUpdate) {
+  const response = await api.patch<User & { bio: string | null; email_digest_enabled: boolean }>('/profile', { user: data })
   return response.data
 }
 

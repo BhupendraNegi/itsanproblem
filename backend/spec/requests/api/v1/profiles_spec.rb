@@ -15,6 +15,16 @@ RSpec.describe "Api::V1::Profiles", type: :request do
       expect(user.reload.name).to eq("Alice B")
     end
 
+    it "toggles the email digest preference" do
+      patch "/api/v1/profile",
+        params: {user: {email_digest_enabled: false}},
+        headers: auth_headers_for(user), as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["email_digest_enabled"]).to be(false)
+      expect(user.reload.email_digest_enabled).to be(false)
+    end
+
     it "rejects invalid updates" do
       patch "/api/v1/profile",
         params: {user: {name: ""}}, headers: auth_headers_for(user), as: :json

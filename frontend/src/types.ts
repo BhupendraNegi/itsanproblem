@@ -120,4 +120,5 @@ export type UserProfile = {
   recent_comments: ProfileComment[]
   // only present when viewing your own profile
   posts?: ProfilePost[]
+  email_digest_enabled?: boolean
 }
