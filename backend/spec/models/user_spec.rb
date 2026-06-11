@@ -30,6 +30,33 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "username" do
+    it "auto-generates from the name on create" do
+      user.save!
+      expect(user.username).to eq("alice")
+    end
+
+    it "accepts an explicit username and normalizes case" do
+      user.username = "Alice_99"
+      user.save!
+      expect(user.username).to eq("alice_99")
+    end
+
+    it "rejects invalid formats" do
+      ["ab", "has space", "UPPER!", "12345"].each do |bad|
+        user.username = bad
+        expect(user).not_to be_valid, "expected #{bad.inspect} to be invalid"
+      end
+    end
+
+    it "enforces uniqueness by generating a different username" do
+      User.create!(name: "Alice", email: "other@example.com", password: "password123")
+      user.save!
+      expect(user.username).to start_with("alice")
+      expect(user.username).not_to eq("alice")
+    end
+  end
+
   describe "associations" do
     it { is_expected.to have_many(:post_authors).dependent(:destroy) }
     it { is_expected.to have_many(:posts).through(:post_authors) }

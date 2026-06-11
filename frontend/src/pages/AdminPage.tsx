@@ -173,7 +173,7 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
                     )}
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--fg2)', fontFamily: 'var(--font-mono)' }}>
-                    {u.email} · {u.post_count} posts · {u.comment_count} replies
+                    @{u.username} · {u.email} · {u.post_count} posts · {u.comment_count} replies
                   </div>
                 </div>
                 {u.id !== currentUser.id && (

@@ -29,7 +29,7 @@ export function Header({ user, onLogout }: HeaderProps) {
           <Link to="/settings" className="logout-icon-btn" title="Settings" aria-label="Settings">
             <img src="/assets/icons/settings.svg" alt="" />
           </Link>
-          <Link to={`/users/${user.id}`} className="user-pill" style={{ textDecoration: 'none' }}>
+          <Link to={`/users/${user.username ?? user.id}`} className="user-pill" style={{ textDecoration: 'none' }}>
             <span className="user-name">{user.name}</span>
             <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
           </Link>

@@ -24,6 +24,7 @@ password = "strongpassword@123itsap"
 # ── Users ──────────────────────────────────────────────────────────────────
 demo = User.find_or_create_by!(email: "demo@itsanproblem.test") do |u|
   u.name = "Demo User"
+  u.username = "demo"
   u.password = password
   u.password_confirmation = password
 end
@@ -31,6 +32,7 @@ end
 # Staff accounts for the /admin moderation UI.
 User.find_or_create_by!(email: "admin@itsanproblem.test") do |u|
   u.name = "Admin"
+  u.username = "admin"
   u.password = password
   u.password_confirmation = password
   u.role = "admin"
@@ -38,6 +40,7 @@ end
 
 User.find_or_create_by!(email: "moderator@itsanproblem.test") do |u|
   u.name = "Moderator"
+  u.username = "moderator"
   u.password = password
   u.password_confirmation = password
   u.role = "moderator"

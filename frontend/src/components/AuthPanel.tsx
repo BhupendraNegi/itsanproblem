@@ -3,8 +3,8 @@ import React from 'react'
 interface AuthPanelProps {
   mode: 'login' | 'register'
   setMode: (mode: 'login' | 'register') => void
-  authFields: { name: string; email: string; password: string; passwordConfirmation: string }
-  setAuthFields: (fields: { name: string; email: string; password: string; passwordConfirmation: string }) => void
+  authFields: { name: string; username: string; email: string; password: string; passwordConfirmation: string }
+  setAuthFields: (fields: { name: string; username: string; email: string; password: string; passwordConfirmation: string }) => void
   onSubmit: (event: React.FormEvent) => void
   isLoading: boolean
   error: string | null
@@ -67,14 +67,24 @@ export function AuthPanel({
 
         <form onSubmit={onSubmit} className="stack">
           {mode === 'register' && (
-            <label className="field">
-              <span>Name</span>
-              <input
-                value={authFields.name}
-                onChange={(e) => setAuthFields({ ...authFields, name: e.target.value })}
-                placeholder="What should we call you?"
-              />
-            </label>
+            <>
+              <label className="field">
+                <span>Name</span>
+                <input
+                  value={authFields.name}
+                  onChange={(e) => setAuthFields({ ...authFields, name: e.target.value })}
+                  placeholder="What should we call you?"
+                />
+              </label>
+              <label className="field">
+                <span>Username</span>
+                <input
+                  value={authFields.username}
+                  onChange={(e) => setAuthFields({ ...authFields, username: e.target.value })}
+                  placeholder="Optional — we'll make one from your name"
+                />
+              </label>
+            </>
           )}
           <label className="field">
             <span>Email</span>

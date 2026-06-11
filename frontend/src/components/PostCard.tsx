@@ -116,7 +116,7 @@ export function PostCard({
                 <p>{comment.body}</p>
                 <span className="comment-meta">
                   {comment.author_id != null ? (
-                    <Link to={`/users/${comment.author_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                    <Link to={`/users/${comment.author_username ?? comment.author_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                       <strong>{comment.author}</strong>
                     </Link>
                   ) : (

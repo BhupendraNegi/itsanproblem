@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../test/renderWithProviders'
 import { SettingsPage } from '../../pages/SettingsPage'
@@ -27,6 +27,12 @@ describe('SettingsPage', () => {
     renderSettings()
     expect(screen.getByLabelText('Name')).toHaveValue('Alice')
     expect(screen.getByLabelText('Email')).toHaveValue('alice@example.com')
+  })
+
+  it('prefills the username from the profile API', async () => {
+    renderSettings()
+    // the field renders empty first, then fills when the profile loads
+    await waitFor(() => expect(screen.getByLabelText('Username')).toHaveValue('alice'))
   })
 
   it('saves the profile and shows confirmation', async () => {

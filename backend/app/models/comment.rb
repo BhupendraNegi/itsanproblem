@@ -16,6 +16,7 @@ class Comment < ApplicationRecord
     super({only: [:id, :body, :created_at]}.merge(options)).merge(
       "author" => op ? post.anon_handle : user.name,
       "author_id" => op ? nil : user_id,
+      "author_username" => op ? nil : user.username,
       "helpful_count" => helpful_marks.size,
       "viewer_marked" => viewer ? helpful_marks.any? { |m| m.user_id == viewer.id } : false
     )

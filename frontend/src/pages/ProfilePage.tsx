@@ -23,11 +23,10 @@ function formatJoined(timestamp: string) {
 }
 
 export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
-  const { id } = useParams<{ id: string }>()
-  const userId = Number(id)
-  const { data: profile, isLoading, error } = useUserProfile(userId)
+  const { handle } = useParams<{ handle: string }>()
+  const { data: profile, isLoading, error } = useUserProfile(handle ?? '')
 
-  const isOwnProfile = currentUser.id === userId
+  const isOwnProfile = profile?.id === currentUser.id
 
   return (
     <>
@@ -86,7 +85,7 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                     )}
                   </h1>
                   <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--fg2)', fontFamily: 'var(--font-mono)' }}>
-                    Joined {formatJoined(profile.joined_at)}
+                    @{profile.username} · Joined {formatJoined(profile.joined_at)}
                   </p>
                   {profile.bio && (
                     <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--fg1)', lineHeight: 1.5 }}>

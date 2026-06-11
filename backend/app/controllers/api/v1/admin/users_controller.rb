@@ -8,7 +8,7 @@ module Api
           users = User.order(:id)
           if params[:q].present?
             term = "%#{User.sanitize_sql_like(params[:q])}%"
-            users = users.where("name LIKE :q OR email LIKE :q", q: term)
+            users = users.where("name LIKE :q OR email LIKE :q OR username LIKE :q", q: term)
           end
 
           render json: users.limit(100).map { |user| user_entry(user) }
@@ -31,7 +31,7 @@ module Api
           Impersonation.create!(admin: current_user, user: @user)
           token = encode_token(user_id: @user.id, impersonator_id: current_user.id)
           render json: {
-            user: @user.slice(:id, :name, :email, :role),
+            user: @user.slice(:id, :name, :username, :email, :role),
             token: token
           }
         end
@@ -54,6 +54,7 @@ module Api
           {
             id: user.id,
             name: user.name,
+            username: user.username,
             email: user.email,
             role: user.role,
             joined_at: user.created_at,

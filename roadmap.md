@@ -51,6 +51,10 @@ Remaining from P0 scope:
   them `digested_at` so nothing is sent twice. Opt-out lives in Settings → Notifications
   (`users.email_digest_enabled`). Dev mail is written to `backend/tmp/mails/` (`:file`
   delivery); production SMTP is env-driven and no-ops until `SMTP_ADDRESS` is set.
+- [x] **6b. Usernames** — unique `@username` per user (auto-derived from the name at signup,
+  optionally chosen, editable in Settings); profile URLs are `/users/:username` instead of
+  numeric ids (old id links still resolve). Shown on profiles, comment links, and the admin
+  user list.
 - [x] **6. User profile, expanded** — `bio` shown on the profile page; on **your own** profile,
   a "Your posts" list shows your anonymous posts with their handles, hidden status, and counts
   (resolved through the `post_authors` ledger, visible to no one else). Editing happens in
