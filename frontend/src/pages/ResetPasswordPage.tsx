@@ -45,8 +45,8 @@ export function ResetPasswordPage() {
             {!token && <div className="alert warning">This link is missing its token — use the link from the email.</div>}
             {error && <div className="alert danger">{error}</div>}
             <label className="field">
-              <span>New password</span>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="new-password" />
+              <span>New password <span className="char-count">min 8 characters</span></span>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required autoComplete="new-password" />
             </label>
             <label className="field">
               <span>Confirm new password</span>

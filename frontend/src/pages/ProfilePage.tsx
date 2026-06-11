@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useUserProfile } from '../hooks/useMutations'
 import { Header } from '../components/Header'
+import { avatarHueClass } from '../avatar'
 import type { User } from '../types'
 
 interface ProfilePageProps {
@@ -48,7 +49,7 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
             {/* Profile header */}
             <div className="card">
               <div className="profile-header">
-                <div className="profile-avatar">{profile.name.charAt(0).toUpperCase()}</div>
+                <div className={`profile-avatar ${avatarHueClass(profile.username)}`}>{profile.name.charAt(0).toUpperCase()}</div>
                 <div className="profile-identity">
                   <h1 className="profile-name">
                     {profile.name}

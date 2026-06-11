@@ -58,9 +58,9 @@ export async function resetPassword(data: { token: string; password: string; pas
   return response.data
 }
 
-export async function fetchPosts(sort: 'recent' | 'hot' = 'recent') {
+export async function fetchPosts(sort: 'recent' | 'hot' = 'recent', page = 1) {
   const response = await api.get<Post[]>('/posts', {
-    params: sort === 'hot' ? { sort } : undefined,
+    params: { page, ...(sort === 'hot' ? { sort } : {}) },
   })
   return response.data
 }

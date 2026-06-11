@@ -20,6 +20,19 @@ RSpec.describe "Api::V1::Posts", type: :request do
       expect(body.first.keys).not_to include("user_id")
     end
 
+    context "pagination" do
+      it "returns 10 posts per page" do
+        12.times { |n| user.posts.create!(title: "Post #{n}", body: "Body") }
+
+        get "/api/v1/posts"
+        expect(JSON.parse(response.body).length).to eq(10)
+
+        get "/api/v1/posts?page=2"
+        # 12 new + 1 from setup = 13 total → 3 on page 2
+        expect(JSON.parse(response.body).length).to eq(3)
+      end
+    end
+
     context "with ?sort=hot" do
       it "orders by helpful marks (last 7 days) instead of recency" do
         popular = user.posts.create!(title: "Older but loved", body: "Help me.", created_at: 2.days.ago)

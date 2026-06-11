@@ -31,10 +31,21 @@ function AppContent() {
   const [postTitle, setPostTitle] = useState('')
   const [postBody, setPostBody] = useState('')
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({})
-  const [sort, setSort] = useState<'recent' | 'hot'>('recent')
+  const [sort, setSort] = useState<'recent' | 'hot'>(() => {
+    try {
+      const saved = localStorage.getItem('feedSort')
+      if (saved === 'hot' || saved === 'recent') return saved
+    } catch { /* no-op */ }
+    return 'recent'
+  })
 
-  const { data, isLoading, error } = usePosts(sort)
-  const posts = data ?? []
+  function changeSort(next: 'recent' | 'hot') {
+    setSort(next)
+    try { localStorage.setItem('feedSort', next) } catch { /* no-op */ }
+  }
+
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(sort)
+  const posts = data?.pages.flat() ?? []
 
   const authMutation = useAuthMutation(setAlertMessage, setAuthFields, login)
   const postMutation = usePostMutation(setAlertMessage, setPostTitle, setPostBody)
@@ -142,7 +153,7 @@ function AppContent() {
                 role="tab"
                 aria-selected={sort === 'recent'}
                 className={sort === 'recent' ? 'is-active' : ''}
-                onClick={() => setSort('recent')}
+                onClick={() => changeSort('recent')}
               >
                 Recent
               </button>
@@ -150,7 +161,7 @@ function AppContent() {
                 role="tab"
                 aria-selected={sort === 'hot'}
                 className={sort === 'hot' ? 'is-active' : ''}
-                onClick={() => setSort('hot')}
+                onClick={() => changeSort('hot')}
               >
                 Hot
               </button>
@@ -169,6 +180,21 @@ function AppContent() {
 
         {error && <div className="alert danger">Failed to load posts. Please try again.</div>}
 
+        {isLoading && (
+          <>
+            <div className="skeleton-card" />
+            <div className="skeleton-card" />
+            <div className="skeleton-card" />
+          </>
+        )}
+
+        {!isLoading && !error && posts.length === 0 && (
+          <div className="card empty">
+            <h3>No posts yet</h3>
+            <p>Be the first — your problem posts as Anonymous, always.</p>
+          </div>
+        )}
+
         {posts.map((post) => (
           <PostCard
             key={post.id}
@@ -179,6 +205,12 @@ function AppContent() {
             isCommentLoading={commentMutation.isPending}
           />
         ))}
+
+        {hasNextPage && (
+          <button className="btn-secondary load-more" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+            {isFetchingNextPage ? 'Loading…' : 'Load more'}
+          </button>
+        )}
       </section>
     </main>
   )

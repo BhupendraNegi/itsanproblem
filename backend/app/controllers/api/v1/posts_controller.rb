@@ -5,9 +5,13 @@ module Api
       before_action :set_current_user, only: [:index, :show]
       before_action :set_post, only: [:show]
 
+      PER_PAGE = 10
+
       def index
         posts = Post.visible.includes(:post_author, :helpful_marks, comments: [:user, :helpful_marks])
         posts = (params[:sort] == "hot") ? posts.hot : posts.order(created_at: :desc)
+        page = [params[:page].to_i, 1].max
+        posts = posts.offset((page - 1) * PER_PAGE).limit(PER_PAGE)
         render json: posts.map { |post| post.as_json(viewer: current_user) }
       end
 
