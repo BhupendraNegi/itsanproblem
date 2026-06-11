@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 interface AuthPanelProps {
   mode: 'login' | 'register'
@@ -124,6 +125,9 @@ export function AuthPanel({
           >
             {isLoading ? 'Processing…' : (mode === 'register' ? 'Create account' : 'Sign in')}
           </button>
+          {mode === 'login' && (
+            <Link to="/forgot-password" className="forgot-link">Forgot password?</Link>
+          )}
         </form>
       </section>
 

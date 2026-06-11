@@ -8,6 +8,8 @@ import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { PostForm } from './components/PostForm'
 import { PostCard } from './components/PostCard'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { PostPage } from './pages/PostPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -93,16 +95,25 @@ function AppContent() {
             </div>
           </div>
         </header>
-        <AuthPanel
-          mode={mode}
-          setMode={setMode}
-          authFields={authFields}
-          setAuthFields={setAuthFields}
-          onSubmit={handleAuthSubmit}
-          isLoading={authMutation.isPending}
-          error={alertMessage}
-          allowRegister={allowRegister}
-        />
+        <Routes>
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route
+            path="*"
+            element={
+              <AuthPanel
+                mode={mode}
+                setMode={setMode}
+                authFields={authFields}
+                setAuthFields={setAuthFields}
+                onSubmit={handleAuthSubmit}
+                isLoading={authMutation.isPending}
+                error={alertMessage}
+                allowRegister={allowRegister}
+              />
+            }
+          />
+        </Routes>
       </>
     )
   }

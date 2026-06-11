@@ -60,6 +60,55 @@ RSpec.describe "Api::V1::Auth", type: :request do
     end
   end
 
+  describe "password reset" do
+    let!(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }
+
+    before { ActionMailer::Base.deliveries.clear }
+
+    it "emails a reset link for a known email" do
+      post "/api/v1/auth/forgot_password", params: {email: "alice@example.com"}, as: :json
+      expect(response).to have_http_status(:ok)
+      mail = ActionMailer::Base.deliveries.last
+      expect(mail.to).to eq(["alice@example.com"])
+      expect(mail.text_part.body.to_s).to include("/reset-password?token=")
+    end
+
+    it "returns the same success for unknown emails without sending" do
+      post "/api/v1/auth/forgot_password", params: {email: "ghost@example.com"}, as: :json
+      expect(response).to have_http_status(:ok)
+      expect(ActionMailer::Base.deliveries).to be_empty
+    end
+
+    it "resets the password with a valid token" do
+      post "/api/v1/auth/forgot_password", params: {email: "alice@example.com"}, as: :json
+      token = ActionMailer::Base.deliveries.last.text_part.body.to_s[/token=([\w-]+)/, 1]
+
+      post "/api/v1/auth/reset_password",
+        params: {token: token, password: "newpassword456", password_confirmation: "newpassword456"}, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.valid_password?("newpassword456")).to be(true)
+      expect(user.reset_password_token).to be_nil
+    end
+
+    it "rejects an invalid token" do
+      post "/api/v1/auth/reset_password",
+        params: {token: "bogus", password: "newpassword456", password_confirmation: "newpassword456"}, as: :json
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "rejects an expired token" do
+      post "/api/v1/auth/forgot_password", params: {email: "alice@example.com"}, as: :json
+      token = ActionMailer::Base.deliveries.last.text_part.body.to_s[/token=([\w-]+)/, 1]
+      user.update!(reset_password_sent_at: 7.hours.ago)
+
+      post "/api/v1/auth/reset_password",
+        params: {token: token, password: "newpassword456", password_confirmation: "newpassword456"}, as: :json
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body)["error"]).to match(/expired/i)
+    end
+  end
+
   describe "POST /api/v1/auth/login" do
     let!(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }
 

@@ -7,6 +7,8 @@ Rails.application.routes.draw do
         post "register", to: "auth#register"
         post "login", to: "auth#login"
         delete "logout", to: "auth#logout"
+        post "forgot_password", to: "auth#forgot_password"
+        post "reset_password", to: "auth#reset_password"
       end
 
       resources :posts, only: [:index, :show, :create] do
