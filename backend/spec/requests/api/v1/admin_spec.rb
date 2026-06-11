@@ -123,6 +123,65 @@ RSpec.describe "Api::V1::Admin", type: :request do
     end
   end
 
+  describe "moderator role" do
+    let!(:moderator) { User.create!(name: "Mod", email: "mod@example.com", password: "password123", role: "moderator") }
+
+    it "can access the dashboard endpoints" do
+      get "/api/v1/admin/stats", headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:ok)
+
+      get "/api/v1/admin/users", headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "can moderate content" do
+      flagger = User.create!(name: "F", email: "f@example.com", password: "password123")
+      post_record.flags.create!(user: flagger, reason: "spam")
+
+      patch "/api/v1/admin/posts/#{post_record.id}/restore", headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:ok)
+      expect(post_record.flags.count).to eq(0)
+    end
+
+    it "can impersonate a member (audited)" do
+      post "/api/v1/admin/users/#{member.id}/impersonate", headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:ok)
+      expect(Impersonation.last).to have_attributes(admin: moderator, user: member)
+    end
+
+    it "cannot impersonate an admin" do
+      post "/api/v1/admin/users/#{admin.id}/impersonate", headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:forbidden)
+      expect(Impersonation.count).to eq(0)
+    end
+
+    it "cannot impersonate another moderator" do
+      other_mod = User.create!(name: "Mod2", email: "mod2@example.com", password: "password123", role: "moderator")
+      post "/api/v1/admin/users/#{other_mod.id}/impersonate", headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "cannot change roles" do
+      patch "/api/v1/admin/users/#{member.id}/role", params: {role: "admin"},
+        headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:forbidden)
+      expect(member.reload.role).to eq("member")
+    end
+
+    it "cannot delete users" do
+      delete "/api/v1/admin/users/#{member.id}", headers: auth_headers_for(moderator), as: :json
+      expect(response).to have_http_status(:forbidden)
+      expect(User.exists?(member.id)).to be(true)
+    end
+
+    it "can be appointed by an admin" do
+      patch "/api/v1/admin/users/#{member.id}/role", params: {role: "moderator"},
+        headers: auth_headers_for(admin), as: :json
+      expect(response).to have_http_status(:ok)
+      expect(member.reload.role).to eq("moderator")
+    end
+  end
+
   describe "DELETE /api/v1/admin/users/:id" do
     it "deletes the user and their posts" do
       delete "/api/v1/admin/users/#{member.id}", headers: auth_headers_for(admin), as: :json

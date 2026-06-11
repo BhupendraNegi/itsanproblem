@@ -11,7 +11,9 @@ import {
   useImpersonateMutation,
 } from '../hooks/useMutations'
 import useAuth from '../store'
-import type { User } from '../types'
+import type { Role, User } from '../types'
+
+const ROLES: Role[] = ['member', 'moderator', 'admin']
 
 interface AdminPageProps {
   currentUser: User
@@ -46,7 +48,10 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
   const deleteUser = useAdminDeleteUserMutation()
   const impersonate = useImpersonateMutation()
 
-  if (currentUser.role !== 'admin') {
+  const isAdmin = currentUser.role === 'admin'
+  const isStaff = isAdmin || currentUser.role === 'moderator'
+
+  if (!isStaff) {
     return <Navigate to="/" replace />
   }
 
@@ -163,8 +168,8 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
                 <div style={{ flex: 1, minWidth: 180 }}>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>
                     {u.name}
-                    {u.role === 'admin' && (
-                      <span style={{ marginLeft: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--primary)' }}>admin</span>
+                    {u.role !== 'member' && (
+                      <span style={{ marginLeft: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--primary)' }}>{u.role}</span>
                     )}
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--fg2)', fontFamily: 'var(--font-mono)' }}>
@@ -172,28 +177,40 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
                   </div>
                 </div>
                 {u.id !== currentUser.id && (
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="action-btn" disabled={impersonate.isPending} onClick={() => handleImpersonate(u.id)}>
-                      Impersonate
-                    </button>
-                    <button
-                      className="action-btn"
-                      disabled={roleMutation.isPending}
-                      onClick={() => roleMutation.mutate({ id: u.id, role: u.role === 'admin' ? 'member' : 'admin' })}
-                    >
-                      {u.role === 'admin' ? 'Demote' : 'Make admin'}
-                    </button>
-                    <button
-                      className="action-btn"
-                      disabled={deleteUser.isPending}
-                      onClick={() => {
-                        if (window.confirm(`Delete ${u.name} and all their posts? This cannot be undone.`)) {
-                          deleteUser.mutate({ id: u.id })
-                        }
-                      }}
-                    >
-                      Delete
-                    </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {/* Moderators may impersonate members only; admins anyone. */}
+                    {(isAdmin || u.role === 'member') && (
+                      <button className="action-btn" disabled={impersonate.isPending} onClick={() => handleImpersonate(u.id)}>
+                        Impersonate
+                      </button>
+                    )}
+                    {isAdmin && (
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--fg2)' }}>
+                        Role
+                        <select
+                          value={u.role}
+                          disabled={roleMutation.isPending}
+                          onChange={(e) => roleMutation.mutate({ id: u.id, role: e.target.value as Role })}
+                        >
+                          {ROLES.map((role) => (
+                            <option key={role} value={role}>{role}</option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+                    {isAdmin && (
+                      <button
+                        className="action-btn"
+                        disabled={deleteUser.isPending}
+                        onClick={() => {
+                          if (window.confirm(`Delete ${u.name} and all their posts? This cannot be undone.`)) {
+                            deleteUser.mutate({ id: u.id })
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

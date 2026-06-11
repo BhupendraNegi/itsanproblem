@@ -21,7 +21,7 @@ export function Header({ user, onLogout }: HeaderProps) {
 
         <div className="navbar-user">
           <NotificationBell />
-          {user.role === 'admin' && (
+          {(user.role === 'admin' || user.role === 'moderator') && (
             <Link to="/admin" className="logout-icon-btn" title="Admin" aria-label="Admin">
               <img src="/assets/icons/users.svg" alt="" />
             </Link>

@@ -4,7 +4,12 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
     :recoverable, :rememberable, :validatable
 
-  enum :role, {member: "member", admin: "admin"}, default: :member
+  enum :role, {member: "member", moderator: "moderator", admin: "admin"}, default: :member
+
+  # Staff can access the admin dashboard; only admins manage roles/accounts.
+  def staff?
+    admin? || moderator?
+  end
 
   has_many :post_authors, dependent: :destroy
   has_many :posts, through: :post_authors

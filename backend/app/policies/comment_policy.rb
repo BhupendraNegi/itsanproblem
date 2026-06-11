@@ -1,9 +1,9 @@
 class CommentPolicy < ApplicationPolicy
   def restore?
-    user.admin?
+    user.staff?
   end
 
   def destroy?
-    user.admin?
+    user.staff?
   end
 end

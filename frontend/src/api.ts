@@ -6,6 +6,7 @@ import type {
   AuthResponse,
   NotificationsResponse,
   Post,
+  Role,
   User,
   UserProfile,
 } from './types'
@@ -134,7 +135,7 @@ export async function adminDeleteContent(target: 'posts' | 'comments', id: numbe
   return response.data
 }
 
-export async function adminSetUserRole(id: number, role: 'member' | 'admin') {
+export async function adminSetUserRole(id: number, role: Role) {
   const response = await api.patch<AdminUser>(`/admin/users/${id}/role`, { role })
   return response.data
 }

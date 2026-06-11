@@ -1,16 +1,22 @@
 class UserPolicy < ApplicationPolicy
   def index?
-    user.admin?
+    user.staff?
   end
 
-  # Admins can't change their own role or impersonate/delete themselves —
-  # prevents accidental self-demotion and self-targeted audit noise.
+  # Role changes are admin-only (a moderator must never mint an admin), and
+  # never on yourself — prevents accidental self-demotion.
   def update_role?
     user.admin? && record != user
   end
 
+  # Admins impersonate anyone but themselves. Moderators only impersonate
+  # members — impersonating an admin (or another moderator) would be an
+  # escalation path.
   def impersonate?
-    user.admin? && record != user
+    return false if record == user
+    return true if user.admin?
+
+    user.moderator? && record.member?
   end
 
   def destroy?

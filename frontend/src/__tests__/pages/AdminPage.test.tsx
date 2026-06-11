@@ -7,6 +7,7 @@ import type { User } from '../../types'
 
 const adminUser: User = { id: 1, name: 'Alice', email: 'alice@example.com', role: 'admin' }
 const memberUser: User = { id: 2, name: 'Bob', email: 'bob@example.com', role: 'member' }
+const moderatorUser: User = { id: 3, name: 'Mo', email: 'mo@example.com', role: 'moderator' }
 
 function renderAdmin(user: User) {
   return renderWithProviders(
@@ -39,10 +40,29 @@ describe('AdminPage', () => {
     expect(screen.getAllByRole('button', { name: 'Restore' }).length).toBeGreaterThan(0)
   })
 
-  it('lists users with impersonate and role actions for others', async () => {
+  it('lists users with impersonate and role controls for admins', async () => {
     renderAdmin(adminUser)
     expect(await screen.findByText(/bob@example\.com/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Impersonate' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Make admin' })).toBeInTheDocument()
+    // role select for Bob (the only non-self row), prefilled with his role
+    expect(screen.getByRole('combobox')).toHaveValue('member')
+  })
+
+  describe('as a moderator', () => {
+    it('can view the dashboard', async () => {
+      renderAdmin(moderatorUser)
+      expect(await screen.findByRole('heading', { name: 'Admin' })).toBeInTheDocument()
+      expect(await screen.findByText('Spammy post')).toBeInTheDocument()
+    })
+
+    it('sees Impersonate for members only and no role/delete-user controls', async () => {
+      renderAdmin(moderatorUser)
+      expect(await screen.findByText(/bob@example\.com/)).toBeInTheDocument()
+      // Bob (member) yes, Alice (admin) no
+      expect(screen.getAllByRole('button', { name: 'Impersonate' })).toHaveLength(1)
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+      // the only Delete button is in the moderation queue, not on user rows
+      expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
+    })
   })
 })

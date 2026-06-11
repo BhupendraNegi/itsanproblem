@@ -7,6 +7,7 @@ import type {
   AuthResponse,
   NotificationsResponse,
   Post,
+  Role,
   User,
   Comment,
   UserProfile,
@@ -198,7 +199,7 @@ export function useAdminModerationMutation() {
 export function useAdminRoleMutation() {
   const queryClient = useQueryClient()
 
-  return useMutation<AdminUser, Error, { id: number; role: 'member' | 'admin' }>({
+  return useMutation<AdminUser, Error, { id: number; role: Role }>({
     mutationFn: ({ id, role }) => api.adminSetUserRole(id, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
