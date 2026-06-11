@@ -16,6 +16,13 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(body["user"].keys).not_to include("encrypted_password")
     end
 
+    it "always creates a member — a role in the payload is ignored" do
+      params = {user: valid_params[:user].merge(role: "admin")}
+      post "/api/v1/auth/register", params: params, as: :json
+      expect(response).to have_http_status(:created)
+      expect(User.find_by(email: "alice@example.com").role).to eq("member")
+    end
+
     it "returns errors for missing name" do
       post "/api/v1/auth/register", params: {user: {email: "alice@example.com", password: "password123", password_confirmation: "password123"}}, as: :json
       expect(response).to have_http_status(:unprocessable_content)

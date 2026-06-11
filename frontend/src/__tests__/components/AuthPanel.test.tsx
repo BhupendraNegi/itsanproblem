@@ -71,4 +71,18 @@ describe('AuthPanel', () => {
     renderWithProviders(<AuthPanel {...defaultProps} />)
     expect(screen.getByText(/your posts are anonymous by default/i)).toBeInTheDocument()
   })
+
+  describe('when allowRegister is false (the /admin route)', () => {
+    it('hides the Create Account tab', () => {
+      renderWithProviders(<AuthPanel {...defaultProps} allowRegister={false} />)
+      expect(screen.queryByRole('tab', { name: /create account/i })).not.toBeInTheDocument()
+      expect(screen.getByText(/accounts can’t be created from here/i)).toBeInTheDocument()
+    })
+
+    it('still allows signing in', () => {
+      renderWithProviders(<AuthPanel {...defaultProps} allowRegister={false} />)
+      expect(screen.getByLabelText('Email')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
+    })
+  })
 })
