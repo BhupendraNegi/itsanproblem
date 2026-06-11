@@ -22,7 +22,7 @@ function AppContent() {
 
   // The admin route is sign-in only: no account creation from /admin.
   const allowRegister = !location.pathname.startsWith('/admin')
-  const [authFields, setAuthFields] = useState({ name: '', email: '', password: '', passwordConfirmation: '' })
+  const [authFields, setAuthFields] = useState({ name: '', username: '', email: '', password: '', passwordConfirmation: '' })
   const [alertMessage, setAlertMessage] = useState<string | null>(null)
   const [postTitle, setPostTitle] = useState('')
   const [postBody, setPostBody] = useState('')
@@ -173,7 +173,7 @@ function AppContent() {
   return (
     <Routes>
       <Route path="/" element={feed} />
-      <Route path="/users/:id" element={<ProfilePage currentUser={user} onLogout={logout} />} />
+      <Route path="/users/:handle" element={<ProfilePage currentUser={user} onLogout={logout} />} />
       <Route path="/settings" element={<SettingsPage currentUser={user} onLogout={logout} />} />
       <Route path="/admin" element={<AdminPage currentUser={user} onLogout={logout} />} />
       <Route path="*" element={<Navigate to="/" replace />} />

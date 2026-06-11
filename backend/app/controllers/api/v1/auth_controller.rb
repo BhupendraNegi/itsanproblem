@@ -31,11 +31,11 @@ module Api
       private
 
       def register_params
-        params.require(:user).permit(:name, :email, :password, :password_confirmation)
+        params.require(:user).permit(:name, :username, :email, :password, :password_confirmation)
       end
 
       def user_response(user)
-        user.slice(:id, :name, :email, :role)
+        user.slice(:id, :name, :username, :email, :role)
       end
     end
   end

@@ -23,6 +23,7 @@ module Api
         profile = {
           id: @user.id,
           name: @user.name,
+          username: @user.username,
           bio: @user.bio,
           joined_at: @user.created_at,
           helpful_points: stat.helpful_points,
@@ -61,9 +62,11 @@ module Api
       end
 
       def set_user
-        @user = User.find(params[:id])
-      rescue ActiveRecord::RecordNotFound
-        render json: {error: "User not found"}, status: :not_found
+        @user = User.find_by(username: params[:id])
+        # Usernames can't be all digits, so numeric values are unambiguous —
+        # keeps old /users/:id links working.
+        @user ||= User.find_by(id: params[:id]) if /\A\d+\z/.match?(params[:id].to_s)
+        render json: {error: "User not found"}, status: :not_found unless @user
       end
     end
   end

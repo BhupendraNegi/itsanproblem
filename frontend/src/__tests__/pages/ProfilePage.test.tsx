@@ -11,9 +11,9 @@ const otherUser = { id: 99, name: 'Bob', email: 'bob@example.com' }
 function renderProfile(user = currentUser) {
   return renderWithProviders(
     <Routes>
-      <Route path="/users/:id" element={<ProfilePage currentUser={user} onLogout={vi.fn()} />} />
+      <Route path="/users/:handle" element={<ProfilePage currentUser={user} onLogout={vi.fn()} />} />
     </Routes>,
-    { routerProps: { initialEntries: ['/users/1'] } }
+    { routerProps: { initialEntries: ['/users/alice'] } }
   )
 }
 
@@ -76,6 +76,11 @@ describe('ProfilePage', () => {
   it('renders the Back to feed link', () => {
     renderProfile()
     expect(screen.getByText(/back to feed/i)).toBeInTheDocument()
+  })
+
+  it('shows the @username in the profile meta', async () => {
+    renderProfile()
+    expect(await screen.findByText(/@alice/)).toBeInTheDocument()
   })
 
   it('renders the bio when present', async () => {

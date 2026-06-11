@@ -27,6 +27,20 @@ RSpec.describe "Api::V1::Users", type: :request do
         expect(body["recent_comments"].first["post_title"]).to eq("My problem")
       end
 
+      it "looks up by username and includes it in the response" do
+        get "/api/v1/users/#{user.username}", headers: auth_headers_for(user), as: :json
+        expect(response).to have_http_status(:ok)
+        body = JSON.parse(response.body)
+        expect(body["username"]).to eq("alice")
+        expect(body["name"]).to eq("Alice")
+      end
+
+      it "still resolves old numeric id URLs" do
+        get "/api/v1/users/#{user.id}", headers: auth_headers_for(user), as: :json
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)["username"]).to eq("alice")
+      end
+
       it "includes the bio" do
         user.update!(bio: "Just here to help.")
         get "/api/v1/users/#{user.id}", headers: auth_headers_for(user), as: :json

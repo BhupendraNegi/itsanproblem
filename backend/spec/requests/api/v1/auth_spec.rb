@@ -16,6 +16,25 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(body["user"].keys).not_to include("encrypted_password")
     end
 
+    it "auto-generates a username and returns it" do
+      post "/api/v1/auth/register", params: valid_params, as: :json
+      expect(JSON.parse(response.body)["user"]["username"]).to eq("alice")
+    end
+
+    it "accepts a chosen username" do
+      params = {user: valid_params[:user].merge(username: "Wise_Owl")}
+      post "/api/v1/auth/register", params: params, as: :json
+      expect(JSON.parse(response.body)["user"]["username"]).to eq("wise_owl")
+    end
+
+    it "rejects a taken username" do
+      User.create!(name: "Z", email: "z@example.com", password: "password123", username: "wise_owl")
+      params = {user: valid_params[:user].merge(username: "wise_owl")}
+      post "/api/v1/auth/register", params: params, as: :json
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body)["errors"].join).to match(/username/i)
+    end
+
     it "always creates a member — a role in the payload is ignored" do
       params = {user: valid_params[:user].merge(role: "admin")}
       post "/api/v1/auth/register", params: params, as: :json

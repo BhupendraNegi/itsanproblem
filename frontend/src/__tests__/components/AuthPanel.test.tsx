@@ -7,7 +7,7 @@ import { AuthPanel } from '../../components/AuthPanel'
 const defaultProps = {
   mode: 'login' as const,
   setMode: vi.fn(),
-  authFields: { name: '', email: '', password: '', passwordConfirmation: '' },
+  authFields: { name: '', username: '', email: '', password: '', passwordConfirmation: '' },
   setAuthFields: vi.fn(),
   onSubmit: vi.fn((e) => e.preventDefault()),
   isLoading: false,

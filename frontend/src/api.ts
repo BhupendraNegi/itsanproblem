@@ -25,10 +25,12 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-export async function register(data: { name: string; email: string; password: string; passwordConfirmation: string }) {
+export async function register(data: { name: string; username?: string; email: string; password: string; passwordConfirmation: string }) {
   const response = await api.post<AuthResponse>('/auth/register', {
     user: {
       name: data.name,
+      // blank → the backend derives one from the name
+      ...(data.username?.trim() ? { username: data.username.trim() } : {}),
       email: data.email,
       password: data.password,
       password_confirmation: data.passwordConfirmation,
@@ -72,6 +74,7 @@ export async function flagContent(target: 'posts' | 'comments', id: number, reas
 
 export type ProfileUpdate = {
   name?: string
+  username?: string
   email?: string
   bio?: string
   email_digest_enabled?: boolean
@@ -103,8 +106,9 @@ export async function markAllNotificationsRead() {
   return response.data
 }
 
-export async function fetchUserProfile(userId: number) {
-  const response = await api.get<UserProfile>(`/users/${userId}`)
+// handle = username; numeric ids still resolve for old links
+export async function fetchUserProfile(handle: string) {
+  const response = await api.get<UserProfile>(`/users/${handle}`)
   return response.data
 }
 

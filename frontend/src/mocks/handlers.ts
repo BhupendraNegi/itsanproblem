@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 
-export const mockUser = { id: 1, name: 'Alice', email: 'alice@example.com' }
+export const mockUser = { id: 1, name: 'Alice', username: 'alice', email: 'alice@example.com' }
 export const mockToken = 'mock-jwt-token'
 
 export const mockPost = {
@@ -20,12 +20,14 @@ export const mockComment = {
   body: 'Have you tried turning it off?',
   author: 'Bob',
   author_id: 2,
+  author_username: 'bob',
   created_at: new Date().toISOString(),
 }
 
 export const mockProfile = {
   id: 1,
   name: 'Alice',
+  username: 'alice',
   bio: 'Just here to help.',
   joined_at: new Date('2025-01-01').toISOString(),
   helpful_points: 5,
@@ -92,8 +94,8 @@ export const mockAdminFlags = {
 }
 
 export const mockAdminUsers = [
-  { id: 1, name: 'Alice', email: 'alice@example.com', role: 'admin', joined_at: new Date('2025-01-01').toISOString(), post_count: 2, comment_count: 3 },
-  { id: 2, name: 'Bob', email: 'bob@example.com', role: 'member', joined_at: new Date('2025-02-01').toISOString(), post_count: 1, comment_count: 4 },
+  { id: 1, name: 'Alice', username: 'alice', email: 'alice@example.com', role: 'admin', joined_at: new Date('2025-01-01').toISOString(), post_count: 2, comment_count: 3 },
+  { id: 2, name: 'Bob', username: 'bob', email: 'bob@example.com', role: 'member', joined_at: new Date('2025-02-01').toISOString(), post_count: 1, comment_count: 4 },
 ]
 
 export const handlers = [
@@ -158,7 +160,7 @@ export const handlers = [
   ),
 
   http.patch('/api/v1/profile', () =>
-    HttpResponse.json({ id: 1, name: 'Alice B', email: 'aliceb@example.com', bio: 'Updated bio.', email_digest_enabled: true })
+    HttpResponse.json({ id: 1, name: 'Alice B', username: 'alice', email: 'aliceb@example.com', bio: 'Updated bio.', email_digest_enabled: true })
   ),
 
   http.patch('/api/v1/profile/password', () =>
@@ -194,7 +196,7 @@ export const handlers = [
   ),
 
   http.post('/api/v1/admin/users/:id/impersonate', () =>
-    HttpResponse.json({ user: { id: 2, name: 'Bob', email: 'bob@example.com', role: 'member' }, token: 'impersonation-token' })
+    HttpResponse.json({ user: { id: 2, name: 'Bob', username: 'bob', email: 'bob@example.com', role: 'member' }, token: 'impersonation-token' })
   ),
 
   http.delete('/api/v1/admin/users/:id', () =>

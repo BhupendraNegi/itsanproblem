@@ -25,9 +25,10 @@ function errorMessage(error: unknown, fallback: string) {
 export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
   const { token, login } = useAuth()
   const { pref, setPref } = useTheme()
-  const { data: profile } = useUserProfile(currentUser.id)
+  const { data: profile } = useUserProfile(currentUser.username ?? String(currentUser.id))
 
   const [name, setName] = useState(currentUser.name)
+  const [username, setUsername] = useState<string | null>(null)
   const [email, setEmail] = useState(currentUser.email)
   const [bio, setBio] = useState<string | null>(null)
   const [profileStatus, setProfileStatus] = useState<{ kind: 'success' | 'danger'; text: string } | null>(null)
@@ -41,9 +42,10 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
   const profileMutation = useProfileMutation()
   const passwordMutation = usePasswordMutation()
 
-  // Bio and digest preference come from the profile API, not the auth store;
-  // prefill once loaded.
+  // Bio, username, and digest preference come from the profile API, not the
+  // auth store; prefill once loaded.
   const bioValue = bio ?? profile?.bio ?? ''
+  const usernameValue = username ?? profile?.username ?? currentUser.username ?? ''
   const digestEnabled = digestPref ?? profile?.email_digest_enabled ?? true
 
   function handleDigestToggle() {
@@ -57,11 +59,11 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
   function handleProfileSubmit(event: React.FormEvent) {
     event.preventDefault()
     profileMutation.mutate(
-      { name: name.trim(), email: email.trim(), bio: bioValue.trim() },
+      { name: name.trim(), username: usernameValue.trim(), email: email.trim(), bio: bioValue.trim() },
       {
         onSuccess: (updated) => {
           // Spread currentUser so fields not in the response (role) survive.
-          if (token) login({ ...currentUser, name: updated.name, email: updated.email }, token)
+          if (token) login({ ...currentUser, name: updated.name, username: updated.username, email: updated.email }, token)
           setProfileStatus({ kind: 'success', text: 'Profile updated' })
         },
         onError: (error) => setProfileStatus({ kind: 'danger', text: errorMessage(error, 'Failed to update profile') }),
@@ -106,6 +108,15 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
             <label className="field">
               <span>Name</span>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
+            </label>
+            <label className="field">
+              <span>Username</span>
+              <input
+                value={usernameValue}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="lowercase letters, numbers, underscores"
+                required
+              />
             </label>
             <label className="field">
               <span>Email</span>

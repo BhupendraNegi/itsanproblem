@@ -15,6 +15,7 @@ import type {
 
 type AuthFields = {
   name: string
+  username: string
   email: string
   password: string
   passwordConfirmation: string
@@ -30,6 +31,7 @@ export function useAuthMutation(
       if (mode === 'register') {
         return api.register({
           name: fields.name,
+          username: fields.username,
           email: fields.email,
           password: fields.password,
           passwordConfirmation: fields.passwordConfirmation,
@@ -40,7 +42,7 @@ export function useAuthMutation(
     onSuccess: (data) => {
       login(data.user, data.token)
       setAlertMessage(null)
-      setAuthFields({ name: '', email: '', password: '', passwordConfirmation: '' })
+      setAuthFields({ name: '', username: '', email: '', password: '', passwordConfirmation: '' })
     },
     onError: (error: Error) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -158,11 +160,11 @@ export function useReadAllNotifications() {
   })
 }
 
-export function useUserProfile(userId: number) {
+export function useUserProfile(handle: string) {
   return useQuery<UserProfile>({
-    queryKey: ['user', userId],
-    queryFn: () => api.fetchUserProfile(userId),
-    enabled: !!userId,
+    queryKey: ['user', handle],
+    queryFn: () => api.fetchUserProfile(handle),
+    enabled: !!handle,
   })
 }
 

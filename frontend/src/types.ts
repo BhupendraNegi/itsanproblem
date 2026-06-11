@@ -3,6 +3,8 @@ export type Role = 'member' | 'moderator' | 'admin'
 export type User = {
   id: number
   name: string
+  // optional: sessions stored before usernames existed lack it until re-login
+  username?: string
   email: string
   role?: Role
 }
@@ -45,6 +47,7 @@ export type AdminFlagsResponse = {
 export type AdminUser = {
   id: number
   name: string
+  username: string
   email: string
   role: Role
   joined_at: string
@@ -58,6 +61,7 @@ export type Comment = {
   author: string
   // null when the comment is by the OP, who stays anonymous in their thread
   author_id: number | null
+  author_username?: string | null
   helpful_count?: number
   viewer_marked?: boolean
   created_at: string
@@ -115,6 +119,7 @@ export type ProfilePost = {
 export type UserProfile = {
   id: number
   name: string
+  username: string
   bio: string | null
   joined_at: string
   helpful_points: number

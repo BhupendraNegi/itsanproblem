@@ -5,7 +5,7 @@ module Api
 
       def update
         if current_user.update(profile_params)
-          render json: current_user.slice(:id, :name, :email, :bio, :email_digest_enabled)
+          render json: current_user.slice(:id, :name, :username, :email, :bio, :email_digest_enabled)
         else
           render json: {errors: current_user.errors.full_messages}, status: :unprocessable_content
         end
@@ -26,7 +26,7 @@ module Api
       private
 
       def profile_params
-        params.require(:user).permit(:name, :email, :bio, :email_digest_enabled)
+        params.require(:user).permit(:name, :username, :email, :bio, :email_digest_enabled)
       end
 
       def password_params
