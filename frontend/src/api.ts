@@ -51,6 +51,11 @@ export async function fetchPosts(sort: 'recent' | 'hot' = 'recent') {
   return response.data
 }
 
+export async function fetchPost(id: number) {
+  const response = await api.get<Post>(`/posts/${id}`)
+  return response.data
+}
+
 export async function createPost(data: { title: string; body: string }) {
   const response = await api.post<Post>('/posts', { post: data })
   return response.data

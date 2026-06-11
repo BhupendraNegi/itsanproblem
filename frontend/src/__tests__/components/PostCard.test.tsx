@@ -30,6 +30,11 @@ describe('PostCard', () => {
     expect(screen.getByText('My big problem')).toBeInTheDocument()
   })
 
+  it('links the title to the post detail page in feed mode', () => {
+    renderWithProviders(<PostCard {...defaultProps} />)
+    expect(screen.getByRole('link', { name: 'My big problem' })).toHaveAttribute('href', '/posts/1')
+  })
+
   it('renders the post body (truncated)', () => {
     renderWithProviders(<PostCard {...defaultProps} />)
     expect(screen.getByText(/it has been going on/i)).toBeInTheDocument()

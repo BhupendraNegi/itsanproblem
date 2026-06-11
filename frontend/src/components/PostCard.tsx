@@ -15,6 +15,8 @@ interface PostCardProps {
   setCommentInputs: (inputs: Record<number, string> | ((current: Record<number, string>) => Record<number, string>)) => void
   onCommentSubmit: (event: React.FormEvent, postId: number) => void
   isCommentLoading: boolean
+  // detail page: full body, plain (unlinked) title
+  expanded?: boolean
 }
 
 function formatRelative(timestamp: string) {
@@ -34,7 +36,8 @@ export function PostCard({
   commentInputs,
   setCommentInputs,
   onCommentSubmit,
-  isCommentLoading
+  isCommentLoading,
+  expanded = false
 }: PostCardProps) {
   const helpfulCount = post.helpful_count ?? 0
   const isHot = helpfulCount >= 10
@@ -55,7 +58,13 @@ export function PostCard({
   return (
     <article className="post-card">
       <header className="post-header">
-        <h3 className="post-title">{post.title}</h3>
+        {expanded ? (
+          <h3 className="post-title">{post.title}</h3>
+        ) : (
+          <Link to={`/posts/${post.id}`} className="post-title-link">
+            <h3 className="post-title">{post.title}</h3>
+          </Link>
+        )}
         {isHot && (
           <span className="hot-badge">
             <img src="/assets/icons/flame.svg" alt="" />
@@ -64,7 +73,7 @@ export function PostCard({
         )}
       </header>
 
-      <p className="post-body">{post.body}</p>
+      <p className={`post-body${expanded ? ' expanded' : ''}`}>{post.body}</p>
 
       <div className="post-meta">
         <span>{handle}</span>
