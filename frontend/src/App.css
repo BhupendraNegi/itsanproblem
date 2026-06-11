@@ -90,8 +90,10 @@
   --danger-bg:  var(--red-bg);
   --danger-fg:  var(--red-ink);
 
-  /* The signature Instagram gradient — nav bar, avatars, accents */
+  /* The signature Instagram gradient — avatars, footer wordmark, accents */
   --gradient-brand: linear-gradient(90deg, #feda75 0%, #fa7e1e 22%, #d62976 52%, #962fbf 78%, #4f5bd5 100%);
+  /* Dark chrome for the global frame — nav bar and footer (same in both themes) */
+  --gradient-chrome: linear-gradient(180deg, #262626 0%, #0a0a0a 100%);
   --gradient-page:  #fafafa;
   --gradient-vent:  linear-gradient(135deg, #fa7e1e 0%, #d62976 100%);
 
@@ -205,12 +207,21 @@
   }
 
 /* Dark line-icons sit on light surfaces by default; flip them to light in
-   content areas. The nav bar keeps the colorful gradient, so its white
-   icons are excluded (they live in <header>, not <main>). */
+   content areas. The nav bar is dark chrome with white icons already, so
+   it's excluded (its icons live in <header>, not <main>). */
 :root[data-theme="dark"] main img[src*="/assets/icons/"] { filter: invert(0.9) brightness(1.4); }
 
 /* ---- Base ---- */
 html, body, #root { margin: 0; padding: 0; min-height: 100vh; }
+
+/* Flex column so the footer (margin-top: auto) lands at the bottom of the
+   viewport on short pages without being fixed. The fixed navbar is out of
+   flow; body's padding-top compensates for it, so subtract it here too. */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+}
 
 body {
   font-family: var(--font-body);
@@ -228,7 +239,7 @@ button { font-family: inherit; }
 .navbar {
   position: fixed; top: 0; left: 0; right: 0;
   height: 80px;
-  background: var(--gradient-brand);
+  background: var(--gradient-chrome);
   box-shadow: var(--shadow-nav);
   z-index: 1000;
   display: flex;
@@ -872,10 +883,12 @@ button { font-family: inherit; }
 .empty p { margin: 0; font-size: 14px; }
 
 /* ---- Footer ---- */
+/* Dark chrome like the navbar; margin-top: auto pushes it to the bottom of
+   the #root flex column on short pages (e.g. login) without fixing it. */
 .app-footer {
-  margin-top: var(--space-12);
-  border-top: 1px solid var(--border-default);
-  background: var(--bg-page-soft);
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--gradient-chrome);
 }
 
 .app-footer-inner {
@@ -908,17 +921,17 @@ button { font-family: inherit; }
 }
 
 .app-footer-links a {
-  color: var(--fg2);
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   font-size: var(--text-sm);
   font-weight: 500;
   transition: color var(--motion-fast) var(--ease-standard);
 }
 
-.app-footer-links a:hover { color: var(--primary); }
+.app-footer-links a:hover { color: white; }
 
 .app-footer-copy {
-  color: var(--fg3);
+  color: rgba(255, 255, 255, 0.45);
   font-size: var(--text-xs);
   font-family: var(--font-mono);
 }
@@ -927,6 +940,7 @@ button { font-family: inherit; }
 @media (max-width: 720px) {
   .navbar { height: 100px; }
   body { padding-top: 100px; }
+  #root { min-height: calc(100vh - 100px); }
 
   .navbar-container {
     flex-direction: column;
