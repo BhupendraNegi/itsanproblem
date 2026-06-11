@@ -96,7 +96,6 @@ export function AuthPanel({
             type="submit"
             className="btn-primary auth-submit"
             disabled={isLoading}
-            style={{ marginTop: 6 }}
           >
             {isLoading ? 'Processing…' : (mode === 'register' ? 'Create account' : 'Sign in')}
           </button>
