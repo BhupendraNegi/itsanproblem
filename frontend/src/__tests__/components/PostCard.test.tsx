@@ -10,7 +10,6 @@ const basePost: Post = {
   title: 'My big problem',
   body: 'It has been going on for a while and I need advice.',
   author: 'Anonymous',
-  anon_handle: 'anon_a91f',
   helpful_count: 0,
   created_at: new Date().toISOString(),
   comments: [],
@@ -40,9 +39,10 @@ describe('PostCard', () => {
     expect(screen.getByText(/it has been going on/i)).toBeInTheDocument()
   })
 
-  it('shows the anon handle in the meta line', () => {
+  it('shows the Anonymous mask byline, never a handle', () => {
     renderWithProviders(<PostCard {...defaultProps} />)
-    expect(screen.getByText('anon_a91f')).toBeInTheDocument()
+    expect(screen.getByText('Anonymous')).toBeInTheDocument()
+    expect(screen.queryByText(/anon_/)).not.toBeInTheDocument()
   })
 
   it('shows reply count in the byline', () => {
@@ -125,14 +125,31 @@ describe('PostCard', () => {
     expect(screen.queryByRole('button', { name: /^flag$/i })).not.toBeInTheDocument()
   })
 
-  it('renders OP comments (null author_id) without a profile link', () => {
+  it('badges OP replies and renders them without a profile link', () => {
     const postWithOpComment: Post = {
       ...basePost,
-      comments: [{ id: 9, body: 'Thanks everyone, update inside.', author: 'anon_a91f', author_id: null, created_at: new Date().toISOString() }],
+      comments: [{ id: 9, body: 'Thanks everyone, update inside.', author: 'Anonymous', author_id: null, op: true, created_at: new Date().toISOString() }],
     }
     renderWithProviders(<PostCard {...defaultProps} post={postWithOpComment} />)
-    expect(screen.getAllByText('anon_a91f').length).toBeGreaterThan(0)
-    expect(screen.queryByRole('link', { name: 'anon_a91f' })).not.toBeInTheDocument()
+    expect(screen.getByText('OP')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /anonymous/i })).not.toBeInTheDocument()
+  })
+
+  it('renders anonymous (non-OP) replies without an OP badge or link', () => {
+    const postWithAnonComment: Post = {
+      ...basePost,
+      comments: [{ id: 10, body: 'Been there too.', author: 'Anonymous', author_id: null, op: false, created_at: new Date().toISOString() }],
+    }
+    renderWithProviders(<PostCard {...defaultProps} post={postWithAnonComment} />)
+    expect(screen.getAllByText('Anonymous').length).toBeGreaterThan(1)
+    expect(screen.queryByText('OP')).not.toBeInTheDocument()
+  })
+
+  it('offers a Reply anonymously toggle that changes the form label', async () => {
+    renderWithProviders(<PostCard {...defaultProps} />)
+    expect(screen.getByText(/your name is attached/i)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('checkbox', { name: /reply anonymously/i }))
+    expect(screen.getByText(/no name attached/i)).toBeInTheDocument()
   })
 
   it('lets you flag a comment with a reason', async () => {

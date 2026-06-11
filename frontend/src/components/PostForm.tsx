@@ -21,6 +21,9 @@ export function PostForm({ title, setTitle, body, setBody, onSubmit, isLoading }
           posting anonymously
         </span>
       </div>
+      <p className="section-hint">
+        No name, no handle — nothing links this post to you, not even your other posts.
+      </p>
       <form onSubmit={onSubmit} className="stack">
         <label className="field">
           <span>Title <span className="char-count">{title.length}/120</span></span>

@@ -75,7 +75,7 @@ export async function createPost(data: { title: string; body: string }) {
   return response.data
 }
 
-export async function createComment(postId: number, data: { body: string }) {
+export async function createComment(postId: number, data: { body: string; anonymous?: boolean }) {
   const response = await api.post(`/posts/${postId}/comments`, { comment: data })
   return response.data
 }

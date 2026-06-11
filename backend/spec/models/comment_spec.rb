@@ -43,10 +43,23 @@ RSpec.describe Comment, type: :model do
     context "when the commenter is the OP" do
       subject(:comment) { post.comments.build(body: "Replying in my own thread", user: op) }
 
-      it "shows the post's anon handle instead of the real name" do
+      it "shows Anonymous with the op flag instead of the real name" do
         json = comment.as_json
-        expect(json["author"]).to eq(post.anon_handle)
+        expect(json["author"]).to eq("Anonymous")
         expect(json["author_id"]).to be_nil
+        expect(json["op"]).to be(true)
+      end
+    end
+
+    context "when the commenter opts into anonymity" do
+      subject(:comment) { post.comments.build(body: "Been there too.", user: user, anonymous: true) }
+
+      it "hides the identity but is not the OP" do
+        json = comment.as_json
+        expect(json["author"]).to eq("Anonymous")
+        expect(json["author_id"]).to be_nil
+        expect(json["author_username"]).to be_nil
+        expect(json["op"]).to be(false)
       end
     end
   end

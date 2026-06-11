@@ -92,8 +92,6 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                       <div key={post.id} className="card item-card">
                         <p className="item-title">{post.title}</p>
                         <div className="meta-line">
-                          <span>{post.anon_handle}</span>
-                          <span className="sep">·</span>
                           <span>{post.comment_count} {post.comment_count === 1 ? 'reply' : 'replies'}</span>
                           <span className="sep">·</span>
                           <span>{post.helpful_count} helpful</span>

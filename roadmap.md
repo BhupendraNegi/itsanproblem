@@ -134,6 +134,23 @@ adding scope.
   `/admin` and fires three queries that 403 before the redirect (seen during mobile
   verification). Gate the queries with `enabled: isStaff`.
 
+## Anonymity model v2 (shipped June 2026)
+
+Reworked after review: anonymity should look like the *absence* of identity, not an alternate
+identity.
+
+- [x] **No handles in the UI** — posts show a neutral mask + "Anonymous" everywhere; `anon_handle`
+  stays internal (ledger/uniqueness) and is no longer in any API response.
+- [x] **OP badge** — the post author's replies render as "Anonymous" with an **OP** badge instead
+  of a pseudonym.
+- [x] **Anonymous replies (opt-in)** — "Reply anonymously" checkbox per reply; identity hidden in
+  the UI, `user_id` still recorded for moderation; **no helpful points** for anonymous replies so
+  reputation stays tied to signed advice. Posts remain always-anonymous (uniform anonymity is
+  herd cover; optional anonymity would make anonymous posts conspicuous).
+- [x] **Copy aligned** — auth intro/footnote, navbar subtitle ("Anonymous problems, honest
+  advice"), composer hint ("No name, no handle — nothing links this post to you"), and the
+  post-success message.
+
 ## Next — P1, the founder thesis
 
 Don't start until the P0 loop works end to end.

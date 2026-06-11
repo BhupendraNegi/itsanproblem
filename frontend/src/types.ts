@@ -62,6 +62,8 @@ export type Comment = {
   // null when the comment is by the OP, who stays anonymous in their thread
   author_id: number | null
   author_username?: string | null
+  // true when this reply is by the post's (anonymous) author
+  op?: boolean
   helpful_count?: number
   viewer_marked?: boolean
   created_at: string
@@ -72,7 +74,6 @@ export type Post = {
   title: string
   body: string
   author: string
-  anon_handle?: string
   helpful_count?: number
   viewer_marked?: boolean
   created_at: string
@@ -109,7 +110,6 @@ export type NotificationsResponse = {
 export type ProfilePost = {
   id: number
   title: string
-  anon_handle: string
   created_at: string
   helpful_count: number
   comment_count: number
