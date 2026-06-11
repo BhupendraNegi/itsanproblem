@@ -32,7 +32,10 @@ module Api
 
         # Only you can see your own anonymous posts — resolved through the
         # post_authors ledger, never exposed on anyone else's profile.
-        profile[:posts] = own_posts if @user == current_user
+        if @user == current_user
+          profile[:posts] = own_posts
+          profile[:email_digest_enabled] = @user.email_digest_enabled
+        end
 
         render json: profile
       end

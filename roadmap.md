@@ -46,7 +46,11 @@ All five P0 items shipped (June 2026):
 
 Remaining from P0 scope:
 
-- [ ] **Email digest** — ActionMailer + digest job for the same two notification events.
+- [x] **Email digest** — `DigestJob` (Solid Queue recurring, 8am daily) emails each opted-in
+  user their unread, not-yet-emailed notifications via `DigestMailer` (HTML + text), then stamps
+  them `digested_at` so nothing is sent twice. Opt-out lives in Settings → Notifications
+  (`users.email_digest_enabled`). Dev mail is written to `backend/tmp/mails/` (`:file`
+  delivery); production SMTP is env-driven and no-ops until `SMTP_ADDRESS` is set.
 - [x] **6. User profile, expanded** — `bio` shown on the profile page; on **your own** profile,
   a "Your posts" list shows your anonymous posts with their handles, hidden status, and counts
   (resolved through the `post_authors` ledger, visible to no one else). Editing happens in
