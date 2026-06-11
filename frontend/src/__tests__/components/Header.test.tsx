@@ -3,8 +3,10 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../test/renderWithProviders'
 import { Header } from '../../components/Header'
+import type { User } from '../../types'
 
-const mockUser = { id: 42, name: 'Alice', email: 'alice@example.com' }
+const mockUser: User = { id: 42, name: 'Alice', username: 'alice', email: 'alice@example.com', role: 'member' }
+const staffUser: User = { ...mockUser, role: 'admin' }
 
 describe('Header', () => {
   it('renders the brand name', () => {
@@ -22,16 +24,38 @@ describe('Header', () => {
     expect(screen.getByText('A')).toBeInTheDocument()
   })
 
-  it('user pill links to the current user profile', () => {
+  it('opens the user menu with Profile, Settings, and Log out', async () => {
     renderWithProviders(<Header user={mockUser} onLogout={vi.fn()} />)
-    const link = screen.getByRole('link', { name: /alice/i })
-    expect(link).toHaveAttribute('href', '/users/42')
+    await userEvent.click(screen.getByRole('button', { name: /alice/i }))
+
+    const profile = screen.getByRole('menuitem', { name: 'Profile' })
+    expect(profile).toHaveAttribute('href', '/users/alice')
+    expect(screen.getByRole('menuitem', { name: 'Settings' })).toHaveAttribute('href', '/settings')
+    expect(screen.getByRole('menuitem', { name: 'Log out' })).toBeInTheDocument()
+    // no Admin entry for members
+    expect(screen.queryByRole('menuitem', { name: 'Admin' })).not.toBeInTheDocument()
   })
 
-  it('calls onLogout when the logout button is clicked', async () => {
+  it('shows the Admin entry for staff', async () => {
+    renderWithProviders(<Header user={staffUser} onLogout={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /alice/i }))
+    expect(screen.getByRole('menuitem', { name: 'Admin' })).toHaveAttribute('href', '/admin')
+  })
+
+  it('calls onLogout from the menu and closes it', async () => {
     const onLogout = vi.fn()
     renderWithProviders(<Header user={mockUser} onLogout={onLogout} />)
-    await userEvent.click(screen.getByRole('button', { name: /log out/i }))
+    await userEvent.click(screen.getByRole('button', { name: /alice/i }))
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Log out' }))
     expect(onLogout).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  })
+
+  it('closes the menu when clicking outside', async () => {
+    renderWithProviders(<Header user={mockUser} onLogout={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /alice/i }))
+    expect(screen.getByRole('menu')).toBeInTheDocument()
+    await userEvent.click(document.body)
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
 })
