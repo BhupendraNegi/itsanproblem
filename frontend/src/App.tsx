@@ -149,7 +149,7 @@ function AppContent() {
               onClick={() => queryClient.invalidateQueries({ queryKey: ['posts'] })}
               disabled={isLoading}
             >
-              <img src="/assets/icons/refresh-cw.svg" alt="" style={{ width: 14, height: 14 }} />
+              <img src="/assets/icons/refresh-cw.svg" alt="" className="icon-14" />
               Refresh
             </button>
           </div>

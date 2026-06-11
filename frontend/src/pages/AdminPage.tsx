@@ -21,14 +21,6 @@ interface AdminPageProps {
   onLogout: () => void
 }
 
-const sectionTitle: React.CSSProperties = {
-  fontFamily: 'var(--font-display)',
-  fontSize: 20,
-  fontWeight: 600,
-  letterSpacing: '-0.01em',
-  margin: 0,
-}
-
 function reasonsLabel(reasons: Record<string, number>) {
   return Object.entries(reasons)
     .map(([reason, count]) => `${reason.replace('_', ' ')} ×${count}`)
@@ -77,19 +69,17 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
   return (
     <>
       <Header user={currentUser} onLogout={onLogout} />
-      <main className="app-shell" style={{ maxWidth: 860 }}>
-        <Link to="/" className="btn-ghost" style={{ width: 'fit-content', paddingLeft: 0 }}>
-          <img src="/assets/icons/arrow-right.svg" alt="" style={{ width: 16, height: 16, transform: 'rotate(180deg)' }} />
+      <main className="app-shell">
+        <Link to="/" className="btn-ghost back-link">
+          <img src="/assets/icons/arrow-right.svg" alt="" />
           Back to feed
         </Link>
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.015em', margin: 0 }}>
-          Admin
-        </h1>
+        <h1 className="page-title">Admin</h1>
 
         {/* Stats */}
         {stats && (
-          <section className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 12 }}>
+          <section className="card admin-stats">
             {([
               ['users', stats.users],
               ['posts', stats.posts],
@@ -98,33 +88,33 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
               ['hidden posts', stats.hidden_posts],
               ['hidden comments', stats.hidden_comments],
             ] as const).map(([label, value]) => (
-              <div key={label} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--primary)' }}>{value}</div>
-                <div style={{ fontSize: 12, color: 'var(--fg2)' }}>{label}</div>
+              <div key={label} className="stat-cell">
+                <div className="stat-value primary">{value}</div>
+                <div className="stat-label">{label}</div>
               </div>
             ))}
           </section>
         )}
 
         {/* Moderation queue */}
-        <section style={{ display: 'grid', gap: 12 }}>
-          <h2 style={sectionTitle}>Moderation queue</h2>
+        <section className="page-section">
+          <h2 className="section-title">Moderation queue</h2>
           {flaggedPosts.length === 0 && flaggedComments.length === 0 ? (
             <div className="card empty">
               <h3>Queue is clear</h3>
               <p>Flagged posts and replies will show up here.</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gap: 10 }}>
+            <div className="card-list">
               {flaggedPosts.map((post) => (
-                <div key={`post-${post.id}`} className="card" style={{ padding: '16px 20px', display: 'grid', gap: 8 }}>
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>{post.title}</p>
-                  <p style={{ margin: 0, fontSize: 13, color: 'var(--fg2)' }}>{post.body}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--fg2)' }}>
+                <div key={`post-${post.id}`} className="card item-card">
+                  <p className="item-title">{post.title}</p>
+                  <p className="item-body">{post.body}</p>
+                  <div className="meta-line">
                     <span>post</span>
                     <span>· {reasonsLabel(post.reasons)}</span>
-                    {post.hidden && <span style={{ color: 'var(--accent)' }}>· hidden</span>}
-                    <span style={{ flex: 1 }} />
+                    {post.hidden && <span className="alert-note">· hidden</span>}
+                    <span className="spacer" />
                     <button className="action-btn" disabled={moderation.isPending}
                       onClick={() => moderation.mutate({ action: 'restore', target: 'posts', id: post.id })}>
                       Restore
@@ -137,13 +127,13 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
                 </div>
               ))}
               {flaggedComments.map((comment) => (
-                <div key={`comment-${comment.id}`} className="card" style={{ padding: '16px 20px', display: 'grid', gap: 8 }}>
-                  <p style={{ margin: 0, fontSize: 13 }}>{comment.body}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--fg2)' }}>
+                <div key={`comment-${comment.id}`} className="card item-card">
+                  <p className="item-body">{comment.body}</p>
+                  <div className="meta-line">
                     <span>reply on “{comment.post_title}”</span>
                     <span>· {reasonsLabel(comment.reasons)}</span>
-                    {comment.hidden && <span style={{ color: 'var(--accent)' }}>· hidden</span>}
-                    <span style={{ flex: 1 }} />
+                    {comment.hidden && <span className="alert-note">· hidden</span>}
+                    <span className="spacer" />
                     <button className="action-btn" disabled={moderation.isPending}
                       onClick={() => moderation.mutate({ action: 'restore', target: 'comments', id: comment.id })}>
                       Restore
@@ -160,28 +150,26 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
         </section>
 
         {/* Users */}
-        <section style={{ display: 'grid', gap: 12 }}>
-          <h2 style={sectionTitle}>Users</h2>
-          <label className="field" style={{ maxWidth: 320 }}>
+        <section className="page-section">
+          <h2 className="section-title">Users</h2>
+          <label className="field search-field">
             <span>Search</span>
-            <input value={userQuery} onChange={(e) => setUserQuery(e.target.value)} placeholder="Name or email" />
+            <input value={userQuery} onChange={(e) => setUserQuery(e.target.value)} placeholder="Name, username, or email" />
           </label>
-          <div style={{ display: 'grid', gap: 8 }}>
+          <div className="card-list">
             {(users ?? []).map((u) => (
-              <div key={u.id} className="card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 180 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>
+              <div key={u.id} className="card admin-user-row">
+                <div className="admin-user-info">
+                  <div className="admin-user-name">
                     {u.name}
-                    {u.role !== 'member' && (
-                      <span style={{ marginLeft: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--primary)' }}>{u.role}</span>
-                    )}
+                    {u.role !== 'member' && <span className="role-chip">{u.role}</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--fg2)', fontFamily: 'var(--font-mono)' }}>
+                  <div className="meta-line">
                     @{u.username} · {u.email} · {u.post_count} posts · {u.comment_count} replies
                   </div>
                 </div>
                 {u.id !== currentUser.id && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div className="row-actions">
                     {/* Moderators may impersonate members only; admins anyone. */}
                     {(isAdmin || u.role === 'member') && (
                       <button className="action-btn" disabled={impersonate.isPending} onClick={() => handleImpersonate(u.id)}>
@@ -189,7 +177,7 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
                       </button>
                     )}
                     {isAdmin && (
-                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--fg2)' }}>
+                      <label className="role-select">
                         Role
                         <select
                           value={u.role}

@@ -90,21 +90,19 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
   return (
     <>
       <Header user={currentUser} onLogout={onLogout} />
-      <main className="app-shell" style={{ maxWidth: 720 }}>
-        <Link to="/" className="btn-ghost" style={{ width: 'fit-content', paddingLeft: 0 }}>
-          <img src="/assets/icons/arrow-right.svg" alt="" style={{ width: 16, height: 16, transform: 'rotate(180deg)' }} />
+      <main className="app-shell">
+        <Link to="/" className="btn-ghost back-link">
+          <img src="/assets/icons/arrow-right.svg" alt="" />
           Back to feed
         </Link>
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.015em', margin: 0 }}>
-          Settings
-        </h1>
+        <h1 className="page-title">Settings</h1>
 
         {/* Profile */}
-        <section className="card" style={{ display: 'grid', gap: 14 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, margin: 0 }}>Profile</h2>
+        <section className="card settings-card">
+          <h2 className="section-title">Profile</h2>
           {profileStatus && <div className={`alert ${profileStatus.kind}`}>{profileStatus.text}</div>}
-          <form onSubmit={handleProfileSubmit} style={{ display: 'grid', gap: 12 }}>
+          <form onSubmit={handleProfileSubmit} className="settings-form">
             <label className="field">
               <span>Name</span>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
@@ -131,17 +129,17 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
                 rows={2}
               />
             </label>
-            <button type="submit" className="btn-primary" style={{ width: 'fit-content' }} disabled={profileMutation.isPending}>
+            <button type="submit" className="btn-primary" disabled={profileMutation.isPending}>
               {profileMutation.isPending ? 'Saving…' : 'Save profile'}
             </button>
           </form>
         </section>
 
         {/* Password */}
-        <section className="card" style={{ display: 'grid', gap: 14 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, margin: 0 }}>Password</h2>
+        <section className="card settings-card">
+          <h2 className="section-title">Password</h2>
           {passwordStatus && <div className={`alert ${passwordStatus.kind}`}>{passwordStatus.text}</div>}
-          <form onSubmit={handlePasswordSubmit} style={{ display: 'grid', gap: 12 }}>
+          <form onSubmit={handlePasswordSubmit} className="settings-form">
             <label className="field">
               <span>Current password</span>
               <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoComplete="current-password" />
@@ -154,16 +152,16 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
               <span>Confirm new password</span>
               <input type="password" value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} required autoComplete="new-password" />
             </label>
-            <button type="submit" className="btn-primary" style={{ width: 'fit-content' }} disabled={passwordMutation.isPending}>
+            <button type="submit" className="btn-primary" disabled={passwordMutation.isPending}>
               {passwordMutation.isPending ? 'Changing…' : 'Change password'}
             </button>
           </form>
         </section>
 
         {/* Notifications */}
-        <section className="card" style={{ display: 'grid', gap: 14 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, margin: 0 }}>Notifications</h2>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer' }}>
+        <section className="card settings-card">
+          <h2 className="section-title">Notifications</h2>
+          <label className="checkbox-row">
             <input
               type="checkbox"
               checked={digestEnabled}
@@ -172,15 +170,15 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
             />
             Email me a daily digest
           </label>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--fg2)' }}>
+          <p className="section-hint">
             One email a day with new replies to your posts and helpful marks on your replies —
             it's the only way back to your anonymous posts when you're away.
           </p>
         </section>
 
         {/* Appearance */}
-        <section className="card" style={{ display: 'grid', gap: 14 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, margin: 0 }}>Appearance</h2>
+        <section className="card settings-card">
+          <h2 className="section-title">Appearance</h2>
           <div className="segmented" role="radiogroup" aria-label="Theme">
             {THEME_OPTIONS.map((option) => (
               <button
@@ -195,7 +193,7 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
               </button>
             ))}
           </div>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--fg2)' }}>
+          <p className="section-hint">
             System follows your OS appearance; Light and Dark override it.
           </p>
         </section>
