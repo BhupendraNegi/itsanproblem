@@ -74,7 +74,8 @@ Remaining from P0 scope:
     (admins can't change their own role or delete themselves).
   - **Impersonation** — issues a JWT for the target with an `impersonator_id` claim and writes
     an `impersonations` audit row (who, whom, when); the SPA switches session and returns to
-    the feed.
+    the feed, showing a persistent warning banner with a "Stop impersonating" button that
+    restores the original staff session.
   - **Moderator role** — gets the dashboard, content moderation, and impersonation of
     *members only*; role changes and user deletion stay admin-only (a moderator can never
     mint an admin). Seeded: `moderator@itsanproblem.test`.
