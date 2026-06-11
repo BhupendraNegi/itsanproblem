@@ -126,6 +126,7 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
                 value={bioValue}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="A line about you, shown on your profile"
+                maxLength={300}
                 rows={2}
               />
             </label>

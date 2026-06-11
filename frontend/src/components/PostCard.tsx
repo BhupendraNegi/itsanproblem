@@ -120,6 +120,7 @@ export function PostCard({
               value={commentInputs[post.id] || ''}
               onChange={(e) => setCommentInputs((curr) => ({ ...curr, [post.id]: e.target.value }))}
               placeholder="Write something useful. Your name is attached."
+              maxLength={2000}
               rows={2}
               required
             />

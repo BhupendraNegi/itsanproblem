@@ -23,22 +23,24 @@ export function PostForm({ title, setTitle, body, setBody, onSubmit, isLoading }
       </div>
       <form onSubmit={onSubmit} className="stack">
         <label className="field">
-          <span>Title</span>
+          <span>Title <span className="char-count">{title.length}/120</span></span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onFocus={() => setFocused(true)}
             placeholder="One line — what's actually bothering you"
+            maxLength={120}
             required
           />
         </label>
         {(focused || body || title) && (
           <label className="field">
-            <span>Add details</span>
+            <span>Add details <span className="char-count">{body.length}/5000</span></span>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Set the scene. No need to be tidy."
+              maxLength={5000}
               rows={4}
               required
             />

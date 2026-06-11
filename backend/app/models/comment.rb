@@ -4,7 +4,7 @@ class Comment < ApplicationRecord
   has_many :helpful_marks, as: :markable, dependent: :destroy
   has_many :flags, as: :flaggable, dependent: :destroy
 
-  validates :body, presence: true
+  validates :body, presence: true, length: {maximum: 2000}
 
   after_create :notify_post_author
 

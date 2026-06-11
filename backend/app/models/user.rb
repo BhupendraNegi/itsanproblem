@@ -28,7 +28,8 @@ class User < ApplicationRecord
   # semantics of deleting a user's posts along with the account.
   before_destroy :destroy_authored_posts, prepend: true
 
-  validates :name, presence: true
+  validates :name, presence: true, length: {maximum: 50}
+  validates :bio, length: {maximum: 300}
 
   validates :username, presence: true, uniqueness: true,
     format: {with: USERNAME_FORMAT, message: "must be 3–20 lowercase letters, numbers, or underscores (not all numbers)"}
