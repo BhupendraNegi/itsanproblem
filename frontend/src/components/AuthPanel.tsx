@@ -98,12 +98,16 @@ export function AuthPanel({
             />
           </label>
           <label className="field">
-            <span>Password</span>
+            <span>
+              Password
+              {mode === 'register' && <span className="char-count">min 8 characters</span>}
+            </span>
             <input
               type="password"
               value={authFields.password}
               onChange={(e) => setAuthFields({ ...authFields, password: e.target.value })}
-              placeholder="At least 8 characters"
+              placeholder={mode === 'register' ? 'At least 8 characters' : 'Your password'}
+              minLength={mode === 'register' ? 8 : undefined}
               required
             />
           </label>

@@ -165,8 +165,8 @@ export function SettingsPage({ currentUser, onLogout }: SettingsPageProps) {
               <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoComplete="current-password" />
             </label>
             <label className="field">
-              <span>New password</span>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="new-password" />
+              <span>New password <span className="char-count">min 8 characters</span></span>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required autoComplete="new-password" />
             </label>
             <label className="field">
               <span>Confirm new password</span>

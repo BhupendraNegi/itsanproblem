@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from '../api'
 import type {
   AdminFlagsResponse,
@@ -118,10 +118,15 @@ export function useFlagMutation() {
   })
 }
 
+const POSTS_PER_PAGE = 10
+
 export function usePosts(sort: 'recent' | 'hot' = 'recent') {
-  return useQuery<Post[]>({
+  return useInfiniteQuery({
     queryKey: ['posts', sort],
-    queryFn: () => api.fetchPosts(sort),
+    queryFn: ({ pageParam }) => api.fetchPosts(sort, pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: Post[], pages: Post[][]) =>
+      lastPage.length === POSTS_PER_PAGE ? pages.length + 1 : undefined,
   })
 }
 
@@ -181,18 +186,21 @@ export function useUserProfile(handle: string) {
 
 // ---- Admin ----
 
-export function useAdminStats() {
-  return useQuery<AdminStats>({ queryKey: ['admin', 'stats'], queryFn: api.fetchAdminStats })
+// enabled gates stop non-staff (e.g. a just-impersonated member still on
+// /admin) from firing requests that can only 403 before the redirect.
+export function useAdminStats(enabled = true) {
+  return useQuery<AdminStats>({ queryKey: ['admin', 'stats'], queryFn: api.fetchAdminStats, enabled })
 }
 
-export function useAdminFlags() {
-  return useQuery<AdminFlagsResponse>({ queryKey: ['admin', 'flags'], queryFn: api.fetchAdminFlags })
+export function useAdminFlags(enabled = true) {
+  return useQuery<AdminFlagsResponse>({ queryKey: ['admin', 'flags'], queryFn: api.fetchAdminFlags, enabled })
 }
 
-export function useAdminUsers(q: string) {
+export function useAdminUsers(q: string, enabled = true) {
   return useQuery<AdminUser[]>({
     queryKey: ['admin', 'users', q],
     queryFn: () => api.fetchAdminUsers(q),
+    enabled,
   })
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { NotificationBell } from './NotificationBell'
+import { avatarHueClass } from '../avatar'
 import type { User } from '../types'
 
 interface HeaderProps {
@@ -47,7 +48,7 @@ export function Header({ user, onLogout }: HeaderProps) {
               aria-expanded={menuOpen}
             >
               <span className="user-name">{user.name}</span>
-              <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
+              <span className={`user-avatar ${avatarHueClass(user.username ?? user.name)}`}>{user.name.charAt(0).toUpperCase()}</span>
               <span className="user-caret" aria-hidden>▾</span>
             </button>
             {menuOpen && (

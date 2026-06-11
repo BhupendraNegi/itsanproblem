@@ -33,17 +33,19 @@ export function AdminPage({ currentUser, onLogout }: AdminPageProps) {
   const queryClient = useQueryClient()
   const [userQuery, setUserQuery] = useState('')
 
-  const { data: stats } = useAdminStats()
-  const { data: flagged } = useAdminFlags()
-  const { data: users } = useAdminUsers(userQuery)
+  const isAdmin = currentUser.role === 'admin'
+  const isStaff = isAdmin || currentUser.role === 'moderator'
+
+  // enabled: isStaff stops 403 noise when a non-staff session briefly mounts
+  // this page before the redirect below kicks in
+  const { data: stats } = useAdminStats(isStaff)
+  const { data: flagged } = useAdminFlags(isStaff)
+  const { data: users } = useAdminUsers(userQuery, isStaff)
 
   const moderation = useAdminModerationMutation()
   const roleMutation = useAdminRoleMutation()
   const deleteUser = useAdminDeleteUserMutation()
   const impersonate = useImpersonateMutation()
-
-  const isAdmin = currentUser.role === 'admin'
-  const isStaff = isAdmin || currentUser.role === 'moderator'
 
   if (!isStaff) {
     return <Navigate to="/" replace />

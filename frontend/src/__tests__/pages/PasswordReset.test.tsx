@@ -27,7 +27,7 @@ describe('ResetPasswordPage', () => {
 
   it('resets the password with a token from the URL', async () => {
     renderWithToken('/reset-password?token=abc123')
-    await userEvent.type(screen.getByLabelText('New password'), 'newpassword456')
+    await userEvent.type(screen.getByLabelText(/^new password/i), 'newpassword456')
     await userEvent.type(screen.getByLabelText('Confirm new password'), 'newpassword456')
     await userEvent.click(screen.getByRole('button', { name: /set new password/i }))
     expect(await screen.findByText(/password updated/i)).toBeInTheDocument()

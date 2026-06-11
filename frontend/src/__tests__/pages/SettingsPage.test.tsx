@@ -44,7 +44,7 @@ describe('SettingsPage', () => {
   it('changes the password and clears the form', async () => {
     renderSettings()
     await userEvent.type(screen.getByLabelText('Current password'), 'oldpass123')
-    await userEvent.type(screen.getByLabelText('New password'), 'newpass456')
+    await userEvent.type(screen.getByLabelText(/^new password/i), 'newpass456')
     await userEvent.type(screen.getByLabelText('Confirm new password'), 'newpass456')
     await userEvent.click(screen.getByRole('button', { name: /change password/i }))
     expect(await screen.findByText('Password changed')).toBeInTheDocument()
