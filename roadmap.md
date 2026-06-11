@@ -82,55 +82,55 @@ Remaining from P0 scope:
   - **Site stats** — users / posts / comments / flags / hidden-content totals.
   - Still open: account deactivation (soft suspend) as a gentler option than deletion.
 
-## P0.1 — polish & gaps (proposed, awaiting review)
+## P0.1 — polish & gaps (shipped June 2026)
 
 Things I'd want fixed before showing this to a stranger — found by using the product, not by
-adding scope. Ordered by impact within each group.
+adding scope.
 
 ### Holes in the core loop
 
-- [ ] **1. Post detail page** (`/posts/:id`) — the biggest UX hole: posts aren't clickable.
+- [x] **1. Post detail page** (`/posts/:id`) — the biggest UX hole: posts aren't clickable.
   The feed clamps bodies to 3 lines with no way to read the rest, and `GET /api/v1/posts/:id`
   already exists but nothing in the SPA uses it. One page: full body, all replies, the same
   helpful/flag/reply actions. Everything below that needs a "go to the post" link depends on it.
-- [ ] **2. Clickable notifications** — bell items are plain text; "someone replied to your
+- [x] **2. Clickable notifications** — bell items are plain text; "someone replied to your
   post" should navigate to that post (needs #1). Also show the unread count in the document
   title ("(2) it's an problem.") so a background tab is worth noticing.
-- [ ] **3. Flag a comment** — the backend supports it (`POST /comments/:id/flag`, auto-hide,
+- [x] **3. Flag a comment** — the backend supports it (`POST /comments/:id/flag`, auto-hide,
   moderation queue all work) but the UI only lets you flag posts. Bad replies are the likelier
   abuse target. Small flag affordance on each comment, same reason picker.
-- [ ] **4. "Posted as anon_xxxx" feedback** — after posting, tell the author their handle for
+- [x] **4. "Posted as anon_xxxx" feedback** — after posting, tell the author their handle for
   that thread ("Posted anonymously as anon_a91f") so handles feel like a feature, not a mystery.
 
 ### Trust & safety plumbing (cheap now, painful later)
 
-- [ ] **5. Content length limits** — posts and comments currently have **no max length**; a
+- [x] **5. Content length limits** — posts and comments currently have **no max length**; a
   10MB body is a valid record. Backend validations (title ≤ 120, body ≤ 5000, comment ≤ 2000,
   bio ≤ 300) + matching counters on the composer.
-- [ ] **6. Rate limiting** — `rack-attack` is in the Gemfile but has **no initializer**; it does
+- [x] **6. Rate limiting** — `rack-attack` is in the Gemfile but has **no initializer**; it does
   nothing. Throttle login attempts per email/IP and post/comment creation per user — an
   anonymous board without this is a spam magnet on day one.
-- [ ] **7. Forgot password** — Devise `recoverable` is enabled and the mailer infra now exists,
+- [x] **7. Forgot password** — Devise `recoverable` is enabled and the mailer infra now exists,
   but there's no reset flow. "Forgot password?" link → reset email → set new password. Without
   it, a forgotten password = a lost (anonymous) account nobody can recover.
-- [ ] **8. Delete my account** — only admins can delete users; there's no self-service. Danger
+- [x] **8. Delete my account** — only admins can delete users; there's no self-service. Danger
   zone in Settings (password required): deletes the account and authored posts, same as the
   admin path. (Related: the still-open admin "deactivate" soft-suspend.)
 
 ### Small fit & finish
 
-- [ ] **9. Feed pagination** — `GET /posts` returns every post in the database; fine at 5,
+- [x] **9. Feed pagination** — `GET /posts` returns every post in the database; fine at 5,
   dead at 5000. Simple `?page=` + a "Load more" button.
-- [ ] **10. Loading skeletons & empty states** — the feed shows a bare "Loading…" string and a
+- [x] **10. Loading skeletons & empty states** — the feed shows a bare "Loading…" string and a
   brand-new instance shows nothing inviting. Card-shaped skeletons + a friendly "no posts yet —
   be the first" empty state.
-- [ ] **11. Honest password hint** — the register form says "At least 8 characters" but Devise
+- [x] **11. Honest password hint** — the register form says "At least 8 characters" but Devise
   accepts 6. Align (raise Devise to 8) and show the rule as a field hint, not just a placeholder.
-- [ ] **12. Remember the feed sort** — Recent/Hot resets to Recent on every visit; persist the
+- [x] **12. Remember the feed sort** — Recent/Hot resets to Recent on every visit; persist the
   choice like `themePref`.
-- [ ] **13. Per-user avatar colors** — every avatar is the same gradient, so every face looks
+- [x] **13. Per-user avatar colors** — every avatar is the same gradient, so every face looks
   identical. Derive a stable hue from the username so people are tellable-apart at a glance.
-- [ ] **14. Silence the admin 403s** — an impersonated/non-staff session briefly mounts
+- [x] **14. Silence the admin 403s** — an impersonated/non-staff session briefly mounts
   `/admin` and fires three queries that 403 before the redirect (seen during mobile
   verification). Gate the queries with `enabled: isStaff`.
 
