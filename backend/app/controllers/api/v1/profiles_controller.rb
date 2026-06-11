@@ -23,6 +23,16 @@ module Api
         end
       end
 
+      # Self-service deletion; password required so a hijacked tab can't do it.
+      def destroy
+        unless current_user.valid_password?(params.require(:user)[:password].to_s)
+          return render json: {error: "Password is incorrect"}, status: :unprocessable_content
+        end
+
+        current_user.destroy!
+        render json: {deleted: true}
+      end
+
       private
 
       def profile_params

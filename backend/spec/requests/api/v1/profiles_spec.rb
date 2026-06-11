@@ -38,6 +38,27 @@ RSpec.describe "Api::V1::Profiles", type: :request do
     end
   end
 
+  describe "DELETE /api/v1/profile" do
+    it "deletes the account and authored posts with the correct password" do
+      post = user.posts.create!(title: "Mine", body: "Gone with me.")
+
+      delete "/api/v1/profile", params: {user: {password: "password123"}},
+        headers: auth_headers_for(user), as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(User.exists?(user.id)).to be(false)
+      expect(Post.exists?(post.id)).to be(false)
+    end
+
+    it "refuses with a wrong password" do
+      delete "/api/v1/profile", params: {user: {password: "wrong"}},
+        headers: auth_headers_for(user), as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(User.exists?(user.id)).to be(true)
+    end
+  end
+
   describe "PATCH /api/v1/profile/password" do
     it "changes the password when the current password is correct" do
       patch "/api/v1/profile/password",

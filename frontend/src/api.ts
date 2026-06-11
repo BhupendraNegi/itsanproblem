@@ -115,6 +115,11 @@ export async function changePassword(data: { currentPassword: string; password: 
   return response.data
 }
 
+export async function deleteAccount(password: string) {
+  const response = await api.delete<{ deleted: boolean }>('/profile', { data: { user: { password } } })
+  return response.data
+}
+
 export async function fetchNotifications() {
   const response = await api.get<NotificationsResponse>('/notifications')
   return response.data

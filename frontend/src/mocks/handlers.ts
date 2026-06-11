@@ -179,6 +179,10 @@ export const handlers = [
     HttpResponse.json({ success: true })
   ),
 
+  http.delete('/api/v1/profile', () =>
+    HttpResponse.json({ deleted: true })
+  ),
+
   http.get('/api/v1/admin/stats', () =>
     HttpResponse.json(mockAdminStats)
   ),

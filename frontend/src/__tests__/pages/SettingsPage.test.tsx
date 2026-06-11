@@ -64,6 +64,17 @@ describe('SettingsPage', () => {
     expect(toggle).not.toBeChecked()
   })
 
+  it('deletes the account after password + confirm, then logs out', async () => {
+    const onLogout = vi.fn()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    renderWithProviders(<SettingsPage currentUser={currentUser} onLogout={onLogout} />)
+
+    await userEvent.type(screen.getByLabelText('Confirm with your password'), 'password123')
+    await userEvent.click(screen.getByRole('button', { name: /delete my account/i }))
+
+    await waitFor(() => expect(onLogout).toHaveBeenCalledOnce())
+  })
+
   it('switches the theme preference', async () => {
     renderSettings()
     await userEvent.click(screen.getByRole('radio', { name: 'Dark' }))
