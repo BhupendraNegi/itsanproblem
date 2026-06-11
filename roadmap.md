@@ -60,7 +60,7 @@ Remaining from P0 scope:
   `valid_password?` → `PATCH /profile/password`), and **appearance** (Light / Dark / System
   theme, persisted as `themePref`; dark mode now keys off `data-theme` instead of the media
   query, with an inline pre-resolve script in `index.html` to avoid a flash).
-- [x] **8. Admin role & moderation** — `role` on users (`member`/`admin`) with
+- [x] **8. Admin role & moderation** — `role` on users (`member`/`moderator`/`admin`) with
   [ActionPolicy](https://actionpolicy.evilmartians.io) (deny-by-default policies, 403 on
   violation). Shipped under `/api/v1/admin/*` + an `/admin` SPA page (header link and route
   gated on role; seeded admin: `admin@itsanproblem.test`):
@@ -71,6 +71,9 @@ Remaining from P0 scope:
   - **Impersonation** — issues a JWT for the target with an `impersonator_id` claim and writes
     an `impersonations` audit row (who, whom, when); the SPA switches session and returns to
     the feed.
+  - **Moderator role** — gets the dashboard, content moderation, and impersonation of
+    *members only*; role changes and user deletion stay admin-only (a moderator can never
+    mint an admin). Seeded: `moderator@itsanproblem.test`.
   - **Site stats** — users / posts / comments / flags / hidden-content totals.
   - Still open: account deactivation (soft suspend) as a gentler option than deletion.
 

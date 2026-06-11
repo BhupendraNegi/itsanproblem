@@ -1,8 +1,10 @@
+export type Role = 'member' | 'moderator' | 'admin'
+
 export type User = {
   id: number
   name: string
   email: string
-  role?: 'member' | 'admin'
+  role?: Role
 }
 
 export type AdminStats = {
@@ -44,7 +46,7 @@ export type AdminUser = {
   id: number
   name: string
   email: string
-  role: 'member' | 'admin'
+  role: Role
   joined_at: string
   post_count: number
   comment_count: number

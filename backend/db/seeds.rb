@@ -11,7 +11,7 @@
 # │    password:  strongpassword@123itsap                                              │
 # │                                                                        │
 # │  Other seeded users: priya@ / sam@ / lena@ itsanproblem.test           │
-# │  Admin user:         admin@itsanproblem.test (same password)           │
+# │  Staff users:        admin@ / moderator@ itsanproblem.test             │
 # └──────────────────────────────────────────────────────────────────────┘
 
 if Rails.env.production?
@@ -28,12 +28,19 @@ demo = User.find_or_create_by!(email: "demo@itsanproblem.test") do |u|
   u.password_confirmation = password
 end
 
-# Admin account for the /admin moderation UI.
+# Staff accounts for the /admin moderation UI.
 User.find_or_create_by!(email: "admin@itsanproblem.test") do |u|
   u.name = "Admin"
   u.password = password
   u.password_confirmation = password
   u.role = "admin"
+end
+
+User.find_or_create_by!(email: "moderator@itsanproblem.test") do |u|
+  u.name = "Moderator"
+  u.password = password
+  u.password_confirmation = password
+  u.role = "moderator"
 end
 
 commenters = %w[Priya Sam Lena].map do |name|
