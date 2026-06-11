@@ -845,10 +845,13 @@ body.impersonating .navbar { top: 40px; }
 .post-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 4px;
   border-top: 1px solid var(--border-subtle);
   padding-top: 12px;
 }
+
+.flag-menu { flex-wrap: wrap; }
 
 .action-btn {
   display: inline-flex;
