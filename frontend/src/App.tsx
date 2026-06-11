@@ -80,7 +80,7 @@ function AppContent() {
     postMutation.mutate({ title: postTitle.trim(), body: postBody.trim() })
   }
 
-  function handleCommentSubmit(event: React.FormEvent, postId: number) {
+  function handleCommentSubmit(event: React.FormEvent, postId: number, anonymous: boolean) {
     event.preventDefault()
     if (!user) {
       setAlertMessage('You must be signed in to comment')
@@ -90,7 +90,7 @@ function AppContent() {
     const commentBody = commentInputs[postId]?.trim() || ''
     if (!commentBody) return
 
-    commentMutation.mutate({ postId, body: commentBody })
+    commentMutation.mutate({ postId, body: commentBody, anonymous })
   }
 
   if (!user) {
@@ -102,7 +102,7 @@ function AppContent() {
               <img src="/assets/logo-iap-mark.svg" alt="" />
               <div>
                 <h1 className="app-title">it&apos;s an problem<span className="dot">.</span></h1>
-                <p className="app-subtitle">Anonymous problem board</p>
+                <p className="app-subtitle">Anonymous problems, honest advice</p>
               </div>
             </div>
           </div>

@@ -871,6 +871,26 @@ body.impersonating .navbar { top: 40px; }
   flex-shrink: 0;
 }
 
+/* Anonymity has no identity: the same neutral mask on every post. */
+.post-avatar.anon-mask { background: var(--gradient-chrome); }
+.post-avatar.anon-mask img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+
+.op-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--badge-fg);
+  background: var(--badge-bg);
+  border-radius: var(--radius-pill);
+  vertical-align: middle;
+}
+
+.reply-anon-toggle { font-size: 13px; color: var(--fg2); }
+
 .post-byline-text { display: flex; flex-direction: column; line-height: 1.35; flex: 1; min-width: 0; }
 .post-byline-text strong { font-size: 13px; font-family: var(--font-mono); color: var(--fg1); }
 .post-byline-text > span { font-size: 12px; color: var(--fg2); font-family: var(--font-mono); }
@@ -979,7 +999,10 @@ body.impersonating .navbar { top: 40px; }
 
 .comment-form-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* ---- Composer ---- */

@@ -52,7 +52,6 @@ module Api
             {
               id: post.id,
               title: post.title,
-              anon_handle: post.anon_handle,
               created_at: post.created_at,
               helpful_count: post.helpful_marks.size,
               comment_count: post.comments.size,

@@ -1,6 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useHelpfulMutation } from '../hooks/useMutations'
-import { avatarHueClass } from '../avatar'
 import { FlagButton } from './FlagButton'
 import type { Comment, Post } from '../types'
 
@@ -8,7 +8,7 @@ interface PostCardProps {
   post: Post
   commentInputs: Record<number, string>
   setCommentInputs: (inputs: Record<number, string> | ((current: Record<number, string>) => Record<number, string>)) => void
-  onCommentSubmit: (event: React.FormEvent, postId: number) => void
+  onCommentSubmit: (event: React.FormEvent, postId: number, anonymous: boolean) => void
   isCommentLoading: boolean
   // detail page: full body, plain (unlinked) title
   expanded?: boolean
@@ -36,17 +36,17 @@ export function PostCard({
 }: PostCardProps) {
   const helpfulCount = post.helpful_count ?? 0
   const isHot = helpfulCount >= 10
-  const handle = post.anon_handle ?? 'anonymous'
   const helpfulMutation = useHelpfulMutation()
-
-  const avatarLetter = handle.includes('_') ? handle.split('_')[1].charAt(0).toUpperCase() : handle.charAt(0).toUpperCase()
+  const [replyAnon, setReplyAnon] = useState(false)
 
   return (
     <article className="post-card">
       <div className="post-byline">
-        <span className={`post-avatar ${avatarHueClass(handle)}`}>{avatarLetter}</span>
+        <span className="post-avatar anon-mask">
+          <img src="/assets/icons/user-x.svg" alt="" />
+        </span>
         <span className="post-byline-text">
-          <strong>{handle}</strong>
+          <strong>Anonymous</strong>
           <span>
             {formatRelative(post.created_at)} · {post.comments.length} {post.comments.length === 1 ? 'reply' : 'replies'}
           </span>
@@ -99,7 +99,10 @@ export function PostCard({
                       <strong>{comment.author}</strong>
                     </Link>
                   ) : (
-                    <strong>{comment.author}</strong>
+                    <>
+                      <strong>{comment.author}</strong>
+                      {comment.op && <span className="op-badge" title="The post's author">OP</span>}
+                    </>
                   )}
                   {' '}· {formatRelative(comment.created_at)}
                   {' '}·{' '}
@@ -118,19 +121,23 @@ export function PostCard({
           </ul>
         )}
 
-        <form className="comment-form" onSubmit={(e) => onCommentSubmit(e, post.id)}>
+        <form className="comment-form" onSubmit={(e) => onCommentSubmit(e, post.id, replyAnon)}>
           <label className="field">
-            <span>Reply as <strong>{post.author || 'you'}</strong></span>
+            <span>{replyAnon ? 'Replying anonymously — no name attached' : 'Reply as yourself — your name is attached'}</span>
             <textarea
               value={commentInputs[post.id] || ''}
               onChange={(e) => setCommentInputs((curr) => ({ ...curr, [post.id]: e.target.value }))}
-              placeholder="Write something useful. Your name is attached."
+              placeholder="Write something useful."
               maxLength={2000}
               rows={2}
               required
             />
           </label>
           <div className="comment-form-actions">
+            <label className="checkbox-row reply-anon-toggle">
+              <input type="checkbox" checked={replyAnon} onChange={(e) => setReplyAnon(e.target.checked)} />
+              Reply anonymously
+            </label>
             <button type="submit" className="btn-primary" disabled={isCommentLoading || !commentInputs[post.id]?.trim()}>
               {isCommentLoading ? 'Posting…' : 'Post reply'}
             </button>

@@ -20,11 +20,11 @@ export function PostPage({ currentUser, onLogout }: PostPageProps) {
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({})
   const commentMutation = useCommentMutation(setAlertMessage, setCommentInputs)
 
-  function handleCommentSubmit(event: React.FormEvent, targetPostId: number) {
+  function handleCommentSubmit(event: React.FormEvent, targetPostId: number, anonymous: boolean) {
     event.preventDefault()
     const body = commentInputs[targetPostId]?.trim() || ''
     if (!body) return
-    commentMutation.mutate({ postId: targetPostId, body })
+    commentMutation.mutate({ postId: targetPostId, body, anonymous })
   }
 
   return (

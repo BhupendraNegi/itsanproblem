@@ -8,15 +8,24 @@ class Comment < ApplicationRecord
 
   after_create :notify_post_author
 
+  # The OP is always anonymous in their own thread (badged "OP" by the UI);
+  # other commenters can opt in via the anonymous flag.
+  def op?
+    user_id == post.author_user_id
+  end
+
+  def hide_identity?
+    op? || anonymous?
+  end
+
   def as_json(options = {})
     viewer = options.delete(:viewer)
-    # The OP stays anonymous in their own thread: their replies carry the
-    # post's anon handle instead of their real name.
-    op = user_id == post.author_user_id
+    hidden = hide_identity?
     super({only: [:id, :body, :created_at]}.merge(options)).merge(
-      "author" => op ? post.anon_handle : user.name,
-      "author_id" => op ? nil : user_id,
-      "author_username" => op ? nil : user.username,
+      "author" => hidden ? "Anonymous" : user.name,
+      "author_id" => hidden ? nil : user_id,
+      "author_username" => hidden ? nil : user.username,
+      "op" => op?,
       "helpful_count" => helpful_marks.size,
       "viewer_marked" => viewer ? helpful_marks.any? { |m| m.user_id == viewer.id } : false
     )

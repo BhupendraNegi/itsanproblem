@@ -12,8 +12,10 @@ class HelpfulMark < ApplicationRecord
 
   private
 
+  # Anonymous replies earn no reputation — points are the reward for putting
+  # your name on advice.
   def op_mark_on_comment?
-    markable.is_a?(Comment) && markable.post.author_user_id == user_id
+    markable.is_a?(Comment) && !markable.anonymous? && markable.post.author_user_id == user_id
   end
 
   def award_op_point

@@ -62,12 +62,11 @@ export function usePostMutation(
 
   return useMutation<Post, Error, { title: string; body: string }>({
     mutationFn: api.createPost,
-    onSuccess: (post) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setPostTitle('')
       setPostBody('')
-      // surface the thread handle so anon identity feels deliberate
-      setAlertMessage(post.anon_handle ? `Posted anonymously as ${post.anon_handle}` : 'Post created successfully')
+      setAlertMessage('Posted anonymously — find it later under "Your posts" on your profile.')
     },
     onError: (error: Error) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,8 +82,8 @@ export function useCommentMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useMutation<Comment, Error, { postId: number; body: string }>({
-    mutationFn: ({ postId, body }) => api.createComment(postId, { body }),
+  return useMutation<Comment, Error, { postId: number; body: string; anonymous?: boolean }>({
+    mutationFn: ({ postId, body, anonymous }) => api.createComment(postId, { body, anonymous }),
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setCommentInputs((current: Record<number, string>) => ({ ...current, [postId]: '' }))
