@@ -1,13 +1,7 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useFlagMutation, useHelpfulMutation } from '../hooks/useMutations'
+import { useHelpfulMutation } from '../hooks/useMutations'
+import { FlagButton } from './FlagButton'
 import type { Comment, Post } from '../types'
-
-const FLAG_REASONS = [
-  { value: 'harm', label: 'Harmful' },
-  { value: 'spam', label: 'Spam' },
-  { value: 'identifying_info', label: 'Identifying info' },
-]
 
 interface PostCardProps {
   post: Post
@@ -43,17 +37,6 @@ export function PostCard({
   const isHot = helpfulCount >= 10
   const handle = post.anon_handle ?? 'anonymous'
   const helpfulMutation = useHelpfulMutation()
-  const flagMutation = useFlagMutation()
-  const [flagMenuOpen, setFlagMenuOpen] = useState(false)
-  const [reported, setReported] = useState(false)
-
-  function handleFlag(reason: string) {
-    flagMutation.mutate(
-      { target: 'posts', id: post.id, reason },
-      { onSuccess: () => setReported(true) }
-    )
-    setFlagMenuOpen(false)
-  }
 
   return (
     <article className="post-card">
@@ -93,23 +76,7 @@ export function PostCard({
           {post.viewer_marked ? 'Marked helpful' : 'Mark helpful'}
           {helpfulCount > 0 && <> · {helpfulCount}</>}
         </button>
-        {reported ? (
-          <span className="action-btn is-active">Reported ✓</span>
-        ) : (
-          <button className="action-btn" onClick={() => setFlagMenuOpen((open) => !open)}>
-            <img src="/assets/icons/flag.svg" alt="" />
-            Flag
-          </button>
-        )}
-        {flagMenuOpen && !reported && (
-          <span className="flag-menu">
-            {FLAG_REASONS.map(({ value, label }) => (
-              <button key={value} className="action-btn" onClick={() => handleFlag(value)} disabled={flagMutation.isPending}>
-                {label}
-              </button>
-            ))}
-          </span>
-        )}
+        <FlagButton target="posts" id={post.id} />
       </div>
 
       <div className="comments-section">
@@ -138,6 +105,8 @@ export function PostCard({
                   >
                     Helpful{(comment.helpful_count ?? 0) > 0 && <> · {comment.helpful_count}</>}
                   </button>
+                  {' '}·{' '}
+                  <FlagButton target="comments" id={comment.id} compact />
                 </span>
               </li>
             ))}
