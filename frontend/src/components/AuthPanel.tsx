@@ -8,6 +8,8 @@ interface AuthPanelProps {
   onSubmit: (event: React.FormEvent) => void
   isLoading: boolean
   error: string | null
+  // false on the /admin route: sign-in only, no account creation
+  allowRegister?: boolean
 }
 
 export function AuthPanel({
@@ -17,38 +19,51 @@ export function AuthPanel({
   setAuthFields,
   onSubmit,
   isLoading,
-  error
+  error,
+  allowRegister = true
 }: AuthPanelProps) {
   return (
     <main className="auth-shell">
       <div className="auth-intro">
         <h1>it&apos;s an problem<span className="dot">.</span></h1>
-        <p>Register or log in, then share your anonymous post and let others comment with their name.</p>
+        <p>
+          {allowRegister
+            ? 'Register or log in, then share your anonymous post and let others comment with their name.'
+            : 'Sign in to continue. Accounts can’t be created from here.'}
+        </p>
       </div>
 
       <section className="card">
-        <div className="auth-tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === 'login'}
-            className={`auth-tab${mode === 'login' ? ' active' : ''}`}
-            onClick={() => setMode('login')}
-          >
-            <span>Sign In</span>
-            <span className="tab-sub">Existing user</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === 'register'}
-            className={`auth-tab${mode === 'register' ? ' active' : ''}`}
-            onClick={() => setMode('register')}
-          >
-            <span>Create Account</span>
-            <span className="tab-sub">New user</span>
-          </button>
-        </div>
+        {allowRegister ? (
+          <div className="auth-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'login'}
+              className={`auth-tab${mode === 'login' ? ' active' : ''}`}
+              onClick={() => setMode('login')}
+            >
+              <span>Sign In</span>
+              <span className="tab-sub">Existing user</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'register'}
+              className={`auth-tab${mode === 'register' ? ' active' : ''}`}
+              onClick={() => setMode('register')}
+            >
+              <span>Create Account</span>
+              <span className="tab-sub">New user</span>
+            </button>
+          </div>
+        ) : (
+          <div className="auth-tabs">
+            <span className="auth-tab active" style={{ cursor: 'default' }}>
+              <span>Sign In</span>
+            </span>
+          </div>
+        )}
 
         <form onSubmit={onSubmit} className="stack">
           {mode === 'register' && (

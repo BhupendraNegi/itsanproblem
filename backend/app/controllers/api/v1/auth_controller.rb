@@ -3,6 +3,9 @@ module Api
     class AuthController < ApplicationController
       def register
         user = User.new(register_params)
+        # Public registration always creates members. Admins are made only by
+        # promotion in the admin dashboard (PATCH /admin/users/:id/role).
+        user.role = :member
 
         if user.save
           render json: {user: user_response(user), token: encode_token(user_id: user.id)}, status: :created

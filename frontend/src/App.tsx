@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import useAuth from './store'
 import { AuthPanel } from './components/AuthPanel'
@@ -17,7 +17,11 @@ const queryClient = new QueryClient()
 
 function AppContent() {
   const { user, logout, login } = useAuth()
+  const location = useLocation()
   const [mode, setMode] = useState<'login' | 'register'>('login')
+
+  // The admin route is sign-in only: no account creation from /admin.
+  const allowRegister = !location.pathname.startsWith('/admin')
   const [authFields, setAuthFields] = useState({ name: '', email: '', password: '', passwordConfirmation: '' })
   const [alertMessage, setAlertMessage] = useState<string | null>(null)
   const [postTitle, setPostTitle] = useState('')
@@ -39,6 +43,11 @@ function AppContent() {
       return () => clearTimeout(timer)
     }
   }, [alertMessage])
+
+  // If register mode was selected elsewhere, snap back to login on /admin.
+  useEffect(() => {
+    if (!allowRegister && mode === 'register') setMode('login')
+  }, [allowRegister, mode])
 
   function handleAuthSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -90,6 +99,7 @@ function AppContent() {
           onSubmit={handleAuthSubmit}
           isLoading={authMutation.isPending}
           error={alertMessage}
+          allowRegister={allowRegister}
         />
       </>
     )
