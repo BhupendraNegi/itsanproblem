@@ -30,6 +30,33 @@ RSpec.describe "Api::V1::Posts", type: :request do
       expect(named["author_username"]).to eq(user.username)
     end
 
+    context "search" do
+      it "matches title and body case-insensitively" do
+        user.posts.create!(title: "Roommate drama", body: "He never cleans.")
+        user.posts.create!(title: "Other thing", body: "My ROOMMATE is loud.")
+        user.posts.create!(title: "Unrelated", body: "Nothing here.")
+
+        get "/api/v1/posts?q=roommate"
+        titles = JSON.parse(response.body).pluck("title")
+        expect(titles).to contain_exactly("Roommate drama", "Other thing")
+      end
+
+      it "treats LIKE wildcards as literals" do
+        user.posts.create!(title: "100% stuck", body: "x")
+        get "/api/v1/posts?q=100%25"
+        expect(JSON.parse(response.body).pluck("title")).to eq(["100% stuck"])
+      end
+
+      it "composes with a tag filter" do
+        money = Tag.create!(name: "Money", slug: "money")
+        user.posts.create!(title: "Rent problem", body: "x", tag: money)
+        user.posts.create!(title: "Rent problem untagged", body: "x")
+
+        get "/api/v1/posts?q=rent&tag=money"
+        expect(JSON.parse(response.body).pluck("title")).to eq(["Rent problem"])
+      end
+    end
+
     context "pagination" do
       it "returns 10 posts per page" do
         12.times { |n| user.posts.create!(title: "Post #{n}", body: "Body") }

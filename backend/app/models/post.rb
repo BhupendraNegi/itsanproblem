@@ -13,6 +13,14 @@ class Post < ApplicationRecord
 
   scope :visible, -> { where(hidden_at: nil) }
 
+  # Portable case-insensitive title/body search (SQLite dev, Postgres prod).
+  # pg_trgm ranking can replace this if scale ever demands it.
+  scope :search, ->(query) {
+    term = "%#{sanitize_sql_like(query.to_s.strip.downcase)}%"
+    # explicit ESCAPE so sanitize_sql_like's backslashes work on SQLite too
+    where("LOWER(title) LIKE :q ESCAPE '\\' OR LOWER(body) LIKE :q ESCAPE '\\'", q: term)
+  }
+
   # Hot = most helpful marks within the last 7 days, ties broken by recency.
   scope :hot, -> {
     where(created_at: 7.days.ago..)

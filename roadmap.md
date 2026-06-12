@@ -173,9 +173,10 @@ Don't start until the P0 loop works end to end.
   and a campus-only feed. `colleges` table.
 - [ ] **Badges** (~2 days) — auto-awarded profile chips ("honest neighbor", "first post",
   "10 marked helpful"). `user_stats.badges` JSON + a recurring job.
-- [ ] **Search** (~2 days) — title + body search. Postgres `pg_trgm` + GIN index; no
-  Elasticsearch. (Note: local dev is SQLite — gate the trigram path by adapter or use `LIKE`
-  locally.)
+- [x] **Search** — title + body search via `GET /posts?q=` (portable case-insensitive LIKE with
+  escaped wildcards — works on SQLite dev and Postgres prod; pg_trgm deferred until scale
+  demands ranking). Debounced search box on the feed, shareable `?q=` URLs, composes with
+  rooms/sort/pagination, friendly no-results state.
 
 ## Later — P2, only after traction
 
