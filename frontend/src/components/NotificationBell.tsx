@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useNotifications, useReadAllNotifications } from '../hooks/useMutations'
 import type { Notification } from '../types'
@@ -14,6 +14,7 @@ function describe(notification: Notification) {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
+  const bellRef = useRef<HTMLDivElement>(null)
   const { data } = useNotifications()
   const readAll = useReadAllNotifications()
 
@@ -26,6 +27,18 @@ export function NotificationBell() {
     return () => { document.title = BASE_TITLE }
   }, [unreadCount])
 
+  // close when clicking anywhere outside
+  useEffect(() => {
+    if (!open) return
+    function onClickOutside(event: MouseEvent) {
+      if (bellRef.current && !bellRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [open])
+
   function toggle() {
     const opening = !open
     setOpen(opening)
@@ -35,7 +48,7 @@ export function NotificationBell() {
   }
 
   return (
-    <div className="notification-bell">
+    <div className="notification-bell" ref={bellRef}>
       <button
         className="logout-icon-btn"
         onClick={toggle}

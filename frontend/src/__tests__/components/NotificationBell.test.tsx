@@ -17,4 +17,13 @@ describe('NotificationBell', () => {
     await userEvent.click(screen.getByRole('button', { name: /notifications/i }))
     expect(screen.getByText(/someone replied to “my problem”/i)).toBeInTheDocument()
   })
+
+  it('closes the dropdown when clicking anywhere outside', async () => {
+    renderWithProviders(<NotificationBell />)
+    await screen.findByText('1')
+    await userEvent.click(screen.getByRole('button', { name: /notifications/i }))
+    expect(screen.getByText(/someone replied/i)).toBeInTheDocument()
+    await userEvent.click(document.body)
+    expect(screen.queryByText(/someone replied/i)).not.toBeInTheDocument()
+  })
 })

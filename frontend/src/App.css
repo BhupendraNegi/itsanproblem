@@ -518,7 +518,9 @@ body.impersonating .navbar { top: 40px; }
 .notification-dropdown {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  /* centered under the bell */
+  left: 50%;
+  transform: translateX(-50%);
   width: 300px;
   max-height: 360px;
   overflow-y: auto;
@@ -1567,7 +1569,8 @@ input:-webkit-autofill:focus {
   .notification-dropdown, .user-menu-dropdown { max-width: calc(100vw - 24px); }
 
   /* near the screen edge there's no room to center; anchor right instead */
-  .user-menu-dropdown { left: auto; right: 0; transform: none; }
+  .user-menu-dropdown,
+  .notification-dropdown { left: auto; right: 0; transform: none; }
 
   .comment-form-actions .btn-primary { width: 100%; }
 }
