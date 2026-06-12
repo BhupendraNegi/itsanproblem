@@ -7,6 +7,7 @@ import type {
   NotificationsResponse,
   Post,
   Role,
+  TagWithCount,
   User,
   UserProfile,
 } from './types'
@@ -81,10 +82,15 @@ export async function resetPassword(data: { token: string; password: string; pas
   return response.data
 }
 
-export async function fetchPosts(sort: 'recent' | 'hot' = 'recent', page = 1) {
+export async function fetchPosts(sort: 'recent' | 'hot' = 'recent', page = 1, tag?: string | null) {
   const response = await api.get<Post[]>('/posts', {
-    params: { page, ...(sort === 'hot' ? { sort } : {}) },
+    params: { page, ...(sort === 'hot' ? { sort } : {}), ...(tag ? { tag } : {}) },
   })
+  return response.data
+}
+
+export async function fetchTags() {
+  const response = await api.get<TagWithCount[]>('/tags')
   return response.data
 }
 
@@ -93,7 +99,7 @@ export async function fetchPost(id: number) {
   return response.data
 }
 
-export async function createPost(data: { title: string; body: string; anonymous?: boolean }) {
+export async function createPost(data: { title: string; body: string; anonymous?: boolean; tag_id?: number | null }) {
   const response = await api.post<Post>('/posts', { post: data })
   return response.data
 }

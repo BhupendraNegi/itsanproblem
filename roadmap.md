@@ -164,8 +164,11 @@ Don't start until the P0 loop works end to end.
 - [ ] **Friend-anon posts** (~1 week) — "share with friends only" toggle; OP still anonymous
   within the group. Hard floor of **5 friends** (below that the toggle is disabled — smaller
   groups leak identity by arithmetic). `audiences` table + `min_audience` enforcement.
-- [ ] **Tags & rooms** (~3 days) — six seed tags (academic, relationships, money, mental-health,
-  housing, career), one tag per post, tag-filtered feeds. `tags` + `post_tags`.
+- [x] **Tags & rooms** — six seeded rooms (academic, relationships, money, mental-health,
+  housing, career); optional single tag per post (`posts.tag_id` — simpler than the planned
+  `post_tags` join for one-tag-per-post), `GET /posts?tag=slug` filtered feeds with shareable
+  URLs, room chips + sidebar room list, tag chips on cards, and a crisis-support banner on the
+  mental-health room (from the risk list).
 - [ ] **College verification** (~3 days) — `.edu` domain match on signup → verified-campus badge
   and a campus-only feed. `colleges` table.
 - [ ] **Badges** (~2 days) — auto-awarded profile chips ("honest neighbor", "first post",

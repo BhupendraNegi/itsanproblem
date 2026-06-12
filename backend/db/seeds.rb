@@ -54,10 +54,22 @@ commenters = %w[Priya Sam Lena].map do |name|
   end
 end
 
+# ── Tags (the six rooms) ─────────────────────────────────────────────────────
+TAGS = {
+  "academic" => "Academic",
+  "relationships" => "Relationships",
+  "money" => "Money",
+  "mental-health" => "Mental health",
+  "housing" => "Housing",
+  "career" => "Career"
+}
+TAGS.each { |slug, name| Tag.find_or_create_by!(slug: slug) { |t| t.name = name } }
+
 # ── Posts (authored by the demo user; always shown as "Anonymous") ───────────
 posts = [
   {
     anonymous: true,
+    tag: "academic",
     title: "I keep procrastinating on everything that matters",
     body: "Every time I sit down to do important work I end up cleaning my desk or scrolling. How do you actually start?",
     comments: [
@@ -67,6 +79,7 @@ posts = [
   },
   {
     anonymous: true,
+    tag: "career",
     title: "Burned out at work but scared to take a break",
     body: "I have not taken real time off in over a year and I can feel it. But I worry things will fall apart without me.",
     comments: [
@@ -75,6 +88,7 @@ posts = [
     ]
   },
   {
+    tag: "relationships",
     title: "Moved to a new city and I have no friends here",
     body: "It has been three months and I still spend most weekends alone. Not sure how adults make friends.",
     comments: [
@@ -83,6 +97,7 @@ posts = [
     ]
   },
   {
+    tag: "career",
     title: "Can't decide between a safe job and a risky startup",
     body: "One offer is stable and boring, the other is exciting but could vanish in a year. I keep flip-flopping.",
     comments: [
@@ -95,6 +110,9 @@ posts.each do |attrs|
   post = demo.posts.find_or_create_by!(title: attrs[:title]) do |p|
     p.body = attrs[:body]
     p.anonymous = attrs.fetch(:anonymous, false)
+  end
+  if attrs[:tag] && post.tag_id.nil?
+    post.update!(tag: Tag.find_by!(slug: attrs[:tag]))
   end
 
   attrs[:comments].each_with_index do |body, i|

@@ -30,6 +30,8 @@ Rails.application.routes.draw do
         patch :read_all, on: :collection
       end
 
+      resources :tags, only: [:index]
+
       resources :users, only: [:show]
 
       namespace :admin do

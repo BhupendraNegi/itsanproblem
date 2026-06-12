@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { Tag } from '../types'
 
 interface PostFormProps {
   title: string
@@ -7,11 +8,14 @@ interface PostFormProps {
   setBody: (body: string) => void
   anonymous: boolean
   setAnonymous: (anonymous: boolean) => void
+  tagId: number | null
+  setTagId: (tagId: number | null) => void
+  tags: Tag[]
   onSubmit: (event: React.FormEvent) => void
   isLoading: boolean
 }
 
-export function PostForm({ title, setTitle, body, setBody, anonymous, setAnonymous, onSubmit, isLoading }: PostFormProps) {
+export function PostForm({ title, setTitle, body, setBody, anonymous, setAnonymous, tagId, setTagId, tags, onSubmit, isLoading }: PostFormProps) {
   const [focused, setFocused] = useState(false)
 
   return (
@@ -41,17 +45,30 @@ export function PostForm({ title, setTitle, body, setBody, anonymous, setAnonymo
           />
         </label>
         {(focused || body || title) && (
-          <label className="field">
-            <span>Add details <span className="char-count">{body.length}/5000</span></span>
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Set the scene. No need to be tidy."
-              maxLength={5000}
-              rows={4}
-              required
-            />
-          </label>
+          <>
+            <label className="field">
+              <span>Add details <span className="char-count">{body.length}/5000</span></span>
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Set the scene. No need to be tidy."
+                maxLength={5000}
+                rows={4}
+                required
+              />
+            </label>
+            {tags.length > 0 && (
+              <label className="field">
+                <span>Room <span className="char-count">optional</span></span>
+                <select value={tagId ?? ''} onChange={(e) => setTagId(e.target.value ? Number(e.target.value) : null)}>
+                  <option value="">No room — just the main feed</option>
+                  {tags.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </>
         )}
         <div className="composer-actions">
           <label className="checkbox-row reply-anon-toggle">

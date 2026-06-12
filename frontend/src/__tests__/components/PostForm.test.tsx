@@ -11,6 +11,9 @@ const defaultProps = {
   setBody: vi.fn(),
   anonymous: false,
   setAnonymous: vi.fn(),
+  tagId: null,
+  setTagId: vi.fn(),
+  tags: [],
   onSubmit: vi.fn((e) => e.preventDefault()),
   isLoading: false,
 }
@@ -25,6 +28,22 @@ describe('PostForm', () => {
     renderWithProviders(<PostForm {...defaultProps} />)
     expect(screen.getByText(/posting as you/i)).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: /post anonymously/i })).not.toBeChecked()
+  })
+
+  it('offers a room picker when tags exist and the composer is expanded', async () => {
+    const setTagId = vi.fn()
+    renderWithProviders(
+      <PostForm
+        {...defaultProps}
+        title="A problem"
+        body="Details"
+        tags={[{ id: 1, name: 'Money', slug: 'money' }, { id: 2, name: 'Career', slug: 'career' }]}
+        setTagId={setTagId}
+      />
+    )
+    const select = screen.getByLabelText(/room/i)
+    await userEvent.selectOptions(select, '1')
+    expect(setTagId).toHaveBeenCalledWith(1)
   })
 
   it('switches to anonymous mode when the toggle is on', () => {

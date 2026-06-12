@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import * as api from '../api'
 import type {
   AdminFlagsResponse,
+  TagWithCount,
   AdminStats,
   AdminUser,
   AuthResponse,
@@ -60,7 +61,7 @@ export function usePostMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useMutation<Post, Error, { title: string; body: string; anonymous?: boolean }>({
+  return useMutation<Post, Error, { title: string; body: string; anonymous?: boolean; tag_id?: number | null }>({
     mutationFn: api.createPost,
     onSuccess: (_post, variables) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
@@ -121,13 +122,21 @@ export function useFlagMutation() {
 
 const POSTS_PER_PAGE = 10
 
-export function usePosts(sort: 'recent' | 'hot' = 'recent') {
+export function usePosts(sort: 'recent' | 'hot' = 'recent', tag: string | null = null) {
   return useInfiniteQuery({
-    queryKey: ['posts', sort],
-    queryFn: ({ pageParam }) => api.fetchPosts(sort, pageParam as number),
+    queryKey: ['posts', sort, tag],
+    queryFn: ({ pageParam }) => api.fetchPosts(sort, pageParam as number, tag),
     initialPageParam: 1,
     getNextPageParam: (lastPage: Post[], pages: Post[][]) =>
       lastPage.length === POSTS_PER_PAGE ? pages.length + 1 : undefined,
+  })
+}
+
+export function useTags() {
+  return useQuery<TagWithCount[]>({
+    queryKey: ['tags'],
+    queryFn: api.fetchTags,
+    staleTime: 5 * 60_000,
   })
 }
 

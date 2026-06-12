@@ -66,6 +66,9 @@ export function PostCard({
             {formatRelative(post.created_at)} · {post.comments.length} {post.comments.length === 1 ? 'reply' : 'replies'}
           </span>
         </span>
+        {post.tag && (
+          <Link to={`/?tag=${post.tag.slug}`} className="tag-chip">{post.tag.name}</Link>
+        )}
         {isHot && (
           <span className="hot-badge">
             <img src="/assets/icons/flame.svg" alt="" />

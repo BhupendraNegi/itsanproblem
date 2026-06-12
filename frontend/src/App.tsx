@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import useAuth from './store'
 import { AuthPanel } from './components/AuthPanel'
@@ -20,7 +20,7 @@ import { PostPage } from './pages/PostPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AdminPage } from './pages/AdminPage'
-import { useAuthMutation, usePostMutation, useCommentMutation, usePosts } from './hooks/useMutations'
+import { useAuthMutation, usePostMutation, useCommentMutation, usePosts, useTags } from './hooks/useMutations'
 import './App.css'
 
 const queryClient = new QueryClient()
@@ -37,6 +37,7 @@ function AppContent() {
   const [postTitle, setPostTitle] = useState('')
   const [postBody, setPostBody] = useState('')
   const [postAnonymous, setPostAnonymous] = useState(false)
+  const [postTagId, setPostTagId] = useState<number | null>(null)
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({})
   const [sort, setSort] = useState<'recent' | 'hot'>(() => {
     try {
@@ -51,8 +52,18 @@ function AppContent() {
     try { localStorage.setItem('feedSort', next) } catch { /* no-op */ }
   }
 
-  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(sort)
+  // active room comes from the URL (?tag=slug) so room views are shareable
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTag = searchParams.get('tag')
+
+  function changeTag(slug: string | null) {
+    setSearchParams(slug ? { tag: slug } : {}, { replace: true })
+  }
+
+  const { data: tags } = useTags()
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(sort, activeTag)
   const posts = data?.pages.flat() ?? []
+  const activeTagName = tags?.find((t) => t.slug === activeTag)?.name
 
   const authMutation = useAuthMutation(setAlertMessage, setAuthFields, login)
   const postMutation = usePostMutation(setAlertMessage, setPostTitle, setPostBody)
@@ -84,8 +95,8 @@ function AppContent() {
     }
 
     postMutation.mutate(
-      { title: postTitle.trim(), body: postBody.trim(), anonymous: postAnonymous },
-      { onSuccess: () => setPostAnonymous(false) }
+      { title: postTitle.trim(), body: postBody.trim(), anonymous: postAnonymous, tag_id: postTagId },
+      { onSuccess: () => { setPostAnonymous(false); setPostTagId(null) } }
     )
   }
 
@@ -160,13 +171,43 @@ function AppContent() {
             setBody={setPostBody}
             anonymous={postAnonymous}
             setAnonymous={setPostAnonymous}
+            tagId={postTagId}
+            setTagId={setPostTagId}
+            tags={tags ?? []}
             onSubmit={handlePostSubmit}
             isLoading={postMutation.isPending}
           />
 
+          {/* Rooms */}
+          <div className="room-chips" role="tablist" aria-label="Rooms">
+            <button role="tab" aria-selected={!activeTag} className={`room-chip${!activeTag ? ' is-active' : ''}`} onClick={() => changeTag(null)}>
+              All
+            </button>
+            {(tags ?? []).map((t) => (
+              <button
+                key={t.slug}
+                role="tab"
+                aria-selected={activeTag === t.slug}
+                className={`room-chip${activeTag === t.slug ? ' is-active' : ''}`}
+                onClick={() => changeTag(t.slug)}
+              >
+                {t.name}
+                {t.post_count > 0 && <span className="room-count">{t.post_count}</span>}
+              </button>
+            ))}
+          </div>
+
+          {activeTag === 'mental-health' && (
+            <div className="crisis-banner" role="note">
+              If you're in crisis or thinking about harming yourself, please reach out now —
+              call or text your local crisis line (in the US, dial <strong>988</strong>).
+              This community cares, but trained people can help faster.
+            </div>
+          )}
+
       <section className="posts-grid">
         <header className="section-header">
-          <h2>{sort === 'hot' ? 'Hot this week' : 'Latest posts'}</h2>
+          <h2>{activeTagName ? `${activeTagName}${sort === 'hot' ? ' · hot' : ''}` : (sort === 'hot' ? 'Hot this week' : 'Latest posts')}</h2>
           <div className="right">
             <div className="segmented" role="tablist" aria-label="Sort posts">
               <button
@@ -210,7 +251,7 @@ function AppContent() {
 
         {!isLoading && !error && posts.length === 0 && (
           <div className="card empty">
-            <h3>No posts yet</h3>
+            <h3>{activeTagName ? `Nothing in ${activeTagName} yet` : 'No posts yet'}</h3>
             <p>Be the first — post with your name, or go anonymous when it matters.</p>
           </div>
         )}

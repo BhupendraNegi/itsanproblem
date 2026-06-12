@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
-import { useUserProfile } from '../hooks/useMutations'
+import { useTags, useUserProfile } from '../hooks/useMutations'
 import { avatarHueClass } from '../avatar'
 import type { User } from '../types'
 
 // Desktop-only companion column on the feed: who you are + quick links.
 export function FeedSidebar({ user }: { user: User }) {
   const { data: profile } = useUserProfile(user.username ?? String(user.id))
+  const { data: tags } = useTags()
   const isStaff = user.role === 'admin' || user.role === 'moderator'
   const profileHandle = user.username ?? user.id
 
@@ -37,6 +38,18 @@ export function FeedSidebar({ user }: { user: User }) {
           </div>
         </div>
       </div>
+
+      {tags && tags.length > 0 && (
+        <nav className="card sidebar-nav" aria-label="Rooms">
+          <span className="sidebar-nav-label">Rooms</span>
+          {tags.map((t) => (
+            <Link key={t.slug} to={`/?tag=${t.slug}`}>
+              {t.name}
+              {t.post_count > 0 && <span className="room-count">{t.post_count}</span>}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <nav className="card sidebar-nav" aria-label="Quick links">
         <Link to={`/users/${profileHandle}`}>
