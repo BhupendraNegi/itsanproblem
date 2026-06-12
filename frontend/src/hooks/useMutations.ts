@@ -122,10 +122,10 @@ export function useFlagMutation() {
 
 const POSTS_PER_PAGE = 10
 
-export function usePosts(sort: 'recent' | 'hot' = 'recent', tag: string | null = null) {
+export function usePosts(sort: 'recent' | 'hot' = 'recent', tag: string | null = null, q: string | null = null) {
   return useInfiniteQuery({
-    queryKey: ['posts', sort, tag],
-    queryFn: ({ pageParam }) => api.fetchPosts(sort, pageParam as number, tag),
+    queryKey: ['posts', sort, tag, q],
+    queryFn: ({ pageParam }) => api.fetchPosts(sort, pageParam as number, tag, q),
     initialPageParam: 1,
     getNextPageParam: (lastPage: Post[], pages: Post[][]) =>
       lastPage.length === POSTS_PER_PAGE ? pages.length + 1 : undefined,

@@ -1389,6 +1389,45 @@ body.impersonating .navbar { top: 40px; }
   .feed-sidebar { display: none; }
 }
 
+/* ---- Feed search ---- */
+.feed-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  padding: 0 16px;
+}
+
+.feed-search img { width: 16px; height: 16px; opacity: 0.5; flex-shrink: 0; }
+
+.feed-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 11px 0;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--fg1);
+  outline: none;
+}
+
+.feed-search input::placeholder { color: var(--fg3); }
+.feed-search:focus-within { border-color: var(--border-focus); box-shadow: var(--shadow-ring-focus); }
+
+.search-clear {
+  border: none;
+  background: transparent;
+  color: var(--fg2);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.search-clear:hover { color: var(--fg1); }
+
 /* ---- Rooms (tag filter) ---- */
 .room-chips {
   display: flex;

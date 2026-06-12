@@ -52,16 +52,35 @@ function AppContent() {
     try { localStorage.setItem('feedSort', next) } catch { /* no-op */ }
   }
 
-  // active room comes from the URL (?tag=slug) so room views are shareable
+  // active room + search live in the URL (?tag=slug&q=term), so both are shareable
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
+  const activeQuery = searchParams.get('q') ?? ''
+  const [searchInput, setSearchInput] = useState(activeQuery)
 
-  function changeTag(slug: string | null) {
-    setSearchParams(slug ? { tag: slug } : {}, { replace: true })
+  function updateParams(tag: string | null, q: string) {
+    const params: Record<string, string> = {}
+    if (tag) params.tag = tag
+    if (q.trim()) params.q = q.trim()
+    setSearchParams(params, { replace: true })
   }
 
+  function changeTag(slug: string | null) {
+    updateParams(slug, searchInput)
+  }
+
+  // debounce typing into the URL; activeTag/activeQuery in the deps so a
+  // pending timer is cancelled when the room or URL changes underneath it
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput.trim() !== activeQuery) updateParams(activeTag, searchInput)
+    }, 300)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput, activeQuery, activeTag])
+
   const { data: tags } = useTags()
-  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(sort, activeTag)
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(sort, activeTag, activeQuery || null)
   const posts = data?.pages.flat() ?? []
   const activeTagName = tags?.find((t) => t.slug === activeTag)?.name
 
@@ -178,6 +197,21 @@ function AppContent() {
             isLoading={postMutation.isPending}
           />
 
+          {/* Search */}
+          <div className="feed-search">
+            <img src="/assets/icons/search.svg" alt="" />
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search problems — has anyone else dealt with this?"
+              aria-label="Search posts"
+            />
+            {searchInput && (
+              <button className="search-clear" onClick={() => setSearchInput('')} aria-label="Clear search">×</button>
+            )}
+          </div>
+
           {/* Rooms */}
           <div className="room-chips" role="tablist" aria-label="Rooms">
             <button role="tab" aria-selected={!activeTag} className={`room-chip${!activeTag ? ' is-active' : ''}`} onClick={() => changeTag(null)}>
@@ -207,7 +241,13 @@ function AppContent() {
 
       <section className="posts-grid">
         <header className="section-header">
-          <h2>{activeTagName ? `${activeTagName}${sort === 'hot' ? ' · hot' : ''}` : (sort === 'hot' ? 'Hot this week' : 'Latest posts')}</h2>
+          <h2>
+            {activeQuery
+              ? `Results for “${activeQuery}”`
+              : activeTagName
+                ? `${activeTagName}${sort === 'hot' ? ' · hot' : ''}`
+                : (sort === 'hot' ? 'Hot this week' : 'Latest posts')}
+          </h2>
           <div className="right">
             <div className="segmented" role="tablist" aria-label="Sort posts">
               <button
@@ -251,8 +291,18 @@ function AppContent() {
 
         {!isLoading && !error && posts.length === 0 && (
           <div className="card empty">
-            <h3>{activeTagName ? `Nothing in ${activeTagName} yet` : 'No posts yet'}</h3>
-            <p>Be the first — post with your name, or go anonymous when it matters.</p>
+            <h3>
+              {activeQuery
+                ? `No results for “${activeQuery}”`
+                : activeTagName
+                  ? `Nothing in ${activeTagName} yet`
+                  : 'No posts yet'}
+            </h3>
+            <p>
+              {activeQuery
+                ? 'Nobody has shared this one yet — maybe you should.'
+                : 'Be the first — post with your name, or go anonymous when it matters.'}
+            </p>
           </div>
         )}
 

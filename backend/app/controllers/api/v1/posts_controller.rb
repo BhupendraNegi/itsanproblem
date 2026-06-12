@@ -14,6 +14,7 @@ module Api
           return render json: {error: "Unknown tag"}, status: :not_found unless tag
           posts = posts.where(tag_id: tag.id)
         end
+        posts = posts.search(params[:q]) if params[:q].present?
         posts = (params[:sort] == "hot") ? posts.hot : posts.order(created_at: :desc)
         page = [params[:page].to_i, 1].max
         posts = posts.offset((page - 1) * PER_PAGE).limit(PER_PAGE)
