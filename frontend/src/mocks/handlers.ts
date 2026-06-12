@@ -35,6 +35,10 @@ export const mockProfile = {
   joined_at: new Date('2025-01-01').toISOString(),
   helpful_points: 5,
   comment_count: 3,
+  badges: [
+    { key: 'first_post', name: 'First post', description: 'Shared a problem for the first time' },
+    { key: 'honest_neighbor', name: 'Honest neighbor', description: 'Earned 3 helpful points from people you helped' },
+  ],
   email_digest_enabled: true,
   posts: [
     {

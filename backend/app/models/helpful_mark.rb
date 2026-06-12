@@ -8,6 +8,7 @@ class HelpfulMark < ApplicationRecord
   # helpful_points. Crowd marks count for sorting only.
   after_create :award_op_point
   after_create :notify_comment_author
+  after_create :award_badges
   after_destroy :revoke_op_point
 
   private
@@ -27,6 +28,10 @@ class HelpfulMark < ApplicationRecord
     return unless op_mark_on_comment?
     stat = UserStat.for_user(markable.user)
     stat.decrement!(:helpful_points) if stat.helpful_points.positive?
+  end
+
+  def award_badges
+    Badges.refresh!(markable.user) if markable.is_a?(Comment)
   end
 
   def notify_comment_author

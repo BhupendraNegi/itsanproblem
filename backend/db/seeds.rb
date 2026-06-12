@@ -129,6 +129,7 @@ User.find_each do |user|
   # helpful_points = comments other people left on this user's posts.
   helpful = Comment.joins(post: :post_author).where(post_authors: {user_id: user.id}).count
   stat.update!(comment_count: user.comments.count, helpful_points: helpful)
+  Badges.refresh!(user)
 end
 
 puts "Seeded #{User.count} users, #{Post.count} posts, #{Comment.count} comments."
