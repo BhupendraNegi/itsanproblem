@@ -25,6 +25,29 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// Tokens expire after 24h. When any non-auth request comes back 401 while a
+// session is stored, the session is dead — clear it and return to sign-in
+// instead of leaving a logged-in-looking app that can't load anything.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status
+    const url: string = error?.config?.url ?? ''
+    let hadSession = false
+    try { hadSession = !!localStorage.getItem('authToken') } catch { /* no-op */ }
+    if (status === 401 && hadSession && !url.startsWith('/auth/')) {
+      try {
+        localStorage.removeItem('authUser')
+        localStorage.removeItem('authToken')
+        localStorage.removeItem('impersonatorUser')
+        localStorage.removeItem('impersonatorToken')
+      } catch { /* no-op */ }
+      window.location.assign('/')
+    }
+    return Promise.reject(error)
+  }
+)
+
 export async function register(data: { name: string; username?: string; email: string; password: string; passwordConfirmation: string }) {
   const response = await api.post<AuthResponse>('/auth/register', {
     user: {
