@@ -56,6 +56,12 @@ describe('PostCard', () => {
     expect(screen.queryByText('Anonymous')).not.toBeInTheDocument()
   })
 
+  it('shows a tag chip linking to the room when the post is tagged', () => {
+    const taggedPost: Post = { ...basePost, tag: { id: 1, name: 'Money', slug: 'money' } }
+    renderWithProviders(<PostCard {...defaultProps} post={taggedPost} />)
+    expect(screen.getByRole('link', { name: 'Money' })).toHaveAttribute('href', '/?tag=money')
+  })
+
   it('shows reply count in the byline', () => {
     renderWithProviders(<PostCard {...defaultProps} />)
     expect(screen.getByText(/0 replies/)).toBeInTheDocument()

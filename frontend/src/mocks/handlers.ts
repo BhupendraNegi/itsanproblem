@@ -101,6 +101,12 @@ export const mockAdminUsers = [
   { id: 2, name: 'Bob', username: 'bob', email: 'bob@example.com', role: 'member', joined_at: new Date('2025-02-01').toISOString(), post_count: 1, comment_count: 4 },
 ]
 
+export const mockTags = [
+  { id: 1, name: 'Money', slug: 'money', post_count: 2 },
+  { id: 2, name: 'Career', slug: 'career', post_count: 0 },
+  { id: 3, name: 'Mental health', slug: 'mental-health', post_count: 1 },
+]
+
 export const handlers = [
   http.post('/api/v1/auth/register', () =>
     HttpResponse.json({ user: mockUser, token: mockToken }, { status: 201 })
@@ -124,6 +130,10 @@ export const handlers = [
 
   http.get('/api/v1/posts', () =>
     HttpResponse.json([mockPost])
+  ),
+
+  http.get('/api/v1/tags', () =>
+    HttpResponse.json(mockTags)
   ),
 
   http.get('/api/v1/posts/:id', () =>

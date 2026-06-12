@@ -1,5 +1,13 @@
 export type Role = 'member' | 'moderator' | 'admin'
 
+export type Tag = {
+  id: number
+  name: string
+  slug: string
+}
+
+export type TagWithCount = Tag & { post_count: number }
+
 export type User = {
   id: number
   name: string
@@ -77,6 +85,7 @@ export type Post = {
   author_id?: number | null
   author_username?: string | null
   anonymous?: boolean
+  tag?: Tag | null
   helpful_count?: number
   viewer_marked?: boolean
   created_at: string

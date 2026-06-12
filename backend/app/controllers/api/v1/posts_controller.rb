@@ -8,7 +8,12 @@ module Api
       PER_PAGE = 10
 
       def index
-        posts = Post.visible.includes({post_author: :user}, :helpful_marks, comments: [:user, :helpful_marks])
+        posts = Post.visible.includes({post_author: :user}, :tag, :helpful_marks, comments: [:user, :helpful_marks])
+        if params[:tag].present?
+          tag = Tag.find_by(slug: params[:tag])
+          return render json: {error: "Unknown tag"}, status: :not_found unless tag
+          posts = posts.where(tag_id: tag.id)
+        end
         posts = (params[:sort] == "hot") ? posts.hot : posts.order(created_at: :desc)
         page = [params[:page].to_i, 1].max
         posts = posts.offset((page - 1) * PER_PAGE).limit(PER_PAGE)
@@ -38,7 +43,7 @@ module Api
       end
 
       def post_params
-        params.require(:post).permit(:title, :body, :anonymous)
+        params.require(:post).permit(:title, :body, :anonymous, :tag_id)
       end
     end
   end

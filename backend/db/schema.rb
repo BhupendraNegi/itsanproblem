@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_11_000004) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_12_000001) do
   create_table "comments", force: :cascade do |t|
     t.text "body", null: false
     t.integer "user_id", null: false
@@ -87,6 +87,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_11_000004) do
     t.string "anon_handle", null: false
     t.datetime "hidden_at"
     t.boolean "anonymous", default: false, null: false
+    t.integer "tag_id"
+    t.index ["tag_id"], name: "index_posts_on_tag_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_tags_on_slug", unique: true
   end
 
   create_table "user_stats", force: :cascade do |t|
@@ -129,5 +139,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_11_000004) do
   add_foreign_key "notifications", "users"
   add_foreign_key "post_authors", "posts"
   add_foreign_key "post_authors", "users"
+  add_foreign_key "posts", "tags"
   add_foreign_key "user_stats", "users"
 end

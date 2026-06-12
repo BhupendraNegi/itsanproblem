@@ -1,4 +1,5 @@
 class Post < ApplicationRecord
+  belongs_to :tag, optional: true
   has_one :post_author, dependent: :destroy
   has_one :author_user, through: :post_author, source: :user
   has_many :comments, inverse_of: :post, dependent: :destroy
@@ -38,6 +39,7 @@ class Post < ApplicationRecord
 
     super({only: [:id, :title, :body, :created_at]}.merge(options)).merge(identity).merge(
       "anonymous" => anonymous?,
+      "tag" => tag&.as_json,
       "helpful_count" => helpful_marks.size,
       "viewer_marked" => viewer ? helpful_marks.any? { |m| m.user_id == viewer.id } : false,
       "comments" => comments.reject(&:hidden_at).sort_by(&:created_at).map { |c| c.as_json(viewer: viewer) }
