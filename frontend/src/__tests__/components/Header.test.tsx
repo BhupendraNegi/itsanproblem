@@ -24,6 +24,19 @@ describe('Header', () => {
     expect(screen.getByText('A')).toBeInTheDocument()
   })
 
+  it('puts the theme picker first in the menu and switches themes', async () => {
+    const { useTheme } = await import('../../store')
+    useTheme.setState({ pref: 'system' })
+    renderWithProviders(<Header user={mockUser} onLogout={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /alice/i }))
+
+    expect(screen.getByRole('radiogroup', { name: 'Theme' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('radio', { name: 'Dark' }))
+    expect(useTheme.getState().pref).toBe('dark')
+    // menu stays open so the switch is visible
+    expect(screen.getByRole('menu')).toBeInTheDocument()
+  })
+
   it('opens the user menu with Profile, Settings, and Log out', async () => {
     renderWithProviders(<Header user={mockUser} onLogout={vi.fn()} />)
     await userEvent.click(screen.getByRole('button', { name: /alice/i }))

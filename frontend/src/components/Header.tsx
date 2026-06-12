@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { NotificationBell } from './NotificationBell'
 import { avatarHueClass } from '../avatar'
+import { useTheme, type ThemePref } from '../store'
 import type { User } from '../types'
+
+const THEME_OPTIONS: { value: ThemePref; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'Auto' },
+]
 
 interface HeaderProps {
   user: User
@@ -12,6 +19,7 @@ interface HeaderProps {
 export function Header({ user, onLogout }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const { pref, setPref } = useTheme()
 
   useEffect(() => {
     if (!menuOpen) return
@@ -53,6 +61,23 @@ export function Header({ user, onLogout }: HeaderProps) {
             </button>
             {menuOpen && (
               <nav className="user-menu-dropdown" role="menu">
+                {/* stays open on theme change so the switch is visible */}
+                <div className="menu-theme-row" role="none">
+                  <span>Theme</span>
+                  <div className="segmented mini" role="radiogroup" aria-label="Theme">
+                    {THEME_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        role="radio"
+                        aria-checked={pref === option.value}
+                        className={pref === option.value ? 'is-active' : ''}
+                        onClick={() => setPref(option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <Link role="menuitem" to={`/users/${user.username ?? user.id}`} onClick={close}>
                   <img src="/assets/icons/user.svg" alt="" className="menu-icon" />
                   Profile
