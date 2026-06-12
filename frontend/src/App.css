@@ -220,27 +220,19 @@
     --shadow-ring-focus: 0 0 0 3px rgba(0, 149, 246, 0.30);
   }
 
-/* In dark mode the chrome inverts: white→grey gradient with dark text. */
+/* In dark mode the chrome is a grey gradient — clearly a surface, but only
+   a step lighter than the pure-black page behind it. */
 :root[data-theme="dark"] {
-  --gradient-chrome: linear-gradient(180deg, #ffffff 0%, #d4d4d4 100%);
-  --chrome-fg: #111111;
-  --chrome-fg-muted: rgba(0, 0, 0, 0.65);
-  --chrome-fg-faint: rgba(0, 0, 0, 0.45);
-  --chrome-surface: rgba(0, 0, 0, 0.07);
-  --chrome-surface-hover: rgba(0, 0, 0, 0.13);
-  --chrome-border: rgba(0, 0, 0, 0.18);
-  --chrome-border-strong: rgba(0, 0, 0, 0.32);
-  --chrome-divider: rgba(0, 0, 0, 0.1);
-  --chrome-icon-filter: brightness(0) opacity(0.8);
-}
-
-/* On the light chrome the wordmark's pale-yellow gradient stop washes out;
-   start the text gradient at orange instead. */
-:root[data-theme="dark"] .app-title,
-:root[data-theme="dark"] .app-footer-brand {
-  background: linear-gradient(90deg, #fa7e1e 0%, #d62976 40%, #962fbf 70%, #4f5bd5 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
+  --gradient-chrome: linear-gradient(180deg, #2e2e2e 0%, #161616 100%);
+  --chrome-fg: #f5f5f5;
+  --chrome-fg-muted: rgba(255, 255, 255, 0.75);
+  --chrome-fg-faint: rgba(255, 255, 255, 0.45);
+  --chrome-surface: rgba(255, 255, 255, 0.1);
+  --chrome-surface-hover: rgba(255, 255, 255, 0.16);
+  --chrome-border: rgba(255, 255, 255, 0.22);
+  --chrome-border-strong: rgba(255, 255, 255, 0.35);
+  --chrome-divider: rgba(255, 255, 255, 0.08);
+  --chrome-icon-filter: brightness(0) invert(1);
 }
 
 /* Dark line-icons sit on light surfaces by default; flip them to light in
