@@ -111,8 +111,10 @@
   --gradient-page:  #fafafa;
   --gradient-vent:  linear-gradient(135deg, #fa7e1e 0%, #d62976 100%);
 
-  /* Tells the browser to render native controls/scrollbars per theme. */
-  color-scheme: light dark;
+  /* Native controls/scrollbars must follow the app theme (data-theme), not
+     the OS — "light dark" let a dark OS render black checkboxes inside the
+     light theme. The dark block below switches this to dark. */
+  color-scheme: light;
 
   /* ---- Type ---- */
   --font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
@@ -188,6 +190,8 @@
    preference wins; "System" resolves to the OS prefers-color-scheme value
    (also pre-resolved by the inline script in index.html to avoid a flash). */
 :root[data-theme="dark"] {
+    color-scheme: dark;
+
     --bg-page:        #000000;
     --bg-page-soft:   #121212;
     --bg-card:        #121212;
@@ -1086,7 +1090,10 @@ body.impersonating .navbar { top: 40px; }
 
 .composer-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* ---- Empty state ---- */
@@ -1415,6 +1422,14 @@ body.impersonating .navbar { top: 40px; }
 .settings-form { display: grid; gap: 12px; }
 .settings-form .btn-primary { width: fit-content; }
 .checkbox-row { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+
+/* brand-colored checks, sized consistently everywhere */
+input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
 
 /* ---- Admin page ---- */
 .admin-stats {
