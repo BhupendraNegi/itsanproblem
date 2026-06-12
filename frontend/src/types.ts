@@ -74,6 +74,9 @@ export type Post = {
   title: string
   body: string
   author: string
+  author_id?: number | null
+  author_username?: string | null
+  anonymous?: boolean
   helpful_count?: number
   viewer_marked?: boolean
   created_at: string
@@ -110,6 +113,7 @@ export type NotificationsResponse = {
 export type ProfilePost = {
   id: number
   title: string
+  anonymous?: boolean
   created_at: string
   helpful_count: number
   comment_count: number

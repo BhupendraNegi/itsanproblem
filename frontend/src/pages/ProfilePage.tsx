@@ -73,13 +73,15 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
               </div>
             </div>
 
-            {/* Own anonymous posts — only present on your own profile */}
+            {/* Own profile: all posts (anonymous included). Others: named only. */}
             {profile.posts && (
               <section className="page-section">
-                <h2 className="section-title">Your posts</h2>
-                <p className="section-hint">
-                  Only you can see this list — everyone else sees these posts as anonymous.
-                </p>
+                <h2 className="section-title">{isOwnProfile ? 'Your posts' : 'Posts'}</h2>
+                {isOwnProfile && (
+                  <p className="section-hint">
+                    Anonymous posts appear here only for you — everyone else sees them with no author at all.
+                  </p>
+                )}
 
                 {profile.posts.length === 0 ? (
                   <div className="card empty">
@@ -92,6 +94,8 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                       <div key={post.id} className="card item-card">
                         <p className="item-title">{post.title}</p>
                         <div className="meta-line">
+                          {post.anonymous && <span className="alert-note">anonymous</span>}
+                          {post.anonymous && <span className="sep">·</span>}
                           <span>{post.comment_count} {post.comment_count === 1 ? 'reply' : 'replies'}</span>
                           <span className="sep">·</span>
                           <span>{post.helpful_count} helpful</span>

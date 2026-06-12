@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Comment, type: :model do
   let(:op) { User.create!(name: "Olive", email: "olive@example.com", password: "password123") }
   let(:user) { User.create!(name: "Alice", email: "alice@example.com", password: "password123") }
-  let(:post) { op.posts.create!(title: "My problem", body: "It is bad.") }
+  let(:post) { op.posts.create!(title: "My problem", body: "It is bad.", anonymous: true) }
   subject(:comment) { post.comments.build(body: "Have you tried turning it off?", user: user) }
 
   describe "validations" do
@@ -47,6 +47,18 @@ RSpec.describe Comment, type: :model do
         json = comment.as_json
         expect(json["author"]).to eq("Anonymous")
         expect(json["author_id"]).to be_nil
+        expect(json["op"]).to be(true)
+      end
+    end
+
+    context "when the OP replies on their own NAMED post" do
+      let(:post) { op.posts.create!(title: "Named problem", body: "It is bad.", anonymous: false) }
+      subject(:comment) { post.comments.build(body: "Replying openly", user: op) }
+
+      it "shows the real name but keeps the op flag" do
+        json = comment.as_json
+        expect(json["author"]).to eq("Olive")
+        expect(json["author_id"]).to eq(op.id)
         expect(json["op"]).to be(true)
       end
     end

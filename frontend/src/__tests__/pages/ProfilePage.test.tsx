@@ -93,7 +93,7 @@ describe('ProfilePage', () => {
     renderProfile()
     expect(await screen.findByText('Your posts')).toBeInTheDocument()
     expect(screen.getByText('My secret problem')).toBeInTheDocument()
-    expect(screen.getByText(/only you can see this list/i)).toBeInTheDocument()
+    expect(screen.getByText(/anonymous posts appear here only for you/i)).toBeInTheDocument()
   })
 
   it('hides the "Your posts" section when the API omits posts', async () => {

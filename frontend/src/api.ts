@@ -70,7 +70,7 @@ export async function fetchPost(id: number) {
   return response.data
 }
 
-export async function createPost(data: { title: string; body: string }) {
+export async function createPost(data: { title: string; body: string; anonymous?: boolean }) {
   const response = await api.post<Post>('/posts', { post: data })
   return response.data
 }

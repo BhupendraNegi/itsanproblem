@@ -31,6 +31,7 @@ function AppContent() {
   const [alertMessage, setAlertMessage] = useState<string | null>(null)
   const [postTitle, setPostTitle] = useState('')
   const [postBody, setPostBody] = useState('')
+  const [postAnonymous, setPostAnonymous] = useState(false)
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({})
   const [sort, setSort] = useState<'recent' | 'hot'>(() => {
     try {
@@ -77,7 +78,10 @@ function AppContent() {
       return
     }
 
-    postMutation.mutate({ title: postTitle.trim(), body: postBody.trim() })
+    postMutation.mutate(
+      { title: postTitle.trim(), body: postBody.trim(), anonymous: postAnonymous },
+      { onSuccess: () => setPostAnonymous(false) }
+    )
   }
 
   function handleCommentSubmit(event: React.FormEvent, postId: number, anonymous: boolean) {
@@ -102,7 +106,7 @@ function AppContent() {
               <img src="/assets/logo-iap-mark.svg" alt="" />
               <div>
                 <h1 className="app-title">it&apos;s an problem<span className="dot">.</span></h1>
-                <p className="app-subtitle">Anonymous problems, honest advice</p>
+                <p className="app-subtitle">Real problems, honest advice</p>
               </div>
             </div>
           </div>
@@ -140,13 +144,15 @@ function AppContent() {
         <FeedSidebar user={user} />
         <div className="feed-main">
           <PostForm
-        title={postTitle}
-        setTitle={setPostTitle}
-        body={postBody}
-        setBody={setPostBody}
-        onSubmit={handlePostSubmit}
-        isLoading={postMutation.isPending}
-      />
+            title={postTitle}
+            setTitle={setPostTitle}
+            body={postBody}
+            setBody={setPostBody}
+            anonymous={postAnonymous}
+            setAnonymous={setPostAnonymous}
+            onSubmit={handlePostSubmit}
+            isLoading={postMutation.isPending}
+          />
 
       <section className="posts-grid">
         <header className="section-header">
@@ -195,7 +201,7 @@ function AppContent() {
         {!isLoading && !error && posts.length === 0 && (
           <div className="card empty">
             <h3>No posts yet</h3>
-            <p>Be the first — your problem posts as Anonymous, always.</p>
+            <p>Be the first — post with your name, or go anonymous when it matters.</p>
           </div>
         )}
 

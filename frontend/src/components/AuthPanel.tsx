@@ -30,7 +30,7 @@ export function AuthPanel({
         <h1>it&apos;s an problem<span className="dot">.</span></h1>
         <p>
           {allowRegister
-            ? 'Post your problems anonymously — no names, no handles, nothing linking back to you. Get honest replies from real people.'
+            ? 'Share what\u2019s bothering you — with your name, or fully anonymously when it matters. Honest replies from real people.'
             : 'Sign in to continue. Accounts can’t be created from here.'}
         </p>
       </div>
@@ -137,7 +137,7 @@ export function AuthPanel({
       </section>
 
       <p className="auth-footnote">
-        Posts are always anonymous. Replies are signed unless you choose otherwise.
+        You choose per post and per reply: your name, or full anonymity — no name, no handle, no trace.
       </p>
     </main>
   )

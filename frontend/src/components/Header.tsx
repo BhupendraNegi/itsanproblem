@@ -34,7 +34,7 @@ export function Header({ user, onLogout }: HeaderProps) {
           <img src="/assets/logo-iap-mark.svg" alt="" />
           <div>
             <h1 className="app-title">it&apos;s an problem<span className="dot">.</span></h1>
-            <p className="app-subtitle">Anonymous problems, honest advice</p>
+            <p className="app-subtitle">Real problems, honest advice</p>
           </div>
         </div>
 

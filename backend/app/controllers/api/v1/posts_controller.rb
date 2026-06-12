@@ -8,7 +8,7 @@ module Api
       PER_PAGE = 10
 
       def index
-        posts = Post.visible.includes(:post_author, :helpful_marks, comments: [:user, :helpful_marks])
+        posts = Post.visible.includes({post_author: :user}, :helpful_marks, comments: [:user, :helpful_marks])
         posts = (params[:sort] == "hot") ? posts.hot : posts.order(created_at: :desc)
         page = [params[:page].to_i, 1].max
         posts = posts.offset((page - 1) * PER_PAGE).limit(PER_PAGE)
@@ -38,7 +38,7 @@ module Api
       end
 
       def post_params
-        params.require(:post).permit(:title, :body)
+        params.require(:post).permit(:title, :body, :anonymous)
       end
     end
   end

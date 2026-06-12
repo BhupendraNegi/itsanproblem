@@ -57,6 +57,7 @@ end
 # ── Posts (authored by the demo user; always shown as "Anonymous") ───────────
 posts = [
   {
+    anonymous: true,
     title: "I keep procrastinating on everything that matters",
     body: "Every time I sit down to do important work I end up cleaning my desk or scrolling. How do you actually start?",
     comments: [
@@ -65,6 +66,7 @@ posts = [
     ]
   },
   {
+    anonymous: true,
     title: "Burned out at work but scared to take a break",
     body: "I have not taken real time off in over a year and I can feel it. But I worry things will fall apart without me.",
     comments: [
@@ -92,6 +94,7 @@ posts = [
 posts.each do |attrs|
   post = demo.posts.find_or_create_by!(title: attrs[:title]) do |p|
     p.body = attrs[:body]
+    p.anonymous = attrs.fetch(:anonymous, false)
   end
 
   attrs[:comments].each_with_index do |body, i|
