@@ -7,6 +7,7 @@ class Comment < ApplicationRecord
   validates :body, presence: true, length: {maximum: 2000}
 
   after_create :notify_post_author
+  after_create :award_badges
 
   # The OP stays anonymous in their own thread only when the post itself is
   # anonymous (badged "OP" by the UI either way); other commenters can opt in
@@ -33,6 +34,12 @@ class Comment < ApplicationRecord
   end
 
   private
+
+  def award_badges
+    Badges.refresh!(user)
+    # the post author may have just earned conversation_starter
+    Badges.refresh!(post.author_user)
+  end
 
   def notify_post_author
     recipient_id = post.author_user_id

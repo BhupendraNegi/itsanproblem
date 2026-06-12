@@ -10,6 +10,7 @@ class Post < ApplicationRecord
   validates :body, presence: true, length: {maximum: 5000}
 
   before_create :assign_anon_handle
+  after_create :award_author_badges
 
   scope :visible, -> { where(hidden_at: nil) }
 
@@ -55,6 +56,10 @@ class Post < ApplicationRecord
   end
 
   private
+
+  def award_author_badges
+    Badges.refresh!(author_user)
+  end
 
   def assign_anon_handle
     self.anon_handle ||= generate_anon_handle

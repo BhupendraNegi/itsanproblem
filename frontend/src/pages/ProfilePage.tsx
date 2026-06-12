@@ -60,6 +60,17 @@ export function ProfilePage({ currentUser, onLogout }: ProfilePageProps) {
                 </div>
               </div>
 
+              {/* Badges */}
+              {profile.badges.length > 0 && (
+                <div className="badge-list">
+                  {profile.badges.map((badge) => (
+                    <span key={badge.key} className="profile-badge" title={badge.description}>
+                      {badge.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Stats row */}
               <div className="stats-row">
                 <div className="stat-cell">

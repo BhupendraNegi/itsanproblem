@@ -28,6 +28,7 @@ module Api
           joined_at: @user.created_at,
           helpful_points: stat.helpful_points,
           comment_count: @user.comments.count,
+          badges: Badges.for_keys(stat.badges),
           recent_comments: recent_comments
         }
 

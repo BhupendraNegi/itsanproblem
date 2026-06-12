@@ -84,6 +84,13 @@ describe('ProfilePage', () => {
     expect((await screen.findAllByText(/@alice/)).length).toBeGreaterThan(0)
   })
 
+  it('shows earned badges with descriptions', async () => {
+    renderProfile()
+    const badge = await screen.findByText('Honest neighbor')
+    expect(badge).toHaveAttribute('title', expect.stringMatching(/3 helpful points/))
+    expect(screen.getByText('First post')).toBeInTheDocument()
+  })
+
   it('renders the bio when present', async () => {
     renderProfile()
     expect(await screen.findByText('Just here to help.')).toBeInTheDocument()

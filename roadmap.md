@@ -159,20 +159,15 @@ identity.
 
 Don't start until the P0 loop works end to end.
 
-- [ ] **Friend graph** (~1 week) — add friends by email/username, mutual confirmation, friend
-  count visible only to the user. `friendships` table.
-- [ ] **Friend-anon posts** (~1 week) — "share with friends only" toggle; OP still anonymous
-  within the group. Hard floor of **5 friends** (below that the toggle is disabled — smaller
-  groups leak identity by arithmetic). `audiences` table + `min_audience` enforcement.
 - [x] **Tags & rooms** — six seeded rooms (academic, relationships, money, mental-health,
   housing, career); optional single tag per post (`posts.tag_id` — simpler than the planned
   `post_tags` join for one-tag-per-post), `GET /posts?tag=slug` filtered feeds with shareable
   URLs, room chips + sidebar room list, tag chips on cards, and a crisis-support banner on the
   mental-health room (from the risk list).
-- [ ] **College verification** (~3 days) — `.edu` domain match on signup → verified-campus badge
-  and a campus-only feed. `colleges` table.
-- [ ] **Badges** (~2 days) — auto-awarded profile chips ("honest neighbor", "first post",
-  "10 marked helpful"). `user_stats.badges` JSON + a recurring job.
+- [x] **Badges** — six auto-awarded profile chips (first post, first reply, honest neighbor at
+  3 points, trusted voice at 10, conversation starter at 5 replies on a post, crowd favorite at
+  10 marks on one reply). `user_stats.badges` JSON, awarded **event-driven** from model
+  callbacks instead of the planned cron job (instant, no recurring infra), never revoked.
 - [x] **Search** — title + body search via `GET /posts?q=` (portable case-insensitive LIKE with
   escaped wildcards — works on SQLite dev and Postgres prod; pg_trgm deferred until scale
   demands ranking). Debounced search box on the feed, shareable `?q=` URLs, composes with
@@ -181,6 +176,16 @@ Don't start until the P0 loop works end to end.
 ## Later — P2, only after traction
 
 Deliberately not started; need real users and data first.
+
+- [ ] **Friend graph** *(moved from P1 — founder undecided)* — add friends by email/username,
+  mutual confirmation, friend count visible only to the user. `friendships` table.
+- [ ] **Friend-anon posts** *(moved from P1 — depends on the friend graph)* — "share with
+  friends only" toggle; OP still anonymous within the group. Hard floor of **5 friends**
+  (smaller groups leak identity by arithmetic). Open design question: how audience
+  (everyone/friends) composes with the named-by-default identity choice.
+- [ ] **College verification** *(moved from P1 — founder undecided)* — `.edu` domain match on
+  signup → verified-campus badge and a campus-only feed; open question whether registration
+  should be restricted to known domains (single-campus wedge) or open with badges.
 
 - [ ] **AI advisor** — RAG/fine-tune over comments with ≥ N helpful marks; needs 10k+
   helpful-marked replies, a safety filter, and evals first.

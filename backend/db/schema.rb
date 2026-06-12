@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_12_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_12_000002) do
   create_table "comments", force: :cascade do |t|
     t.text "body", null: false
     t.integer "user_id", null: false
@@ -105,6 +105,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_12_000001) do
     t.integer "comment_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "badges", default: [], null: false
     t.index ["user_id"], name: "index_user_stats_on_user_id", unique: true
   end
 

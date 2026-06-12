@@ -129,6 +129,12 @@ export type ProfilePost = {
   hidden: boolean
 }
 
+export type Badge = {
+  key: string
+  name: string
+  description: string
+}
+
 export type UserProfile = {
   id: number
   name: string
@@ -137,6 +143,7 @@ export type UserProfile = {
   joined_at: string
   helpful_points: number
   comment_count: number
+  badges: Badge[]
   recent_comments: ProfileComment[]
   // only present when viewing your own profile
   posts?: ProfilePost[]
