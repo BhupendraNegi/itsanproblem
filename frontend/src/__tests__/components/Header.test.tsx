@@ -44,6 +44,7 @@ describe('Header', () => {
     const profile = screen.getByRole('menuitem', { name: 'Profile' })
     expect(profile).toHaveAttribute('href', '/users/alice')
     expect(screen.getByRole('menuitem', { name: 'Settings' })).toHaveAttribute('href', '/settings')
+    expect(screen.getByRole('menuitem', { name: 'FAQ' })).toHaveAttribute('href', '/faq')
     expect(screen.getByRole('menuitem', { name: 'Log out' })).toBeInTheDocument()
     // no Admin entry for members
     expect(screen.queryByRole('menuitem', { name: 'Admin' })).not.toBeInTheDocument()

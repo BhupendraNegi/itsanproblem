@@ -9,6 +9,11 @@ import { Header } from './components/Header'
 import { PostForm } from './components/PostForm'
 import { PostCard } from './components/PostCard'
 import { FeedSidebar } from './components/FeedSidebar'
+import { AboutPage } from './pages/AboutPage'
+import { FaqPage } from './pages/FaqPage'
+import { HelpPage } from './pages/HelpPage'
+import { PrivacyPage } from './pages/PrivacyPage'
+import { TermsPage } from './pages/TermsPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { PostPage } from './pages/PostPage'
@@ -114,6 +119,11 @@ function AppContent() {
         <Routes>
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/faq" element={<FaqPage />} />
           <Route
             path="*"
             element={
@@ -236,6 +246,11 @@ function AppContent() {
         <Route path="/users/:handle" element={<ProfilePage currentUser={user} onLogout={logout} />} />
         <Route path="/settings" element={<SettingsPage currentUser={user} onLogout={logout} />} />
         <Route path="/admin" element={<AdminPage currentUser={user} onLogout={logout} />} />
+        <Route path="/about" element={<><Header user={user} onLogout={logout} /><AboutPage /></>} />
+        <Route path="/help" element={<><Header user={user} onLogout={logout} /><HelpPage /></>} />
+        <Route path="/privacy" element={<><Header user={user} onLogout={logout} /><PrivacyPage /></>} />
+        <Route path="/terms" element={<><Header user={user} onLogout={logout} /><TermsPage /></>} />
+        <Route path="/faq" element={<><Header user={user} onLogout={logout} /><FaqPage /></>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

@@ -92,6 +92,10 @@ export function Header({ user, onLogout }: HeaderProps) {
                   <img src="/assets/icons/settings.svg" alt="" className="menu-icon" />
                   Settings
                 </Link>
+                <Link role="menuitem" to="/faq" onClick={close}>
+                  <img src="/assets/icons/help-circle.svg" alt="" className="menu-icon" />
+                  FAQ
+                </Link>
                 <button role="menuitem" onClick={() => { close(); onLogout() }}>
                   <img src="/assets/icons/log-out.svg" alt="" className="menu-icon" />
                   Log out
