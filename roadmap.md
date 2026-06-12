@@ -145,8 +145,12 @@ identity.
   of a pseudonym.
 - [x] **Anonymous replies (opt-in)** — "Reply anonymously" checkbox per reply; identity hidden in
   the UI, `user_id` still recorded for moderation; **no helpful points** for anonymous replies so
-  reputation stays tied to signed advice. Posts remain always-anonymous (uniform anonymity is
-  herd cover; optional anonymity would make anonymous posts conspicuous).
+  reputation stays tied to signed advice.
+- [x] **v3: posts get the choice too (founder call)** — posts are **named by default** with a
+  "Post anonymously" toggle; existing posts were backfilled anonymous (they were created under
+  the always-anonymous promise). Named posts show the author with a profile link; public
+  profiles list a user's named posts; the OP badge appears on the author's replies either way
+  (identity hidden only when the post itself is anonymous).
 - [x] **Copy aligned** — auth intro/footnote, navbar subtitle ("Anonymous problems, honest
   advice"), composer hint ("No name, no handle — nothing links this post to you"), and the
   post-success message.

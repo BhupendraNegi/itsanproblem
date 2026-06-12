@@ -69,7 +69,7 @@ describe('AuthPanel', () => {
 
   it('shows the anonymous disclaimer', () => {
     renderWithProviders(<AuthPanel {...defaultProps} />)
-    expect(screen.getByText(/posts are always anonymous/i)).toBeInTheDocument()
+    expect(screen.getByText(/you choose per post and per reply/i)).toBeInTheDocument()
   })
 
   describe('when allowRegister is false (the /admin route)', () => {

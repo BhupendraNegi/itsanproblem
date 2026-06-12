@@ -10,6 +10,9 @@ const basePost: Post = {
   title: 'My big problem',
   body: 'It has been going on for a while and I need advice.',
   author: 'Anonymous',
+  author_id: null,
+  author_username: null,
+  anonymous: true,
   helpful_count: 0,
   created_at: new Date().toISOString(),
   comments: [],
@@ -39,10 +42,18 @@ describe('PostCard', () => {
     expect(screen.getByText(/it has been going on/i)).toBeInTheDocument()
   })
 
-  it('shows the Anonymous mask byline, never a handle', () => {
+  it('shows the Anonymous mask byline on anonymous posts, never a handle', () => {
     renderWithProviders(<PostCard {...defaultProps} />)
     expect(screen.getByText('Anonymous')).toBeInTheDocument()
     expect(screen.queryByText(/anon_/)).not.toBeInTheDocument()
+  })
+
+  it('shows the author with a profile link on named posts', () => {
+    const namedPost: Post = { ...basePost, anonymous: false, author: 'Alice', author_id: 1, author_username: 'alice' }
+    renderWithProviders(<PostCard {...defaultProps} post={namedPost} />)
+    const authorLink = screen.getByRole('link', { name: 'Alice' })
+    expect(authorLink).toHaveAttribute('href', '/users/alice')
+    expect(screen.queryByText('Anonymous')).not.toBeInTheDocument()
   })
 
   it('shows reply count in the byline', () => {

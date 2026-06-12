@@ -31,11 +31,13 @@ module Api
           recent_comments: recent_comments
         }
 
-        # Only you can see your own anonymous posts — resolved through the
-        # post_authors ledger, never exposed on anyone else's profile.
+        # You see all your posts (anonymous ones included — resolved through
+        # the post_authors ledger). Everyone else only sees named posts.
         if @user == current_user
           profile[:posts] = own_posts
           profile[:email_digest_enabled] = @user.email_digest_enabled
+        else
+          profile[:posts] = public_posts
         end
 
         render json: profile
@@ -52,10 +54,29 @@ module Api
             {
               id: post.id,
               title: post.title,
+              anonymous: post.anonymous?,
               created_at: post.created_at,
               helpful_count: post.helpful_marks.size,
               comment_count: post.comments.size,
               hidden: post.hidden_at.present?
+            }
+          end
+      end
+
+      def public_posts
+        @user.posts.visible.where(anonymous: false)
+          .includes(:comments, :helpful_marks)
+          .order(created_at: :desc)
+          .limit(20)
+          .map do |post|
+            {
+              id: post.id,
+              title: post.title,
+              anonymous: false,
+              created_at: post.created_at,
+              helpful_count: post.helpful_marks.size,
+              comment_count: post.comments.size,
+              hidden: false
             }
           end
       end

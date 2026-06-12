@@ -56,8 +56,18 @@ RSpec.describe Post, type: :model do
       expect(json.keys).to include("id", "title", "body", "created_at")
     end
 
-    it "sets author to Anonymous" do
-      expect(post.as_json["author"]).to eq("Anonymous")
+    it "sets author to Anonymous when the post is anonymous" do
+      post.update!(anonymous: true)
+      json = post.as_json
+      expect(json["author"]).to eq("Anonymous")
+      expect(json["author_id"]).to be_nil
+    end
+
+    it "exposes the author on named posts (the default)" do
+      json = post.as_json
+      expect(json["anonymous"]).to be(false)
+      expect(json["author"]).to eq("Alice")
+      expect(json["author_username"]).to eq(user.username)
     end
 
     it "does not expose user_id" do

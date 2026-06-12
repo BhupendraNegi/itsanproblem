@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_11_000003) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_11_000004) do
   create_table "comments", force: :cascade do |t|
     t.text "body", null: false
     t.integer "user_id", null: false
@@ -86,6 +86,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_11_000003) do
     t.datetime "updated_at", null: false
     t.string "anon_handle", null: false
     t.datetime "hidden_at"
+    t.boolean "anonymous", default: false, null: false
   end
 
   create_table "user_stats", force: :cascade do |t|

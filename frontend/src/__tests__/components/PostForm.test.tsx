@@ -9,6 +9,8 @@ const defaultProps = {
   setTitle: vi.fn(),
   body: '',
   setBody: vi.fn(),
+  anonymous: false,
+  setAnonymous: vi.fn(),
   onSubmit: vi.fn((e) => e.preventDefault()),
   isLoading: false,
 }
@@ -19,9 +21,17 @@ describe('PostForm', () => {
     expect(screen.getByText(/what's an problem/i)).toBeInTheDocument()
   })
 
-  it('shows the posting anonymously indicator', () => {
+  it('shows "posting as you" by default with an anonymous toggle', () => {
     renderWithProviders(<PostForm {...defaultProps} />)
+    expect(screen.getByText(/posting as you/i)).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /post anonymously/i })).not.toBeChecked()
+  })
+
+  it('switches to anonymous mode when the toggle is on', () => {
+    renderWithProviders(<PostForm {...defaultProps} anonymous={true} />)
     expect(screen.getByText(/posting anonymously/i)).toBeInTheDocument()
+    expect(screen.getByText(/nothing links this post to you/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /post anonymously/i })).toBeInTheDocument()
   })
 
   it('shows the title input', () => {
@@ -42,12 +52,12 @@ describe('PostForm', () => {
 
   it('submit button is disabled when title is empty', () => {
     renderWithProviders(<PostForm {...defaultProps} title="" body="" />)
-    expect(screen.getByRole('button', { name: /post anonymously/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /^post$/i })).toBeDisabled()
   })
 
   it('submit button is enabled when both title and body are present', () => {
     renderWithProviders(<PostForm {...defaultProps} title="A problem" body="Details here." />)
-    expect(screen.getByRole('button', { name: /post anonymously/i })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /^post$/i })).not.toBeDisabled()
   })
 
   it('shows Posting… and is disabled while loading', () => {

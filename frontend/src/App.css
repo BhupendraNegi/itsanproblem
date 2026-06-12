@@ -871,7 +871,11 @@ body.impersonating .navbar { top: 40px; }
   flex-shrink: 0;
 }
 
-/* Anonymity has no identity: the same neutral mask on every post. */
+.post-avatar-link { text-decoration: none; display: inline-flex; }
+.post-author-link { color: inherit; text-decoration: none; }
+.post-author-link:hover strong { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Anonymity has no identity: the same neutral mask on every anonymous post. */
 .post-avatar.anon-mask { background: var(--gradient-chrome); }
 .post-avatar.anon-mask img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
 

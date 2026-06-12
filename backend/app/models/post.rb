@@ -28,8 +28,16 @@ class Post < ApplicationRecord
     viewer = options.delete(:viewer)
     # anon_handle stays internal — identity-shaped pseudonyms read like
     # usernames and undermine the "no identity at all" presentation.
-    super({only: [:id, :title, :body, :created_at]}.merge(options)).merge(
-      "author" => "Anonymous",
+    identity = if anonymous?
+      {"author" => "Anonymous", "author_id" => nil, "author_username" => nil}
+    else
+      {"author" => author_user&.name || "Anonymous",
+       "author_id" => author_user&.id,
+       "author_username" => author_user&.username}
+    end
+
+    super({only: [:id, :title, :body, :created_at]}.merge(options)).merge(identity).merge(
+      "anonymous" => anonymous?,
       "helpful_count" => helpful_marks.size,
       "viewer_marked" => viewer ? helpful_marks.any? { |m| m.user_id == viewer.id } : false,
       "comments" => comments.reject(&:hidden_at).sort_by(&:created_at).map { |c| c.as_json(viewer: viewer) }

@@ -60,13 +60,15 @@ export function usePostMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useMutation<Post, Error, { title: string; body: string }>({
+  return useMutation<Post, Error, { title: string; body: string; anonymous?: boolean }>({
     mutationFn: api.createPost,
-    onSuccess: () => {
+    onSuccess: (_post, variables) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setPostTitle('')
       setPostBody('')
-      setAlertMessage('Posted anonymously — find it later under "Your posts" on your profile.')
+      setAlertMessage(variables.anonymous
+        ? 'Posted anonymously — find it later under "Your posts" on your profile.'
+        : 'Posted!')
     },
     onError: (error: Error) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -13,11 +13,21 @@ RSpec.describe "Api::V1::Posts", type: :request do
       expect(body.first["title"]).to eq("My problem")
     end
 
-    it "hides user identity — author is Anonymous" do
+    it "hides user identity on anonymous posts" do
+      user.posts.create!(title: "Secret", body: "Hush.", anonymous: true)
       get "/api/v1/posts", as: :json
       body = JSON.parse(response.body)
-      expect(body.first["author"]).to eq("Anonymous")
-      expect(body.first.keys).not_to include("user_id")
+      anon = body.find { |p| p["title"] == "Secret" }
+      expect(anon["author"]).to eq("Anonymous")
+      expect(anon["author_id"]).to be_nil
+      expect(anon.keys).not_to include("user_id")
+    end
+
+    it "shows the author on named posts" do
+      get "/api/v1/posts", as: :json
+      named = JSON.parse(response.body).find { |p| p["title"] == "My problem" }
+      expect(named["author"]).to eq("Alice")
+      expect(named["author_username"]).to eq(user.username)
     end
 
     context "pagination" do
@@ -83,12 +93,21 @@ RSpec.describe "Api::V1::Posts", type: :request do
     let(:valid_params) { {post: {title: "New problem", body: "Details here."}} }
 
     context "when authenticated" do
-      it "creates a post and returns it" do
+      it "creates a named post by default" do
         post "/api/v1/posts", params: valid_params, headers: auth_headers_for(user), as: :json
         expect(response).to have_http_status(:created)
         body = JSON.parse(response.body)
         expect(body["title"]).to eq("New problem")
+        expect(body["author"]).to eq("Alice")
+        expect(body["anonymous"]).to be(false)
+      end
+
+      it "creates an anonymous post when asked" do
+        post "/api/v1/posts", params: {post: {title: "Quiet one", body: "Shh.", anonymous: true}},
+          headers: auth_headers_for(user), as: :json
+        body = JSON.parse(response.body)
         expect(body["author"]).to eq("Anonymous")
+        expect(body["anonymous"]).to be(true)
       end
 
       it "returns errors for missing title" do

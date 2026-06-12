@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useHelpfulMutation } from '../hooks/useMutations'
+import { avatarHueClass } from '../avatar'
 import { FlagButton } from './FlagButton'
 import type { Comment, Post } from '../types'
 
@@ -42,11 +43,25 @@ export function PostCard({
   return (
     <article className="post-card">
       <div className="post-byline">
-        <span className="post-avatar anon-mask">
-          <img src="/assets/icons/user-x.svg" alt="" />
-        </span>
+        {post.anonymous !== false || post.author_id == null ? (
+          <span className="post-avatar anon-mask">
+            <img src="/assets/icons/user-x.svg" alt="" />
+          </span>
+        ) : (
+          <Link to={`/users/${post.author_username ?? post.author_id}`} className="post-avatar-link">
+            <span className={`post-avatar ${avatarHueClass(post.author_username ?? post.author)}`}>
+              {post.author.charAt(0).toUpperCase()}
+            </span>
+          </Link>
+        )}
         <span className="post-byline-text">
-          <strong>Anonymous</strong>
+          {post.anonymous !== false || post.author_id == null ? (
+            <strong>Anonymous</strong>
+          ) : (
+            <Link to={`/users/${post.author_username ?? post.author_id}`} className="post-author-link">
+              <strong>{post.author}</strong>
+            </Link>
+          )}
           <span>
             {formatRelative(post.created_at)} · {post.comments.length} {post.comments.length === 1 ? 'reply' : 'replies'}
           </span>
@@ -95,9 +110,12 @@ export function PostCard({
                 <p>{comment.body}</p>
                 <span className="comment-meta">
                   {comment.author_id != null ? (
-                    <Link to={`/users/${comment.author_username ?? comment.author_id}`}>
-                      <strong>{comment.author}</strong>
-                    </Link>
+                    <>
+                      <Link to={`/users/${comment.author_username ?? comment.author_id}`}>
+                        <strong>{comment.author}</strong>
+                      </Link>
+                      {comment.op && <span className="op-badge" title="The post's author">OP</span>}
+                    </>
                   ) : (
                     <>
                       <strong>{comment.author}</strong>

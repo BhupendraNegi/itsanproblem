@@ -8,6 +8,9 @@ export const mockPost = {
   title: 'My problem',
   body: 'It is really bad and I need help.',
   author: 'Anonymous',
+  author_id: null,
+  author_username: null,
+  anonymous: true,
   helpful_count: 0,
   viewer_marked: false,
   created_at: new Date().toISOString(),
@@ -37,6 +40,7 @@ export const mockProfile = {
     {
       id: 1,
       title: 'My secret problem',
+      anonymous: true,
       created_at: new Date().toISOString(),
       helpful_count: 2,
       comment_count: 1,

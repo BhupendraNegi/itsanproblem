@@ -8,14 +8,15 @@ class Comment < ApplicationRecord
 
   after_create :notify_post_author
 
-  # The OP is always anonymous in their own thread (badged "OP" by the UI);
-  # other commenters can opt in via the anonymous flag.
+  # The OP stays anonymous in their own thread only when the post itself is
+  # anonymous (badged "OP" by the UI either way); other commenters can opt in
+  # via the anonymous flag.
   def op?
     user_id == post.author_user_id
   end
 
   def hide_identity?
-    op? || anonymous?
+    anonymous? || (op? && post.anonymous?)
   end
 
   def as_json(options = {})
