@@ -96,14 +96,12 @@ function AppContent() {
     }
   }, [alertMessage])
 
-  // If register mode was selected elsewhere, snap back to login on /admin.
-  useEffect(() => {
-    if (!allowRegister && mode === 'register') setMode('login')
-  }, [allowRegister, mode])
+  // On /admin, force login even if register was selected elsewhere.
+  const effectiveMode = allowRegister ? mode : 'login'
 
   function handleAuthSubmit(event: React.FormEvent) {
     event.preventDefault()
-    authMutation.mutate({ mode, fields: authFields })
+    authMutation.mutate({ mode: effectiveMode, fields: authFields })
   }
 
   function handlePostSubmit(event: React.FormEvent) {
@@ -158,7 +156,7 @@ function AppContent() {
             path="*"
             element={
               <AuthPanel
-                mode={mode}
+                mode={effectiveMode}
                 setMode={setMode}
                 authFields={authFields}
                 setAuthFields={setAuthFields}
