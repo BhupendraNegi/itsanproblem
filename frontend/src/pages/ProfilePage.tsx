@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import { useUserProfile } from '../hooks/useMutations'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { Header } from '../components/Header'

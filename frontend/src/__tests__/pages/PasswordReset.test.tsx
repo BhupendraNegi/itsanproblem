@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 import { renderWithProviders } from '../../test/renderWithProviders'
 import { ForgotPasswordPage } from '../../pages/ForgotPasswordPage'
 import { ResetPasswordPage } from '../../pages/ResetPasswordPage'

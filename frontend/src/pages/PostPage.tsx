@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { Header } from '../components/Header'
 import { PostCard } from '../components/PostCard'

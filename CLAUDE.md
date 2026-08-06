@@ -105,6 +105,8 @@ Run on every push to `main` + all PRs:
 ## Conventions & gotchas
 
 - **Ruby version mismatch:** the repo targets Ruby **4.0.3** ([.ruby-version](backend/.ruby-version), Gemfile), but StandardRB's analyzer (RuboCop's parser) does not yet support Ruby 4.0, so `ruby_version` is pinned to **3.3** in [.standard.yml](backend/.standard.yml).
+- **TypeScript is pinned to 6.x**, not 7: typescript-eslint hard-errors on the TS 7 compiler API ([typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)), so `npm ci` fails the peer-dependency check and `npm run lint` throws. Dependabot is told to skip `typescript >= 7.0.0` in [.github/dependabot.yml](.github/dependabot.yml); lift both pins together once typescript-eslint ships TS 7 support.
+- **Import routing from `react-router`, never `react-router-dom`.** The `-dom` package stopped at 7.x and pins a `react-router` with a known RSC-mode CSRF bypass; the app is on `react-router` 8.x directly, which re-exports everything the `-dom` package did.
 - Error responses use a consistent shape: `{ error: "..." }` for single messages, `{ errors: [...] }` (from `model.errors.full_messages`) for validation failures, with `422 :unprocessable_content` for invalid input and `401 :unauthorized` for auth failures.
 - API param wrapping: posts are sent as `{ post: {...} }`, comments as `{ comment: {...} }`, auth as `{ user: {...} }`. The frontend camelCase `passwordConfirmation` is mapped to `password_confirmation` in [src/api.ts](frontend/src/api.ts).
 

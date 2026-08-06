@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import useAuth from './store'
 import { AuthPanel } from './components/AuthPanel'

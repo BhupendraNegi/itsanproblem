@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { useTags, useUserProfile } from '../hooks/useMutations'
 import { avatarHueClass } from '../avatar'
 import type { User } from '../types'

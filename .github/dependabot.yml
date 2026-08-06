@@ -11,6 +11,11 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 10
+    ignore:
+      # typescript-eslint hard-errors on the TS 7 compiler API
+      # (typescript-eslint/typescript-eslint#10940). Stay on TS 6 until it lands.
+      - dependency-name: typescript
+        versions: [">=7.0.0"]
 
   - package-ecosystem: github-actions
     directory: "/"
