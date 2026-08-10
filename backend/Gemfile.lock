@@ -327,9 +327,10 @@ GEM
     ruby-next-core (1.2.0)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
-    sentry-ruby (5.28.1)
+    sentry-ruby (6.7.0)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
+      logger
     shoulda-matchers (6.5.0)
       activesupport (>= 5.2.0)
     sidekiq (8.1.6)
@@ -441,7 +442,7 @@ DEPENDENCIES
   rdoc (>= 7.2)
   redis (~> 6.0)
   rspec-rails (~> 8.0)
-  sentry-ruby (~> 5.26)
+  sentry-ruby (~> 6.7)
   shoulda-matchers (~> 6.0)
   sidekiq (~> 8.0)
   solid_cable
